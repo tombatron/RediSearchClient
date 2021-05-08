@@ -153,7 +153,7 @@ namespace RediSearchClient.Indexes
 
         private static readonly RediSearchSchemaFieldBuilder _fieldBuilder = new RediSearchSchemaFieldBuilder();
 
-        public object[] Build()
+        public RediSearchIndexDefinition Build()
         {
             var argumentLength = 2; // ON {structure}
 
@@ -287,7 +287,7 @@ namespace RediSearchClient.Indexes
                 result[++currentArgumentIndex] = field;
             }
 
-            return result;
+            return new RediSearchIndexDefinition(result);
         }
     }
 }
