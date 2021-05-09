@@ -1,12 +1,20 @@
+using System;
+using RediSearchClient.Indexes;
 using StackExchange.Redis;
 
 namespace RediSearchClient
 {
     public static partial class DatabaseExtensions
     {
-        public static void CreateIndex(this IDatabase db)
+        public static void CreateIndex(this IDatabase db, string indexName, RediSearchIndexDefinition indexDefinition)
         {
+            var commandParameters = new object[1 + indexDefinition.Fields.Length];
 
+            commandParameters[0] = indexName;
+
+            Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
+
+            db.Execute("FT.CREATE", commandParameters);
         }
 
         public static SearchResult Search(this IDatabase db)
