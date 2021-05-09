@@ -1,6 +1,6 @@
-using System;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
+using System;
 
 namespace RediSearchClient
 {
@@ -14,7 +14,7 @@ namespace RediSearchClient
 
             Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
 
-            db.Execute("FT.CREATE", commandParameters);
+            db.Execute(RediSearchCommands.CREATE, commandParameters);
         }
 
         public static SearchResult Search(this IDatabase db)

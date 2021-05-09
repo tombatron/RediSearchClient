@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
 using System;
@@ -34,6 +35,20 @@ namespace RediSearchClient.IntegrationTests
                 .Build();
 
             _db.CreateIndex(indexName, index);
+        }
+
+        [Fact]
+        public async Task WillCreateASimpleIndexAsync()
+        {
+            var indexName = Guid.NewGuid().ToString("n");
+
+            var index = RediSearchIndex
+                .On(RediSearchStructure.HASH)
+                .ForKeysWithPrefix("Bogus::")
+                .WithSchema(x=>x.Text("field_one"))
+                .Build();
+
+            await _db.CreateIndexAsync(indexName, index);
         }
 
         public CreateIndex() => Setup();
