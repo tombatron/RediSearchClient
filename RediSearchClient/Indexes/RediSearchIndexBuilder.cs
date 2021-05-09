@@ -183,7 +183,7 @@ namespace RediSearchClient.Indexes
 
             // ON {structure}
             result[currentArgumentIndex] = "ON";
-            result[++currentArgumentIndex] = _structure;
+            result[++currentArgumentIndex] = _structure.ToString();
 
             // [PREFIX {count} {prefix} [{prefix} ..]
             result[++currentArgumentIndex] = "PREFIX";
