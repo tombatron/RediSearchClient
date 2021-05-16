@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RediSearchClient.Query
@@ -212,7 +213,7 @@ namespace RediSearchClient.Query
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
 
-        public object[] Build()
+        public RediSearchQueryDefinition Build()
         {
             var argumentLength = 2; // {index} {query}
 
@@ -224,9 +225,14 @@ namespace RediSearchClient.Query
             argumentLength += _withSortKeys ? 1 : 0; // [WITHSORTKEYS]
 
             // [FILTER {numeric_field} {min} {max}] ...
-            var numericFilters = _numericFilters.Select(x => x(_numericFilterBuilder)).ToList();
+            List<IRediSearchNumericFilter> numericFilters = null;
 
-            argumentLength += (numericFilters.Count * 4);
+            if (_numericFilters != null)
+            {
+                numericFilters = _numericFilters.Select(x => x(_numericFilterBuilder)).ToList();
+
+                argumentLength += (numericFilters.Count * 4);
+            }
 
             // [GEOFILTER {geo_field} {lon} {lat} {radius} m|km|mi|ft]
             argumentLength += _geoFilterDefinition == null ? 0 : 6;
@@ -325,7 +331,7 @@ namespace RediSearchClient.Query
             }
 
             // [FILTER {numeric_field} {min} {max}] ...
-            if (_numericFilters != null)
+            if (numericFilters != null)
             {
                 foreach (var numericFilter in numericFilters)
                 {
@@ -384,7 +390,7 @@ namespace RediSearchClient.Query
             }
 
             // [SUMMARIZE [FIELDS {num} {field} ... ] [FRAGS {num}] [LEN {fragsize}] [SEPARATOR {separator}]]
-            if (_summarizeBuilder.FieldArguments.Length > 0)
+            if (_summarizeBuilderAction != null && _summarizeBuilder.FieldArguments.Length > 0)
             {
                 foreach (var arg in _summarizeBuilder.FieldArguments)
                 {
@@ -393,7 +399,7 @@ namespace RediSearchClient.Query
             }
 
             // [HIGHLIGHT [FIELDS {num} {field} ... ] [TAGS {open} {close}]]
-            if (_highlightBuilder.FieldArguments.Length > 0)
+            if (_highlightBuilderAction != null && _highlightBuilder.FieldArguments.Length > 0)
             {
                 foreach (var arg in _highlightBuilder.FieldArguments)
                 {
@@ -458,7 +464,7 @@ namespace RediSearchClient.Query
                 result[++currentArgumentIndex] = _limit.limit.ToString();
             }
 
-            return result;
+            return new RediSearchQueryDefinition(result);
         }
     }
 }

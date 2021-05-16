@@ -4,9 +4,11 @@ namespace RediSearchClient
 {
     public class SearchResult
     {
-        public static SearchResult From(RedisResult redisResult)
-        {
-            return default;
-        }
+        public RedisResult RawResult { get; }
+
+        private SearchResult(RedisResult rawResult) =>
+            RawResult = rawResult;
+        public static SearchResult From(RedisResult redisResult) =>
+            new SearchResult(redisResult);
     }
 }
