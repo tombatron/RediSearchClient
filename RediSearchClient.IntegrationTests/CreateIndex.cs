@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests
