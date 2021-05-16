@@ -1,4 +1,5 @@
 using RediSearchClient.Indexes;
+using RediSearchClient.Query;
 using StackExchange.Redis;
 using System;
 
@@ -31,9 +32,21 @@ namespace RediSearchClient
             db.Execute(RediSearchCommands.CREATE, commandParameters);
         }
 
-        public static SearchResult Search(this IDatabase db)
+        /// <summary>
+        /// `FT.SEARCH`
+        /// 
+        /// Searches the index with a textual query, returning either documents or just ids.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsearch
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="queryDefinition"></param>
+        /// <returns></returns>
+        public static SearchResult Search(this IDatabase db, RediSearchQueryDefinition queryDefinition)
         {
-            return null;
+            var redisResult = db.Execute(RediSearchCommands.SEARCH, queryDefinition.Fields);
+            
+            return SearchResult.From(redisResult);
         }
 
         public static AggregateResult Aggregate(this IDatabase db)
