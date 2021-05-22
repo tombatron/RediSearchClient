@@ -1,3 +1,4 @@
+using RediSearchClient.Aggregate;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
@@ -49,9 +50,21 @@ namespace RediSearchClient
             return SearchResult.From(redisResult);
         }
 
-        public static AggregateResult Aggregate(this IDatabase db)
+        /// <summary>
+        /// `FT.AGGREGATE`
+        /// 
+        /// Runs a search query on an index, and performs aggregate transformations on the results.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftaggregate
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aggregateDefinition"></param>
+        /// <returns></returns>
+        public static AggregateResult Aggregate(this IDatabase db, RediSearchAggregateDefinition aggregateDefinition)
         {
-            return null;
+            var redisResult = db.Execute(RediSearchCommands.AGGREGATE, aggregateDefinition.Fields);
+            
+            return AggregateResult.From(redisResult);;
         }
 
         public static string Explain(this IDatabase db)
