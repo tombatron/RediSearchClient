@@ -67,11 +67,6 @@ namespace RediSearchClient
             return AggregateResult.From(redisResult);;
         }
 
-        public static string Explain(this IDatabase db)
-        {
-            return null;
-        }
-
         public static void AlterSchema(this IDatabase db)
         {
 
