@@ -3,6 +3,8 @@ using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RediSearchClient
 {
@@ -67,9 +69,34 @@ namespace RediSearchClient
             return AggregateResult.From(redisResult);;
         }
 
-        public static void AlterSchema(this IDatabase db)
+        /// <summary>
+        /// `FT.ALTER {index} SCHEMA ADD {field} {options} ...`
+        /// 
+        /// Adds a new field to the index.
+        ///
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing and reindexing of existing documents.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="fields"></param>
+        public static void AlterSchema(this IDatabase db, string indexName, params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
         {
+            var builder = new RediSearchSchemaFieldBuilder();
 
+            var builtFields = fields.Select(x=>x(builder)).SelectMany(x=>x.FieldArguments).ToArray();
+
+            var commandArguments = new List<object>(3 + builtFields.Length)
+            {
+                indexName,
+                "SCHEMA",
+                "ADD"
+            };
+
+            commandArguments.AddRange(builtFields);
+            
+            db.Execute(RediSearchCommands.ALTER, commandArguments.ToArray());
         }
 
         public static bool DropIndex(this IDatabase db)
