@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="2.*" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -28,6 +29,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="license\license.txt" Pack="true" PackagePath="$(PackageLicenseFile)"/>
+    <None Include="license\license.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
   </ItemGroup>
 </Project>
