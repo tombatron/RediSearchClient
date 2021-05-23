@@ -72,5 +72,48 @@ namespace RediSearchClient.IntegrationTests
                 yield break;
             }
         }
+
+        public class DropIndexWill : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _indexName;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _indexName = Guid.NewGuid().ToString("n");
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void DropTheIndex()
+            {
+                var indexDefinition = RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix("Whatever::*")
+                    .WithSchema(s => s.Text("Hello"))
+                    .Build();
+
+                _db.CreateIndex(_indexName, indexDefinition);
+
+                var indexes = ((RedisResult[])_db.Execute("FT._LIST")).Select(x => x.ToString());
+
+                Assert.Contains(_indexName, indexes);
+
+                _db.DropIndex(_indexName);
+
+                indexes = ((RedisResult[])_db.Execute("FT._LIST")).Select(x => x.ToString());
+
+                Assert.DoesNotContain(_indexName, indexes);
+            }
+        }
     }
 }

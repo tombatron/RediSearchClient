@@ -48,7 +48,7 @@ namespace RediSearchClient
         public static SearchResult Search(this IDatabase db, RediSearchQueryDefinition queryDefinition)
         {
             var redisResult = db.Execute(RediSearchCommands.SEARCH, queryDefinition.Fields);
-            
+
             return SearchResult.From(redisResult);
         }
 
@@ -65,8 +65,8 @@ namespace RediSearchClient
         public static AggregateResult Aggregate(this IDatabase db, RediSearchAggregateDefinition aggregateDefinition)
         {
             var redisResult = db.Execute(RediSearchCommands.AGGREGATE, aggregateDefinition.Fields);
-            
-            return AggregateResult.From(redisResult);;
+
+            return AggregateResult.From(redisResult); ;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace RediSearchClient
         {
             var builder = new RediSearchSchemaFieldBuilder();
 
-            var builtFields = fields.Select(x=>x(builder)).SelectMany(x=>x.FieldArguments).ToArray();
+            var builtFields = fields.Select(x => x(builder)).SelectMany(x => x.FieldArguments).ToArray();
 
             var commandArguments = new List<object>(3 + builtFields.Length)
             {
@@ -95,13 +95,36 @@ namespace RediSearchClient
             };
 
             commandArguments.AddRange(builtFields);
-            
+
             db.Execute(RediSearchCommands.ALTER, commandArguments.ToArray());
         }
 
-        public static bool DropIndex(this IDatabase db)
+        /// <summary>
+        /// `FT.DROPINDEX`
+        /// 
+        /// Deletes the index.
+        /// 
+        /// By default, FT.DROPINDEX does not delete the document hashes associated with the index. 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="dropDocumentHashes">Drop associated document hashes (defaults to `false`)</param>
+        /// <returns></returns>
+        public static bool DropIndex(this IDatabase db, string indexName, bool dropDocumentHashes = false)
         {
-            return false;
+            var commandArguments = new List<object>(2)
+            {
+                indexName
+            };
+
+            if (dropDocumentHashes)
+            {
+                commandArguments.Add("DD");
+            }
+
+            var result = db.Execute(RediSearchCommands.DROPINDEX, commandArguments.ToArray());
+
+            return result.ToString() == "OK";
         }
 
         public static void AddAlias(this IDatabase db)
