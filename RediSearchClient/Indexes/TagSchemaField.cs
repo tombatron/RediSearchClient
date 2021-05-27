@@ -19,16 +19,17 @@ namespace RediSearchClient.Indexes
         {
             if (_fieldArguments == null)
             {
-                var argumentLength = 2 + (string.IsNullOrEmpty(_separator) ? 0 : 1);
+                var argumentLength = 2 + (string.IsNullOrEmpty(_separator) ? 0 : 2);
 
                 _fieldArguments = new object[argumentLength];
 
                 _fieldArguments[0] = _fieldName;
                 _fieldArguments[1] = "TAG";
 
-                if (argumentLength == 3)
+                if (argumentLength == 4)
                 {
-                    _fieldArguments[2] = _separator;
+                    _fieldArguments[2] = "SEPARATOR";
+                    _fieldArguments[3] = _separator;
                 }
             }
 

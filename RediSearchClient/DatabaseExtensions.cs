@@ -105,6 +105,8 @@ namespace RediSearchClient
         /// Deletes the index.
         /// 
         /// By default, FT.DROPINDEX does not delete the document hashes associated with the index. 
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftdropindex
         /// </summary>
         /// <param name="db"></param>
         /// <param name="indexName"></param>
@@ -127,24 +129,84 @@ namespace RediSearchClient
             return result.ToString() == "OK";
         }
 
-        public static void AddAlias(this IDatabase db)
+        /// <summary>
+        /// `FT.ALIASADD` {name} {index}
+        /// 
+        /// The FT.ALIASADD will add an alias to an index. Index aliases can be used to refer to actual indexes 
+        /// in data commands such as FT.SEARCH or FT.ADD . This allows an administrator to transparently redirect 
+        /// application queries to alternative indexes.
+        /// 
+        /// Indexes can have more than one alias, though an alias cannot refer to another alias.
+        /// 
+        /// FT.ALIASADD will fail if the alias is already associated with another index.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftaliasadd
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="alias"></param>
+        /// <param name="indexName"></param>
+        /// <returns></returns>
+        public static bool AddAlias(this IDatabase db, string alias, string indexName)
         {
+            var result = db.Execute(RediSearchCommands.ALIASADD, alias, indexName);
 
+            return result.ToString() == "OK";
         }
 
-        public static void UpdateAlias(this IDatabase db)
+        /// <summary>
+        /// `FT.ALIASUPDATE` {name} {index}
+        /// 
+        /// The FT.ALIASUPDATE command differs from the FT.ALIASADD command in that it will remove the alias 
+        /// association with a previous index, if any. 
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftaliasupdate
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="alias"></param>
+        /// <param name="indexName"></param>
+        /// <returns></returns>
+        public static bool UpdateAlias(this IDatabase db, string alias, string indexName)
         {
+            var result = db.Execute(RediSearchCommands.ALIASUPDATE, alias, indexName);
 
+            return result.ToString() == "OK";
         }
 
-        public static void DeleteAlias(this IDatabase db)
+        /// <summary>
+        /// `FT.ALIASDEL` {name}
+        /// 
+        /// Removes an existing index alias.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftaliasdel
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="alias"></param>
+        /// <returns></returns>
+        public static bool DeleteAlias(this IDatabase db, string alias)
         {
+            var result = db.Execute(RediSearchCommands.ALIASDEL, alias);
 
+            return result.ToString() == "OK";
         }
 
-        public static string[] TagValues(this IDatabase db)
+        /// <summary>
+        /// `FT.TAGVALS` {index} {field_name}
+        /// 
+        /// Returns the distinct tags indexed in a Tag field .
+        /// 
+        /// This is useful if your tag field indexes things like cities, categories, etc.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#fttagvals
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="index"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public static string[] TagValues(this IDatabase db, string index, string fieldName)
         {
-            return null;
+            var result = db.Execute(RediSearchCommands.TAGVALS, index, fieldName);
+
+            return ((RedisResult[])result).Select(x => x.ToString()).ToArray();
         }
 
         public static int AddSuggestion(this IDatabase db)
