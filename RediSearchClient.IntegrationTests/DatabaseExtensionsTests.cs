@@ -196,5 +196,199 @@ namespace RediSearchClient.IntegrationTests
                 _db.CreateIndex(_indexName, index);
             }
         }
+
+        public class AddSuggestionWill : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _dictionaryName;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _dictionaryName = Guid.NewGuid().ToString("n");
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void AddASuggestionToTheIndex()
+            {
+                var firstResult = _db.AddSuggestion(_dictionaryName, "hello", 1);
+                var secondResult = _db.AddSuggestion(_dictionaryName, "goodnight", 1);
+
+                Assert.Equal(1, firstResult);
+                Assert.Equal(2, secondResult);
+            }
+
+            [Fact]
+            public void AddASuggestionToTheIndexWithPayload()
+            {
+                var result = _db.AddSuggestion(_dictionaryName, "whoa", 1, payload: "hey there");
+            }
+        }
+
+        public class GetSuggestionWill : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _dictionaryName;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _dictionaryName = Guid.NewGuid().ToString("n");
+
+                SetupSuggestions();
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void ReturnSuggestions()
+            {
+                var suggestions = _db.GetSuggestions(_dictionaryName, "he");
+
+                Assert.Equal(3, suggestions.Length);
+            }
+
+            [Fact]
+            public void ReturnSuggestionsWithScores()
+            {
+                var suggestions = _db.GetSuggestions(_dictionaryName, "he", withScores: true);
+
+                var hasScores = suggestions.All(x => x.Score > 0);
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasScores);
+            }
+
+            [Fact]
+            public void ReturnSuggestionsWithPayloads()
+            {
+                var suggestions = _db.GetSuggestions(_dictionaryName, "he", withPayloads: true);
+
+                var hasPayloads = suggestions.All(x => !string.IsNullOrEmpty(x.Payload));
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasPayloads);
+            }
+
+            [Fact]
+            public void ReturnSuggestionsWithScoresAndPayloads()
+            {
+                var suggestions = _db.GetSuggestions(_dictionaryName, "he", withScores: true, withPayloads: true);
+
+                var hasScores = suggestions.All(x => x.Score > 0);
+                var hasPayloads = suggestions.All(x => !string.IsNullOrEmpty(x.Payload));
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasScores);
+                Assert.True(hasPayloads);
+            }
+
+            private void SetupSuggestions()
+            {
+                _db.AddSuggestion(_dictionaryName, "hello world", 2, false, "this is hello world's payload");
+                _db.AddSuggestion(_dictionaryName, "hello tom", 2, false, "this is hello tom's payload");
+                _db.AddSuggestion(_dictionaryName, "hey joe", 2, false, "this is hey joe's payload");
+            }
+        }
+
+        public class DeleteSuggestionWill : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _dictionaryName;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _dictionaryName = Guid.NewGuid().ToString("n");
+
+                SetupSuggestions();
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void RemoveSuggestionIfItExists()
+            {
+                var result = _db.DeleteSuggestion(_dictionaryName, "hello world");
+
+                Assert.True(result);
+            }
+
+            [Fact]
+            public void NotRemoveSuggestionIfItDoesntExist()
+            {
+                var result = _db.DeleteSuggestion(_dictionaryName, "hello lucas");
+
+                Assert.False(result);
+            }
+
+            private void SetupSuggestions()
+            {
+                _db.AddSuggestion(_dictionaryName, "hello world", 2, false, "this is hello world's payload");
+                _db.AddSuggestion(_dictionaryName, "hello tom", 2, false, "this is hello tom's payload");
+                _db.AddSuggestion(_dictionaryName, "hey joe", 2, false, "this is hey joe's payload");
+            }
+        }
+
+        public class SuggestionSizeWill : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _dictionaryName;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _dictionaryName = Guid.NewGuid().ToString("n");
+
+                SetupSuggestions();
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void ReturnLengthOfSuggestionDictionary()
+            {
+                var result = _db.SuggestionsSize(_dictionaryName);
+
+                Assert.Equal(3, result);
+            }
+
+            private void SetupSuggestions()
+            {
+                _db.AddSuggestion(_dictionaryName, "hello world", 2, false, "this is hello world's payload");
+                _db.AddSuggestion(_dictionaryName, "hello tom", 2, false, "this is hello tom's payload");
+                _db.AddSuggestion(_dictionaryName, "hey joe", 2, false, "this is hey joe's payload");
+            }
+        }
     }
 }

@@ -265,7 +265,7 @@ namespace RediSearchClient
         /// <param name="withPayloads">If set, we return optional payloads saved along with the suggestions. If no payload is present for an entry, we return a Null Reply.</param>
         /// <param name="max">If set, we limit the results to a maximum of num (default: 5).</param>
         /// <returns>A list of the top suggestions matching the prefix, optionally with score after each entry.</returns>
-        public static SuggestionResult[] GetSuggestions(this IDatabase db, string key, string prefix, bool fuzzy = false, bool withScores = false, bool withPayloads = false, int max = -1)
+        public static SuggestionResult[] GetSuggestions(this IDatabase db, string key, string prefix, bool fuzzy = false, bool withScores = false, bool withPayloads = false, int max = 5)
         {
             var parameters = new List<object>(7)
             {
@@ -296,7 +296,7 @@ namespace RediSearchClient
 
             var result = db.Execute(RediSearchCommand.SUGGET, parameters.ToArray());
 
-            return SuggestionResult.CreateArray(result);
+            return SuggestionResult.CreateArray(result, withScores, withPayloads);
         }
 
         /// <summary>
