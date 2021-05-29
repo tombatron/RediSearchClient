@@ -246,18 +246,75 @@ namespace RediSearchClient
             }
 
             var result = db.Execute(RediSearchCommands.SUGADD, parameters.ToArray());
-            
+
             return (int)result;
         }
 
-        public static SuggestionResult[] GetSuggestions(this IDatabase db)
+        /// <summary>
+        /// `FT.SUGGET`
+        /// 
+        /// Gets completion suggestions for a prefix.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsugget
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="key">The suggestion dictionary key.</param>
+        /// <param name="prefix">The prefix to complete on.</param>
+        /// <param name="fuzzy">If set, we do a fuzzy prefix search, including prefixes at Levenshtein distance of 1 from the prefix sent.</param>
+        /// <param name="withScores">If set, we also return the score of each suggestion. this can be used to merge results from multiple instances.</param>
+        /// <param name="withPayloads">If set, we return optional payloads saved along with the suggestions. If no payload is present for an entry, we return a Null Reply.</param>
+        /// <param name="max">If set, we limit the results to a maximum of num (default: 5).</param>
+        /// <returns>A list of the top suggestions matching the prefix, optionally with score after each entry.</returns>
+        public static SuggestionResult[] GetSuggestions(this IDatabase db, string key, string prefix, bool fuzzy = false, bool withScores = false, bool withPayloads = false, int max = -1)
         {
-            return null;
+            var parameters = new List<object>(7)
+            {
+                key,
+                prefix
+            };
+
+            if (fuzzy)
+            {
+                parameters.Add("FUZZY");
+            }
+
+            if (withScores)
+            {
+                parameters.Add("WITHSCORES");
+            }
+
+            if (withPayloads)
+            {
+                parameters.Add("WITHPAYLOADS");
+            }
+
+            if (max != 5)
+            {
+                parameters.Add("MAX");
+                parameters.Add(max);
+            }
+
+            var result = db.Execute(RediSearchCommands.SUGGET, parameters.ToArray());
+
+            return SuggestionResult.CreateArray(result);
         }
 
-        public static int DeleteSuggestion(this IDatabase db)
+        /// <summary>
+        /// `FT.SUGDEL
+        /// 
+        /// Deletes a string from a suggestion index. 
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsugdel
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="key">The suggestion dictionary key.</param>
+        /// <param name="value">The value to delete.</param>
+        /// <returns>True if the value was found, false otherwise.</returns>
+        public static bool DeleteSuggestion(this IDatabase db, string key, string value)
         {
-            return 0;
+            var result = db.Execute(RediSearchCommands.SUGDEL, key, value);
+
+            return (int)result == 1;
         }
 
         public static int SuggestionsSize(this IDatabase db)
