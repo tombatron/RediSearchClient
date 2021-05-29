@@ -317,9 +317,19 @@ namespace RediSearchClient
             return (int)result == 1;
         }
 
-        public static int SuggestionsSize(this IDatabase db)
+        /// <summary>
+        /// `FT.SUGLEN`
+        /// 
+        /// Gets the size of an auto-complete suggestion dictionary.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsuglen
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="key">The suggestion dictionary key.</param>
+        /// <returns>The current size of the suggestion dictionary.</returns>
+        public static int SuggestionsSize(this IDatabase db, string key)
         {
-            return 0;
+            return (int)db.Execute(RediSearchCommands.SUGLEN, key);
         }
 
         public static void UpdateSynonyms(this IDatabase db)
