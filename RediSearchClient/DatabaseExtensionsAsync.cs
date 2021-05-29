@@ -25,7 +25,7 @@ namespace RediSearchClient
 
             Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
 
-            return db.ExecuteAsync(RediSearchCommands.CREATE, commandParameters);
+            return db.ExecuteAsync(RediSearchCommand.CREATE, commandParameters);
         }
     }
 }

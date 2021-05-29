@@ -1,6 +1,6 @@
 namespace RediSearchClient
 {
-    internal static class RediSearchCommands
+    internal static class RediSearchCommand
     {
         internal const string CREATE = "FT.CREATE";
 

@@ -32,7 +32,7 @@ namespace RediSearchClient
 
             Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
 
-            db.Execute(RediSearchCommands.CREATE, commandParameters);
+            db.Execute(RediSearchCommand.CREATE, commandParameters);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static SearchResult Search(this IDatabase db, RediSearchQueryDefinition queryDefinition)
         {
-            var redisResult = db.Execute(RediSearchCommands.SEARCH, queryDefinition.Fields);
+            var redisResult = db.Execute(RediSearchCommand.SEARCH, queryDefinition.Fields);
 
             return SearchResult.From(redisResult);
         }
@@ -64,7 +64,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static AggregateResult Aggregate(this IDatabase db, RediSearchAggregateDefinition aggregateDefinition)
         {
-            var redisResult = db.Execute(RediSearchCommands.AGGREGATE, aggregateDefinition.Fields);
+            var redisResult = db.Execute(RediSearchCommand.AGGREGATE, aggregateDefinition.Fields);
 
             return AggregateResult.From(redisResult); ;
         }
@@ -97,7 +97,7 @@ namespace RediSearchClient
 
             commandArguments.AddRange(builtFields);
 
-            db.Execute(RediSearchCommands.ALTER, commandArguments.ToArray());
+            db.Execute(RediSearchCommand.ALTER, commandArguments.ToArray());
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace RediSearchClient
                 commandArguments.Add("DD");
             }
 
-            var result = db.Execute(RediSearchCommands.DROPINDEX, commandArguments.ToArray());
+            var result = db.Execute(RediSearchCommand.DROPINDEX, commandArguments.ToArray());
 
             return result.ToString() == "OK";
         }
@@ -149,7 +149,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static bool AddAlias(this IDatabase db, string alias, string indexName)
         {
-            var result = db.Execute(RediSearchCommands.ALIASADD, alias, indexName);
+            var result = db.Execute(RediSearchCommand.ALIASADD, alias, indexName);
 
             return result.ToString() == "OK";
         }
@@ -168,7 +168,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static bool UpdateAlias(this IDatabase db, string alias, string indexName)
         {
-            var result = db.Execute(RediSearchCommands.ALIASUPDATE, alias, indexName);
+            var result = db.Execute(RediSearchCommand.ALIASUPDATE, alias, indexName);
 
             return result.ToString() == "OK";
         }
@@ -185,7 +185,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static bool DeleteAlias(this IDatabase db, string alias)
         {
-            var result = db.Execute(RediSearchCommands.ALIASDEL, alias);
+            var result = db.Execute(RediSearchCommand.ALIASDEL, alias);
 
             return result.ToString() == "OK";
         }
@@ -205,7 +205,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public static string[] TagValues(this IDatabase db, string index, string fieldName)
         {
-            var result = db.Execute(RediSearchCommands.TAGVALS, index, fieldName);
+            var result = db.Execute(RediSearchCommand.TAGVALS, index, fieldName);
 
             return ((RedisResult[])result).Select(x => x.ToString()).ToArray();
         }
@@ -245,7 +245,7 @@ namespace RediSearchClient
                 parameters.Add(payload);
             }
 
-            var result = db.Execute(RediSearchCommands.SUGADD, parameters.ToArray());
+            var result = db.Execute(RediSearchCommand.SUGADD, parameters.ToArray());
 
             return (int)result;
         }
@@ -294,7 +294,7 @@ namespace RediSearchClient
                 parameters.Add(max);
             }
 
-            var result = db.Execute(RediSearchCommands.SUGGET, parameters.ToArray());
+            var result = db.Execute(RediSearchCommand.SUGGET, parameters.ToArray());
 
             return SuggestionResult.CreateArray(result);
         }
@@ -312,7 +312,7 @@ namespace RediSearchClient
         /// <returns>True if the value was found, false otherwise.</returns>
         public static bool DeleteSuggestion(this IDatabase db, string key, string value)
         {
-            var result = db.Execute(RediSearchCommands.SUGDEL, key, value);
+            var result = db.Execute(RediSearchCommand.SUGDEL, key, value);
 
             return (int)result == 1;
         }
@@ -329,7 +329,7 @@ namespace RediSearchClient
         /// <returns>The current size of the suggestion dictionary.</returns>
         public static int SuggestionsSize(this IDatabase db, string key)
         {
-            return (int)db.Execute(RediSearchCommands.SUGLEN, key);
+            return (int)db.Execute(RediSearchCommand.SUGLEN, key);
         }
 
         public static void UpdateSynonyms(this IDatabase db)
