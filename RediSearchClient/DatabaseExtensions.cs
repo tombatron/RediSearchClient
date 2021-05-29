@@ -74,7 +74,8 @@ namespace RediSearchClient
         /// 
         /// Adds a new field to the index.
         ///
-        /// Adding a field to the index will cause any future document updates to use the new field when indexing and reindexing of existing documents.
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing 
+        /// and reindexing of existing documents.
         /// 
         /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
         /// </summary>
@@ -209,9 +210,44 @@ namespace RediSearchClient
             return ((RedisResult[])result).Select(x => x.ToString()).ToArray();
         }
 
-        public static int AddSuggestion(this IDatabase db)
+        /// <summary>
+        /// `FT.SUGADD`
+        /// 
+        /// Adds a suggestion string to an auto-complete suggestion dictionary. This is disconnected 
+        /// from the index definitions, and leaves creating and updating suggestions dictionaries to the user.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsugadd
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="key">The suggestion dictionary key.</param>
+        /// <param name="value">The suggestion string we index.</param>
+        /// <param name="score">A floating point number of the suggestion string's weight.</param>
+        /// <param name="increment">If set, we increment the existing entry of the suggestion by the given score, instead of replacing the score. This is useful for updating the dictionary based on user queries in real time.</param>
+        /// <param name="payload">If set, we save an extra payload with the suggestion, that can be fetched by adding the WITHPAYLOADS argument to FT.SUGGET.</param>
+        /// <returns>The current size of the suggestion dictionary.</returns>
+        public static int AddSuggestion(this IDatabase db, string key, string value, double score, bool increment = false, string payload = default)
         {
-            return 0;
+            var parameters = new List<object>(5)
+            {
+                key,
+                value,
+                score
+            };
+
+            if (increment)
+            {
+                parameters.Add("INCR");
+            }
+
+            if (!string.IsNullOrEmpty(payload))
+            {
+                parameters.Add("PAYLOAD");
+                parameters.Add(payload);
+            }
+
+            var result = db.Execute(RediSearchCommands.SUGADD, parameters.ToArray());
+            
+            return (int)result;
         }
 
         public static SuggestionResult[] GetSuggestions(this IDatabase db)
