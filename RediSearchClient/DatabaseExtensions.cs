@@ -332,14 +332,71 @@ namespace RediSearchClient
             return (int)db.Execute(RediSearchCommand.SUGLEN, key);
         }
 
-        public static void UpdateSynonyms(this IDatabase db)
-        {
+        /// <summary>
+        /// `FT.SYNUPDATE`
+        /// 
+        /// Updates a synonym group.
+        ///
+        /// The command is used to create or update a synonym group with additional terms. 
+        /// Only documents which were indexed after the update will be affected.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#synonym
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="synonymGroupId"></param>
+        /// <param name="terms"></param>
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, params (string term1, string term2)[] terms) =>
+            db.UpdateSynonyms(indexName, synonymGroupId, false, terms);
 
+        /// <summary>
+        /// `FT.SYNUPDATE`
+        /// 
+        /// Updates a synonym group.
+        ///
+        /// The command is used to create or update a synonym group with additional terms. 
+        /// Only documents which were indexed after the update will be affected.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#synonym
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="synonymGroupId"></param>
+        /// <param name="skipInitialScan">If set, we do not scan and index.</param>
+        /// <param name="terms"></param>
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, bool skipInitialScan, params (string term1, string term2)[] terms)
+        {
+            var parameters = new List<object>(5)
+            {
+                indexName,
+                synonymGroupId,
+                skipInitialScan
+            };
+
+            foreach(var (term1, term2) in terms)
+            {
+                parameters.Add(term1);
+                parameters.Add(term2);
+            }
+
+            db.Execute(RediSearchCommand.SYNUPDATE, parameters.ToArray());
         }
 
-        public static string[] DumpSynonyms(this IDatabase db)
+        /// <summary>
+        /// `FT.SYNDUMP`
+        /// 
+        /// Dumps the contents of a synonym group.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftsyndump
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <returns></returns>
+        public static SynonymGroupElement[] DumpSynonyms(this IDatabase db, string indexName)
         {
-            return null;
+            var rawResult = db.Execute(RediSearchCommand.SYNDUMP, indexName);
+
+            return SynonymGroupElement.CreateGroupResult(rawResult);
         }
 
         public static SpellCheckResult[] SpellCheck(this IDatabase db)

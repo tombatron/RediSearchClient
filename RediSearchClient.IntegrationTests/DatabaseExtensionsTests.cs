@@ -390,5 +390,61 @@ namespace RediSearchClient.IntegrationTests
                 _db.AddSuggestion(_dictionaryName, "hey joe", 2, false, "this is hey joe's payload");
             }
         }
+
+        public class SynonymsManagement : BaseIntegrationTest
+        {
+            private ConnectionMultiplexer _muxr;
+            private IDatabase _db;
+            private string _indexName;
+            private string _synonymGroupId;
+
+            public override void Setup()
+            {
+                _muxr = ConnectionMultiplexer.Connect("localhost");
+
+                _db = _muxr.GetDatabase(0);
+
+                _indexName = Guid.NewGuid().ToString("n");
+
+                _synonymGroupId = Guid.NewGuid().ToString("n");
+
+                CreateSynonyms();
+            }
+
+            public override void TearDown()
+            {
+                _muxr.Dispose();
+            }
+
+            [Fact]
+            public void Works()
+            {
+                var synonyms = _db.DumpSynonyms(_indexName);
+
+                Assert.NotNull(synonyms);
+            }
+
+            private void CreateSynonyms()
+            {
+                var index = RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix($"this_doesnt_matter:")
+                    .WithSchema(
+                        x => x.Tag("city"),
+                        x => x.Tag("state")
+                    )
+                    .Build();
+
+                _db.CreateIndex(_indexName, index);
+
+                _db.UpdateSynonyms(_indexName, _synonymGroupId, 
+                    ("poop", "dookie"), 
+                    ("pee pee", "tink tink"),
+                    ("dog", "dag"),
+                    ("toliet", "head"),
+                    ("child", "kid")
+                );
+            }
+        }
     }
 }
