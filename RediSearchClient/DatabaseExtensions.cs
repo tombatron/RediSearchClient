@@ -373,7 +373,7 @@ namespace RediSearchClient
                 skipInitialScan
             };
 
-            foreach(var (term1, term2) in terms)
+            foreach (var (term1, term2) in terms)
             {
                 parameters.Add(term1);
                 parameters.Add(term2);
@@ -399,9 +399,38 @@ namespace RediSearchClient
             return SynonymGroupElement.CreateGroupResult(rawResult);
         }
 
-        public static SpellCheckResult[] SpellCheck(this IDatabase db)
+        /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName">The index with the indexed terms.</param>
+        /// <param name="query">The search query.</param>
+        /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static SpellCheckResult[] SpellCheck(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
         {
-            return null;
+            var parameters = new List<object>(2)
+            {
+                indexName,
+                query
+            };
+
+            if (distance != 1)
+            {
+                parameters.Add("DISTANCE");
+                parameters.Add(distance);
+            }
+
+            var result = db.Execute(RediSearchCommand.SPELLCHECK, parameters.ToArray());
+
+            return SpellCheckResult.CreateArray(result);
         }
 
         public static int AddToDictionary(this IDatabase db)
