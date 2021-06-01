@@ -483,9 +483,21 @@ namespace RediSearchClient
             return (int)result;
         }
 
-        public static string[] DumpDictionary(this IDatabase db)
+        /// <summary>
+        /// `FT.DICTDUMP`
+        /// 
+        /// Dumps all terms in the given dictionary.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftdictdump
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="dictionaryName">The dictionary name.</param>
+        /// <returns>Returns array where each element is a dictionary term.</returns>
+        public static string[] DumpDictionary(this IDatabase db, string dictionaryName)
         {
-            return null;
+            var result = db.Execute(RediSearchCommand.DICTDUMP, dictionaryName);
+
+            return (string[])result;
         }
 
         public static InfoResult GetInfo(this IDatabase db)
