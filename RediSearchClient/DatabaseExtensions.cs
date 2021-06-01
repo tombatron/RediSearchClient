@@ -500,9 +500,21 @@ namespace RediSearchClient
             return (string[])result;
         }
 
-        public static InfoResult GetInfo(this IDatabase db)
+        /// <summary>
+        /// `FT.INFO`
+        /// 
+        /// Returns information and statistics on the index.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftinfo
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <returns></returns>
+        public static InfoResult GetInfo(this IDatabase db, string indexName)
         {
-            return null;
+            var result = db.Execute(RediSearchCommand.INFO, indexName);
+
+            return InfoResult.Create(result);
         }
 
         public static string[] ListIndexes(this IDatabase db)
