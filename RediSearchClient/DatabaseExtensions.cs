@@ -433,9 +433,29 @@ namespace RediSearchClient
             return SpellCheckResult.CreateArray(result);
         }
 
-        public static int AddToDictionary(this IDatabase db)
+        /// <summary>
+        /// `FT.DICTADD {dict} {term} [{term} ...]
+        /// 
+        /// Adds terms to a dictionary.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftdictadd
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="dictionaryName">The dictionary name.</param>
+        /// <param name="terms">The term(s) to add to the dictionary.</param>
+        /// <returns>The number of new terms added to the dictionary.</returns>
+        public static int AddToDictionary(this IDatabase db, string dictionaryName, params string[] terms)
         {
-            return 0;
+            var parameters = new List<object>
+            {
+                dictionaryName
+            };
+
+            parameters.AddRange(terms);
+
+            var result = db.Execute(RediSearchCommand.DICTADD, parameters.ToArray());
+
+            return (int)result;
         }
 
         public static int DeleteFromDictionary(this IDatabase db)
