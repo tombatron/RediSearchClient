@@ -458,9 +458,29 @@ namespace RediSearchClient
             return (int)result;
         }
 
-        public static int DeleteFromDictionary(this IDatabase db)
+        /// <summary>
+        /// `FT.DICTDEL`
+        /// 
+        /// Deletes terms from a dictionary.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftdictdel
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="dictionaryName">The dictionary name.</param>
+        /// <param name="terms">The term(s) to delete from the dictionary.</param>
+        /// <returns>The number of terms deleted.</returns>
+        public static int DeleteFromDictionary(this IDatabase db, string dictionaryName, params string[] terms)
         {
-            return 0;
+            var parameters = new List<object>
+            {
+                dictionaryName
+            };
+
+            parameters.AddRange(terms);
+
+            var result = db.Execute(RediSearchCommand.DICTDEL, parameters.ToArray());
+
+            return (int)result;
         }
 
         public static string[] DumpDictionary(this IDatabase db)
