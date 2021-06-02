@@ -1,4 +1,5 @@
 using RediSearchClient.Aggregate;
+using RediSearchClient.Exceptions;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
@@ -517,14 +518,55 @@ namespace RediSearchClient
             return InfoResult.Create(result);
         }
 
+        /// <summary>
+        /// `FT._LIST`
+        /// 
+        /// Returns a list of all existing indexes.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ft_list
+        /// </summary>
+        /// <param name="db"></param>
+        /// <returns>An array with index names.</returns>
         public static string[] ListIndexes(this IDatabase db)
         {
             return null;
         }
 
-        public static ConfigureResult Configure(this IDatabase db)
+        /// <summary>
+        /// `FT.CONFIG SET`
+        /// 
+        /// Sets a runtime configuration option.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftconfig
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="option"></param>
+        /// <param name="value"></param>
+        public static void SetConfiguration(this IDatabase db, string option, string value)
         {
-            return null;
+            var result = db.Execute(RediSearchCommand.CONFIG, "SET", option, value);
+
+            if ((string)result != "OK")
+            {
+                throw new RediSearchConfigurationException($"Looks like {option} with {value} wasn't valid.");
+            }
+        }
+
+        /// <summary>
+        /// `FT.CONFIG GET`
+        /// 
+        /// Gets a runtime configuration option.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftconfig
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public static string GetConfiguration(this IDatabase db, string option)
+        {
+            var result = db.Execute(RediSearchCommand.CONFIG, "GET", option);
+
+            return (string)result;
         }
     }
 }

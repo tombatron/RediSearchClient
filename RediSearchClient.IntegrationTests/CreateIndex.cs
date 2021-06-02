@@ -1,28 +1,12 @@
 using RediSearchClient.Indexes;
-using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests
 {
-    public class CreateIndex : IDisposable
+    public class CreateIndex : BaseIntegrationTest
     {
-        private ConnectionMultiplexer _muxr;
-        private IDatabase _db;
-
-        private void Setup()
-        {
-            _muxr = ConnectionMultiplexer.Connect("localhost");
-
-            _db = _muxr.GetDatabase(0);
-        }
-
-        private void TearDown()
-        {
-            _muxr.Dispose();
-        }
-
         [Fact]
         public void WillCreateASimpleIndex()
         {
@@ -50,9 +34,5 @@ namespace RediSearchClient.IntegrationTests
 
             await _db.CreateIndexAsync(indexName, index);
         }
-
-        public CreateIndex() => Setup();
-
-        public void Dispose() => TearDown();
     }
 }
