@@ -88,7 +88,7 @@ namespace RediSearchClient.IntegrationTests
 
                 CreateTestSearchData();
             }
-            
+
             [Fact]
             public void WillReturnAnIndexesTags()
             {
@@ -317,13 +317,53 @@ namespace RediSearchClient.IntegrationTests
 
                 _db.CreateIndex(_indexName, index);
 
-                _db.UpdateSynonyms(_indexName, _synonymGroupId, 
-                    ("poop", "dookie"), 
+                _db.UpdateSynonyms(_indexName, _synonymGroupId,
+                    ("poop", "dookie"),
                     ("pee pee", "tink tink"),
                     ("dog", "dag"),
                     ("toliet", "head"),
                     ("child", "kid")
                 );
+            }
+        }
+
+        public class GetInfoWill : BaseIntegrationTest
+        {
+            public override void Setup()
+            {
+                base.Setup();
+
+                SetupTestIndex();
+            }
+
+            [Fact]
+            public void ReturnInfoAboutAnIndex()
+            {
+                var info = _db.GetInfo(_indexName);
+
+                Assert.Equal(_indexName, info.IndexName);
+                
+                Assert.Contains("NOFREQS", info.IndexOptions);
+                Assert.Contains("NOOFFSETS", info.IndexOptions);
+            }
+
+            private void SetupTestIndex()
+            {
+                var index = RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix("Whoa::")
+                    .WithSchema
+                    (
+                        x => x.Geo("whereami"),
+                        x => x.Numeric("numberz"),
+                        x => x.Tag("tag_field", separator: "|"),
+                        x => x.Text("wurds", sortable: true, nostem: true, noindex: false, phonetic: Language.French, weight: 2)
+                    )
+                    .NoFrequencies()
+                    .NoOffsets()
+                    .Build();
+
+                _db.CreateIndex(_indexName, index);
             }
         }
     }

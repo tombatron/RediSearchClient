@@ -515,7 +515,7 @@ namespace RediSearchClient
         {
             var result = db.Execute(RediSearchCommand.INFO, indexName);
 
-            return InfoResult.Create(result);
+            return InfoResult.Create((RedisResult[])result);
         }
 
         /// <summary>
