@@ -9,6 +9,7 @@ namespace RediSearchClient.IntegrationTests
         protected IDatabase _db;
         protected string _indexName;
         protected string _recordPrefix;
+        protected string _dictionaryName;
 
         public virtual void Setup()
         {
@@ -18,6 +19,7 @@ namespace RediSearchClient.IntegrationTests
 
             _indexName = Guid.NewGuid().ToString("n");
             _recordPrefix = Guid.NewGuid().ToString("n");
+            _dictionaryName = Guid.NewGuid().ToString("n");
         }
 
         public virtual void TearDown()

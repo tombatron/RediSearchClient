@@ -9,6 +9,8 @@ namespace RediSearchClient.IntegrationTests
     {
         public override void Setup()
         {
+            base.Setup();
+            
             CreateTestSearchData();
         }
 

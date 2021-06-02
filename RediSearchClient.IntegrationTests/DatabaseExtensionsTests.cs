@@ -11,24 +11,6 @@ namespace RediSearchClient.IntegrationTests
     {
         public class AlterSchemaWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _indexName;
-
-            public override void Setup()
-            {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _indexName = Guid.NewGuid().ToString("n");
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
-            }
-
             [Fact]
             public void AlterExistingSchema()
             {
@@ -75,24 +57,6 @@ namespace RediSearchClient.IntegrationTests
 
         public class DropIndexWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _indexName;
-
-            public override void Setup()
-            {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _indexName = Guid.NewGuid().ToString("n");
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
-            }
-
             [Fact]
             public void DropTheIndex()
             {
@@ -118,28 +82,13 @@ namespace RediSearchClient.IntegrationTests
 
         public class TagValuesWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _indexName;
-            private string _recordPrefix;
-
             public override void Setup()
             {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _indexName = Guid.NewGuid().ToString("n");
-                _recordPrefix = Guid.NewGuid().ToString("n");
+                base.Setup();
 
                 CreateTestSearchData();
             }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
-            }
-
+            
             [Fact]
             public void WillReturnAnIndexesTags()
             {
@@ -199,24 +148,6 @@ namespace RediSearchClient.IntegrationTests
 
         public class AddSuggestionWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _dictionaryName;
-
-            public override void Setup()
-            {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _dictionaryName = Guid.NewGuid().ToString("n");
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
-            }
-
             [Fact]
             public void AddASuggestionToTheIndex()
             {
@@ -236,24 +167,11 @@ namespace RediSearchClient.IntegrationTests
 
         public class GetSuggestionWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _dictionaryName;
-
             public override void Setup()
             {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _dictionaryName = Guid.NewGuid().ToString("n");
+                base.Setup();
 
                 SetupSuggestions();
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
             }
 
             [Fact]
@@ -309,24 +227,11 @@ namespace RediSearchClient.IntegrationTests
 
         public class DeleteSuggestionWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _dictionaryName;
-
             public override void Setup()
             {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _dictionaryName = Guid.NewGuid().ToString("n");
+                base.Setup();
 
                 SetupSuggestions();
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
             }
 
             [Fact]
@@ -355,24 +260,11 @@ namespace RediSearchClient.IntegrationTests
 
         public class SuggestionSizeWill : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _dictionaryName;
-
             public override void Setup()
             {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _dictionaryName = Guid.NewGuid().ToString("n");
+                base.Setup();
 
                 SetupSuggestions();
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
             }
 
             [Fact]
@@ -393,27 +285,15 @@ namespace RediSearchClient.IntegrationTests
 
         public class SynonymsManagement : BaseIntegrationTest
         {
-            private ConnectionMultiplexer _muxr;
-            private IDatabase _db;
-            private string _indexName;
             private string _synonymGroupId;
 
             public override void Setup()
             {
-                _muxr = ConnectionMultiplexer.Connect("localhost");
-
-                _db = _muxr.GetDatabase(0);
-
-                _indexName = Guid.NewGuid().ToString("n");
+                base.Setup();
 
                 _synonymGroupId = Guid.NewGuid().ToString("n");
 
                 CreateSynonyms();
-            }
-
-            public override void TearDown()
-            {
-                _muxr.Dispose();
             }
 
             [Fact]
