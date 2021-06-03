@@ -1,3 +1,4 @@
+using System.Linq;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
@@ -25,6 +26,25 @@ namespace RediSearchClient.IntegrationTests
             var result = _db.Search(query);
 
             Assert.NotNull(result.RawResult);
+        }
+
+        [Fact]
+        public void CanParseQueryResult()
+        {
+            var query = RediSearchQuery
+                .On(_indexName)
+                .UsingQuery("*")
+                .Build();
+
+            var result = _db.Search(query);
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.RawResult);
+            Assert.Equal(5, result.RecordCount);
+
+            var tom = result.FirstOrDefault(x => (string)x.Fields["first_name"] == "Tom");
+
+            Assert.NotNull(tom);
         }
 
         private void CreateTestSearchData()
