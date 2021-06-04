@@ -10,7 +10,7 @@ namespace RediSearchClient.IntegrationTests
         public override void Setup()
         {
             base.Setup();
-            
+
             CreateTestSearchData();
         }
 
@@ -21,8 +21,8 @@ namespace RediSearchClient.IntegrationTests
                 .On(_indexName)
                 .Query("*")
                 .Load("@score")
-                .GroupBy(gb => 
-                { 
+                .GroupBy(gb =>
+                {
                     gb.Fields("@documentType");
                     gb.Reduce(Reducer.Sum, "@score").As("total");
                 })
@@ -33,6 +33,31 @@ namespace RediSearchClient.IntegrationTests
             var result = _db.Aggregate(aggregation);
 
             Assert.NotNull(result.RawResult);
+        }
+
+        [Fact]
+        public void CanParseQueryResult()
+        {
+            var aggregation = RediSearchAggregateQuery
+                .On(_indexName)
+                .Query("*")
+                .Load("@score")
+                .GroupBy(gb =>
+                {
+                    gb.Fields("@documentType");
+                    gb.Reduce(Reducer.Sum, "@score").As("total");
+                })
+                .Build();
+
+            var result = _db.Aggregate(aggregation);
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.RawResult);
+            Assert.NotNull(result.Records);
+            Assert.Equal(1, result.RecordCount);
+
+            Assert.Equal("demo", (string)result.Records[0]["documentType"]);
+            Assert.Equal(15, (int)result.Records[0]["total"]);
         }
 
         private void CreateTestSearchData()

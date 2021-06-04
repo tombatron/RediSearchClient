@@ -1,15 +1,61 @@
+using System.Collections.Generic;
 using StackExchange.Redis;
 
 namespace RediSearchClient
 {
     public class AggregateResult
     {
-        public RedisResult RawResult { get; }
+        public RedisResult[] RawResult { get; }
+
+        private int _recordCount = -1;
+
+        public int RecordCount
+        {
+            get
+            {
+                if (_recordCount == -1)
+                {
+                    _recordCount = (int)RawResult[0];
+                }
+
+                return _recordCount;
+            }
+        }
+
+        private Dictionary<string, RedisResult>[] _records;
+
+        public Dictionary<string, RedisResult>[] Records
+        {
+            get
+            {
+                if (_records == default)
+                {
+                    _records = new Dictionary<string, RedisResult>[RecordCount];
+
+                    for (var i = 1; i < RawResult.Length; i++)
+                    {
+                        _records[i - 1] = new Dictionary<string, RedisResult>();
+
+                        var recordFields = (RedisResult[])RawResult[i];
+
+                        for (var j = 0; j < recordFields.Length; j++)
+                        {
+                            var key = (string)recordFields[j];
+                            var value = recordFields[++j];
+
+                            _records[i - 1].Add(key, value);
+                        }
+                    }
+                }
+
+                return _records;
+            }
+        }
 
         private AggregateResult(RedisResult rawResult) =>
-            RawResult = rawResult;
+            RawResult = (RedisResult[])rawResult;
 
-        public static AggregateResult From(RedisResult redisResult) =>
+        internal static AggregateResult From(RedisResult redisResult) =>
             new AggregateResult(redisResult);
     }
 }
