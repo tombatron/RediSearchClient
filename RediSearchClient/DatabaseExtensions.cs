@@ -529,7 +529,9 @@ namespace RediSearchClient
         /// <returns>An array with index names.</returns>
         public static string[] ListIndexes(this IDatabase db)
         {
-            return null;
+            var result = (RedisResult[])db.Execute(RediSearchCommand.LIST);
+
+            return result.Select(x=>x.ToString()).ToArray();
         }
 
         /// <summary>
