@@ -3,12 +3,23 @@ using StackExchange.Redis;
 
 namespace RediSearchClient
 {
+    /// <summary>
+    /// Describes a result from the `FT.AGGREGATE` command.
+    /// </summary>
     public class AggregateResult
     {
+        /// <summary>
+        /// The unparsed value returned from Redis.
+        /// </summary>
+        /// <value></value>
         public RedisResult[] RawResult { get; }
 
         private int _recordCount = -1;
 
+        /// <summary>
+        /// The number of search results contained within the collection.
+        /// </summary>
+        /// <value></value>
         public int RecordCount
         {
             get
@@ -24,6 +35,10 @@ namespace RediSearchClient
 
         private Dictionary<string, RedisResult>[] _records;
 
+        /// <summary>
+        /// The parsed response from the `FT.AGGREGATE` command. 
+        /// </summary>
+        /// <value></value>
         public Dictionary<string, RedisResult>[] Records
         {
             get

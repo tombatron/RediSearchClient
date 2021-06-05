@@ -3,6 +3,9 @@ using static RediSearchClient.ConversionUtilities;
 
 namespace RediSearchClient
 {
+    /// <summary>
+    /// Statistics... about garbarge collection. 
+    /// </summary>
     public class GarbageCollectionStatistics
     {
         internal GarbageCollectionStatistics() { }

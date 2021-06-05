@@ -2,6 +2,9 @@ using StackExchange.Redis;
 
 namespace RediSearchClient
 {
+    /// <summary>
+    /// Statistics about cursors I guess. 
+    /// </summary>
     public class CursorStatistics
     {
         internal CursorStatistics() { }

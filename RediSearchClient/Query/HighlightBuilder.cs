@@ -1,9 +1,16 @@
 namespace RediSearchClient.Query
 {
+    /// <summary>
+    /// A builder that aids in configuring how search results should be highlighted.
+    /// </summary>
     public sealed class HighlightBuilder
     {
         private string[] _fields;
 
+        /// <summary>
+        /// Which fields are we to highlight?
+        /// </summary>
+        /// <param name="fields"></param>
         public void Fields(params string[] fields)
         {
             _fields = fields;
@@ -12,13 +19,18 @@ namespace RediSearchClient.Query
         private string _open;
         private string _close;
 
+        /// <summary>
+        /// How should the highlighted fields be... highlighted?
+        /// </summary>
+        /// <param name="open">This will be prefixed on a matched highlighted value.</param>
+        /// <param name="close">This will be suffixed on a matched highlighted value.</param>
         public void Tags(string open, string close)
         {
             _open = open;
             _close = close;
         }
 
-        public object[] FieldArguments => GenerateArguments();
+        internal object[] FieldArguments => GenerateArguments();
 
         private object[] _fieldArguments;
 
