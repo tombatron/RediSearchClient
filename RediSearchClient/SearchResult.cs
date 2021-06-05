@@ -4,12 +4,23 @@ using StackExchange.Redis;
 
 namespace RediSearchClient
 {
+    /// <summary>
+    /// Describes a result from the `FT.SEARCH` command. 
+    /// </summary>
     public class SearchResult : IEnumerable<SearchResultItem>
     {
+        /// <summary>
+        /// The unparsed value returned from Redis. 
+        /// </summary>
+        /// <value></value>
         public RedisResult[] RawResult { get; }
 
         private int _recordCount = -1;
 
+        /// <summary>
+        /// The number of search results contained within the collection.
+        /// </summary>
+        /// <value></value>
         public int RecordCount
         {
             get
@@ -29,6 +40,10 @@ namespace RediSearchClient
         internal static SearchResult From(RedisResult redisResult) =>
             new SearchResult(redisResult);
 
+        /// <summary>
+        /// Allows for iterating over this enumerable. 
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<SearchResultItem> GetEnumerator() =>
             ResultProcessor().GetEnumerator();
 
