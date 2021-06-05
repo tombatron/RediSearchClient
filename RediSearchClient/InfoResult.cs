@@ -67,8 +67,16 @@ namespace RediSearchClient
 
         public int HashIndexingFailures { get; private set; }
 
+        /// <summary>
+        /// Whether or not the index is being scanned in the background. 
+        /// </summary>
+        /// <value></value>
         public int Indexing { get; private set; }
 
+        /// <summary>
+        /// Progress of background indexing. This will be `1` if complete. 
+        /// </summary>
+        /// <value></value>
         public double PercentIndexed { get; private set; }
 
         // gc stats

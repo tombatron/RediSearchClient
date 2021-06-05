@@ -10,18 +10,46 @@ namespace RediSearchClient
     {
         internal IndexDefinition() { }
 
+        /// <summary>
+        /// It's the type... of the key. Can be: TEXT, NUMERIC, GEO, TAG
+        /// </summary>
+        /// <value></value>
         public string KeyType { get; private set; }
 
+        /// <summary>
+        /// Which key prefixes are being indexed?
+        /// </summary>
+        /// <value></value>
         public string[] Prefixes { get; private set; }
 
+        /// <summary>
+        /// The filter expression applied to the index during creation. 
+        /// </summary>
+        /// <value></value>
         public string Filter { get; private set; }
 
+        /// <summary>
+        /// If set, indicates the field on the document that should specify the document's language.
+        /// </summary>
+        /// <value></value>
         public string LanguageField { get; private set; }
 
+        /// <summary>
+        /// The default score for documents added to the specific index.
+        /// </summary>
+        /// <value></value>
         public double DefaultScore { get; private set; }
 
+        /// <summary>
+        /// Indicates which field on a document should be used as the document's rank.
+        /// </summary>
+        /// <value></value>
         public string ScoreField { get; private set; }
 
+        /// <summary>
+        /// If set, indicates which field on the document should as a binary safe payload string.
+        /// </summary>
+        /// <value></value>
         public string PayloadField { get; private set; }
 
         internal static IndexDefinition Create(RedisResult[] redisResults)
