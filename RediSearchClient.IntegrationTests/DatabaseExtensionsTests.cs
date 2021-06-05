@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using StackExchange.Redis;
 using RediSearchClient.Indexes;
+using RediSearchClient.Exceptions;
 
 namespace RediSearchClient.IntegrationTests
 {
@@ -342,7 +343,7 @@ namespace RediSearchClient.IntegrationTests
                 var info = _db.GetInfo(_indexName);
 
                 Assert.Equal(_indexName, info.IndexName);
-                
+
                 Assert.Contains("NOFREQS", info.IndexOptions);
                 Assert.Contains("NOOFFSETS", info.IndexOptions);
             }
@@ -364,6 +365,46 @@ namespace RediSearchClient.IntegrationTests
                     .Build();
 
                 _db.CreateIndex(_indexName, index);
+            }
+        }
+
+        public class ConfigurationCommandsWill : BaseIntegrationTest
+        {
+            [Fact]
+            public void GetAllConfigurationOptions()
+            {
+                var configuration = _db.GetConfiguration("*");
+
+                var maxExpansions = configuration.Where(x => x.Item1 == "MAXEXPANSIONS").FirstOrDefault();
+
+                Assert.NotNull(maxExpansions);
+                Assert.Equal("200", maxExpansions.Item2);
+            }
+
+            [Fact]
+            public void GetSpecificConfigurationOption()
+            {
+                var timeoutConfiguration = _db.GetConfiguration("TIMEOUT");
+
+                Assert.Equal("TIMEOUT", timeoutConfiguration.First().Item1);
+                Assert.Equal("500", timeoutConfiguration.First().Item2);
+            }
+
+            [Fact]
+            public void SetConfigurationOption()
+            {
+                _db.SetConfiguration("TIMEOUT", "1000");
+            }
+
+            [Fact]
+            public void ThrowExceptionOnBadConfiguration()
+            {
+                var exception = Assert.Throws<RediSearchConfigurationException>(() =>
+                {
+                    _db.SetConfiguration("THIS ISNT GOING TO WORK", "WHOA NELLY");
+                });
+
+                Assert.Equal("Looks like `THIS ISNT GOING TO WORK` with `WHOA NELLY` wasn't valid.", exception.Message);
             }
         }
     }

@@ -6,6 +6,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static RediSearchClient.ConversionUtilities;
 
 namespace RediSearchClient
 {
@@ -548,7 +549,7 @@ namespace RediSearchClient
 
             if ((string)result != "OK")
             {
-                throw new RediSearchConfigurationException($"Looks like {option} with {value} wasn't valid.");
+                throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.");
             }
         }
 
@@ -562,11 +563,17 @@ namespace RediSearchClient
         /// <param name="db"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static string GetConfiguration(this IDatabase db, string option)
+        public static Tuple<string, string>[] GetConfiguration(this IDatabase db, string option)
         {
-            var result = db.Execute(RediSearchCommand.CONFIG, "GET", option);
+            var result = (RedisResult[])db.Execute(RediSearchCommand.CONFIG, "GET", option);
 
-            return (string)result;
+            return result.Select(x =>
+            {
+                var pair = (RedisResult[])x;
+
+                return new Tuple<string, string>((string)pair[0], (string)pair[1]);
+            })
+            .ToArray();
         }
     }
 }
