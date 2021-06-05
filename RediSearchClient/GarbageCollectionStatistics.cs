@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using static RediSearchClient.ConversionUtilities;
 
 namespace RediSearchClient
 {
@@ -31,25 +32,25 @@ namespace RediSearchClient
                 switch (label)
                 {
                     case "bytes_collected":
-                        result.BytesCollected = (int)redisResult[++i];
+                        result.BytesCollected = ConvertToInt(redisResult[++i]);
                         break;
                     case "total_ms_run":
-                        result.TotalMillisecondsRun = (int)redisResult[++i];
+                        result.TotalMillisecondsRun = ConvertToInt(redisResult[++i]);
                         break;
                     case "total_cycles":
-                        result.TotalCycles = (int)redisResult[++i];
+                        result.TotalCycles = ConvertToInt(redisResult[++i]);
                         break;
                     case "average_cycle_time_ms":
-                        result.AverageCycleTimeMilliseconds = (int)redisResult[++i];
+                        result.AverageCycleTimeMilliseconds = ConvertToInt(redisResult[++i]);
                         break;
                     case "last_run_time_ms":
-                        result.LastRunTimeMilliseconds = (int)redisResult[++i];
+                        result.LastRunTimeMilliseconds = ConvertToInt(redisResult[++i]);
                         break;
                     case "gc_numeric_trees_missed":
-                        result.GcNumericTreesMissed = (int)redisResult[++i];
+                        result.GcNumericTreesMissed = ConvertToInt(redisResult[++i]);
                         break;
                     case "gc_blocked_denied":
-                        result.GcBlocksDenied = (int)redisResult[++i];
+                        result.GcBlocksDenied = ConvertToInt(redisResult[++i]);
                         break;
                     default:
                         ++i;

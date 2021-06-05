@@ -108,9 +108,32 @@ namespace RediSearchClient
                             var properties = (RedisResult[])fieldValues[j];
                             var fieldDict = new Dictionary<string, object>();
 
-                            for (var k = 0; k < properties.Length; k++)
+                            fieldDict.Add("fieldName", (string)properties[0]);
+
+                            List<string> extraFieldOptions = default;
+
+                            for (var k = 1; k < properties.Length; k++)
                             {
-                                fieldDict.Add((string)properties[k], properties[++k]);
+                                var fieldName = (string)properties[k];
+
+                                if (fieldName == "SORTABLE" || fieldName == "NOSTEM")
+                                {
+                                    if (extraFieldOptions == default)
+                                    {
+                                        extraFieldOptions = new List<string>();
+                                    }
+
+                                    extraFieldOptions.Add(fieldName);
+                                }
+                                else
+                                {
+                                    fieldDict.Add(fieldName, properties[++k]);
+                                }
+                            }
+
+                            if (extraFieldOptions != default)
+                            {
+                                fieldDict.Add("extraoptions", extraFieldOptions.ToArray());
                             }
 
                             fields[j] = fieldDict;
