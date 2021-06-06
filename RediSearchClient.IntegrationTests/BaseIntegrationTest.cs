@@ -1,10 +1,13 @@
 using System;
 using StackExchange.Redis;
+using static RediSearchClient.IntegrationTests.SampleData;
 
 namespace RediSearchClient.IntegrationTests
 {
     public abstract class BaseIntegrationTest : IDisposable
     {
+        protected const string MovieDataPrefix = "movie::";
+
         private ConnectionMultiplexer _muxr;
         protected IDatabase _db;
         protected string _indexName;
@@ -20,6 +23,8 @@ namespace RediSearchClient.IntegrationTests
             _indexName = Guid.NewGuid().ToString("n");
             _recordPrefix = Guid.NewGuid().ToString("n");
             _dictionaryName = Guid.NewGuid().ToString("n");
+
+            SetupDemoMovieData();
         }
 
         public virtual void TearDown()
@@ -35,6 +40,20 @@ namespace RediSearchClient.IntegrationTests
         public void Dispose()
         {
             TearDown();
+        }
+
+        private void SetupDemoMovieData()
+        {
+            if (_db.KeyExists($"{MovieDataPrefix}1"))
+            {
+                // Movies are already in the database, bail. 
+                return;
+            }
+
+            for (var i = 0; i < Movies.Length; i++)
+            {
+                _db.HashSet($"{MovieDataPrefix}{i + 1}", Movies[i]);
+            }
         }
     }
 }
