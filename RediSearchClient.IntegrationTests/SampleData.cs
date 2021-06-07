@@ -1,9 +1,13 @@
+using System.IO;
+using System.Collections.Generic;
 using StackExchange.Redis;
+using System.Text.Json;
 
 namespace RediSearchClient.IntegrationTests
 {
     public static class SampleData
     {
+        // Source: https://github.com/sckott/elastic_data/blob/master/data/omdb.json
         public static HashEntry[][] Movies = new[]
         {
             new [] {new HashEntry("Title","Iron Man"), new HashEntry("Year",2008), new HashEntry("YearEnd",0), new HashEntry("Rated","PG-13"), new HashEntry("Released",63345283200), new HashEntry("Runtime",126), new HashEntry("Genre","Action, Adventure, Sci-Fi"), new HashEntry("Director","Jon Favreau"), new HashEntry("Writer","Mark Fergus (screenplay), Hawk Ostby (screenplay), Art Marcum (screenplay), Matt Holloway (screenplay), Stan Lee (characters), Don Heck (characters), Larry Lieber (characters), Jack Kirby (characters)"), new HashEntry("Actors","Robert Downey Jr., Terrence Howard, Jeff Bridges, Gwyneth Paltrow"), new HashEntry("Plot","After being held captive in an Afghan cave, a billionaire engineer creates a unique weaponized suit of armor to fight evil."), new HashEntry("Language","English, Persian, Urdu, Arabic, Hungarian"), new HashEntry("Awards","Nominated for 2 Oscars. Another 19 wins & 61 nominations."), new HashEntry("Poster","http://ia.media-imdb.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_SX300.jpg"), new HashEntry("Metascore",79), new HashEntry("imdbRating",7.9000000000000004), new HashEntry("imdbVotes",689098), new HashEntry("imdbID","tt0371746"), new HashEntry("Type","movie")},
@@ -228,5 +232,49 @@ namespace RediSearchClient.IntegrationTests
 
             new [] {new HashEntry("Title","Battlestar Galactica"), new HashEntry("Year",2004), new HashEntry("YearEnd",2009), new HashEntry("Rated","TV-14"), new HashEntry("Released",63241257600), new HashEntry("Runtime",44), new HashEntry("Genre","Action, Adventure, Drama"), new HashEntry("Director","N/A"), new HashEntry("Writer","Glen A. Larson, Ronald D. Moore"), new HashEntry("Actors","Edward James Olmos, Mary McDonnell, Jamie Bamber, James Callis"), new HashEntry("Plot","When an old enemy, the Cylons, resurface and obliterate the 12 colonies, the crew of the aged Galactica protect a small civilian fleet - the last of humanity - as they journey toward the fabled 13th colony, Earth."), new HashEntry("Language","English"), new HashEntry("Awards","Won 3 Primetime Emmys. Another 32 wins & 80 nominations."), new HashEntry("Poster","http://ia.media-imdb.com/images/M/MV5BMTc1NTg1MDk3NF5BMl5BanBnXkFtZTYwNDYyMjI3._V1_SX300.jpg"), new HashEntry("Metascore",0), new HashEntry("imdbRating",8.8000000000000007), new HashEntry("imdbVotes",118636), new HashEntry("imdbID","tt0407362"), new HashEntry("Type","series")},
         };
+
+        // Source: https://public.opendatasoft.com/explore/dataset/us-zip-code-latitude-and-longitude/export/
+        public static IEnumerable<HashEntry[]> ZipCodes
+        {
+            get
+            {
+                var zipDataPath = Path.Combine(Directory.GetCurrentDirectory(), "zips.txt");
+                var zipDataStream = File.OpenRead(zipDataPath);
+
+
+                var deserializedZipData = JsonSerializer.DeserializeAsync<IEnumerable<ZipData>>(zipDataStream).GetAwaiter().GetResult();
+
+                foreach(var zip in deserializedZipData)
+                {
+                    yield return new []
+                    {
+                        new HashEntry("ZipCode", zip.ZipCode),
+                        new HashEntry("City", zip.City),
+                        new HashEntry("State", zip.State),
+                        new HashEntry("Latitude", zip.Latitude),
+                        new HashEntry("Longitude", zip.Longitude),
+                        new HashEntry("TimeZoneOffset", zip.TimeZoneOffset),
+                        new HashEntry("DaylightSavingsFlag", zip.DaylightSavingsFlag),
+                    };
+                }
+            }
+        }
+
+        public class ZipData
+        {
+            public string ZipCode { get; set; }
+
+            public string City { get; set; }
+
+            public string State { get; set; }
+
+            public double Latitude { get; set; }
+
+            public double Longitude { get; set; }
+
+            public double TimeZoneOffset { get; set; }
+
+            public int DaylightSavingsFlag { get; set; }
+        }
     }
 }

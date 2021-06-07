@@ -24,4 +24,8 @@
     <ProjectReference Include="..\RediSearchClient\RediSearchClient.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="zips.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

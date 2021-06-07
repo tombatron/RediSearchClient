@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Linq;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
@@ -62,6 +63,11 @@ namespace RediSearchClient.IntegrationTests
                 .Build();
 
             _db.CreateIndex(_indexName, index);
+
+            while(_db.GetInfo(_indexName).Indexing == 1)
+            {
+                Thread.Sleep(500); // Yeah I know...
+            }
         }
     }
 }

@@ -1,10 +1,11 @@
+using RediSearchClient.Exceptions;
+using RediSearchClient.Indexes;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
-using StackExchange.Redis;
-using RediSearchClient.Indexes;
-using RediSearchClient.Exceptions;
 
 namespace RediSearchClient.IntegrationTests
 {
@@ -144,6 +145,11 @@ namespace RediSearchClient.IntegrationTests
                     .Build();
 
                 _db.CreateIndex(_indexName, index);
+
+                while(_db.GetInfo(_indexName).Indexing == 1)
+                {
+                    Thread.Sleep(500);
+                }
             }
         }
 
@@ -387,7 +393,6 @@ namespace RediSearchClient.IntegrationTests
                 var timeoutConfiguration = _db.GetConfiguration("TIMEOUT");
 
                 Assert.Equal("TIMEOUT", timeoutConfiguration.First().Item1);
-                Assert.Equal("500", timeoutConfiguration.First().Item2);
             }
 
             [Fact]

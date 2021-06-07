@@ -1,6 +1,7 @@
 using RediSearchClient.Aggregate;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
+using System.Threading;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests
@@ -99,6 +100,11 @@ namespace RediSearchClient.IntegrationTests
                 .Build();
 
             _db.CreateIndex(_indexName, index);
+
+            while (_db.GetInfo(_indexName).Indexing == 1)
+            {
+                Thread.Sleep(500);
+            }
         }
     }
 }
