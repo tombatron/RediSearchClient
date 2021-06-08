@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests
@@ -16,11 +17,7 @@ namespace RediSearchClient.IntegrationTests
             [Fact]
             public void AlterExistingSchema()
             {
-                var indexDefinition = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
-                    .ForKeysWithPrefix("Bogus::")
-                    .WithSchema(x => x.Text("field_one"))
-                    .Build();
+                var indexDefinition = CreateSampleIndex();
 
                 _db.CreateIndex(_indexName, indexDefinition);
 
@@ -39,6 +36,40 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(2, fields.Count);
                 Assert.Contains("field_two", fields);
+            }
+
+            [Fact]
+            public async Task AlterExistingSchemaAsync()
+            {
+                var indexDefinition = CreateSampleIndex();
+                var indexName = $"{_indexName}_async";
+
+                await _db.CreateIndexAsync(indexName, indexDefinition);
+
+                var indexInfo = await _db.ExecuteAsync("FT.INFO", indexName);
+
+                var fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Equal(1, fields.Count);
+                Assert.Contains("field_one", fields);
+
+                await _db.AlterSchemaAsync(indexName, f => f.Text("field_two"));
+
+                indexInfo = await _db.ExecuteAsync("FT.INFO", indexName);
+
+                fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Equal(2, fields.Count);
+                Assert.Contains("field_two", fields);
+            }
+
+            private RediSearchIndexDefinition CreateSampleIndex()
+            {
+                return RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix("Bogus::")
+                    .WithSchema(x => x.Text("field_one"))
+                    .Build();
             }
 
             private static IEnumerable<string> GetSchemaFields(RedisResult rawResult)
@@ -62,11 +93,7 @@ namespace RediSearchClient.IntegrationTests
             [Fact]
             public void DropTheIndex()
             {
-                var indexDefinition = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
-                    .ForKeysWithPrefix("Whatever::*")
-                    .WithSchema(s => s.Text("Hello"))
-                    .Build();
+                var indexDefinition = CreateSimpleIndexDefinition();
 
                 _db.CreateIndex(_indexName, indexDefinition);
 
@@ -80,8 +107,119 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.DoesNotContain(_indexName, indexes);
             }
+
+            [Fact]
+            public async Task DropTheIndexAsync()
+            {
+                var indexDefinition = CreateSimpleIndexDefinition();
+                var indexName = $"{_indexName}_async";
+
+                await _db.CreateIndexAsync(indexName, indexDefinition);
+
+                var indexes = ((RedisResult[])(await _db.ExecuteAsync("FT._LIST"))).Select(x => x.ToString());
+
+                Assert.Contains(indexName, indexes);
+
+                await _db.DropIndexAsync(indexName);
+
+                indexes = ((RedisResult[])(await _db.ExecuteAsync("FT._LIST"))).Select(x => x.ToString());
+
+                Assert.DoesNotContain(indexName, indexes);
+            }
+
+            private RediSearchIndexDefinition CreateSimpleIndexDefinition()
+            {
+                return RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix("Whatever::*")
+                    .WithSchema(s => s.Text("Hello"))
+                    .Build();
+            }
         }
 
+        public class AliasCommands : BaseIntegrationTest
+        {
+            public override void Setup()
+            {
+                base.Setup();
+
+                var index = RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix($"{_recordPrefix}:")
+                    .WithSchema(
+                        x => x.Tag("city"),
+                        x => x.Tag("state")
+                    )
+                    .Build();
+
+                _db.CreateIndex(_indexName, index);
+            }
+
+            [Fact]
+            public void CanAddAlias()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+
+                var success = _db.AddAlias(alias, _indexName);
+
+                Assert.True(success);
+            }
+
+            [Fact]
+            public async Task CanAddAliasAsync()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+                
+                var success = await _db.AddAliasAsync(alias, _indexName);
+
+                Assert.True(success);
+            }
+
+            [Fact]
+            public void CanUpdateAlias()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+
+                var success = _db.UpdateAlias(alias, _indexName);
+
+                Assert.True(success);
+            }
+
+            [Fact]
+            public async Task CanUpdateAliasAsync()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+
+                var success = await _db.UpdateAliasAsync(alias, _indexName);
+
+                Assert.True(success);
+            }
+
+            [Fact]
+            public void CanDeleteAlias()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+
+                _db.AddAlias(alias, _indexName);
+
+                var success = _db.DeleteAlias(alias);
+
+                Assert.True(success);
+            }
+
+            [Fact]
+            public async Task CanDeleteAliasAsync()
+            {
+                var alias = Guid.NewGuid().ToString("n");
+
+                _db.AddAlias(alias, _indexName);
+
+                var success = _db.DeleteAlias(alias);
+
+                Assert.True(success);
+            }
+        }
+ 
         public class TagValuesWill : BaseIntegrationTest
         {
             public override void Setup()
@@ -92,9 +230,18 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
-            public void WillReturnAnIndexesTags()
+            public void WillReturnAnIndexsTags()
             {
                 var tags = _db.TagValues(_indexName, "city");
+
+                Assert.Equal(5, tags.Length);
+                Assert.Contains("pensacola", tags);
+            }
+
+            [Fact]
+            public async Task WillReturnAnIndexsTagsAsync()
+            {
+                var tags = await _db.TagValuesAsync(_indexName, "city");
 
                 Assert.Equal(5, tags.Length);
                 Assert.Contains("pensacola", tags);
@@ -107,6 +254,14 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(0, tags.Length);
             }
+
+            [Fact]
+            public async Task WillReturnEmptyArrayWhenMissingFieldsAsync()
+            {
+                var tags = await _db.TagValuesAsync(_indexName, "state");
+
+                Assert.Equal(0, tags.Length);
+            }            
 
             private void CreateTestSearchData()
             {
@@ -146,7 +301,7 @@ namespace RediSearchClient.IntegrationTests
 
                 _db.CreateIndex(_indexName, index);
 
-                while(_db.GetInfo(_indexName).Indexing == 1)
+                while (_db.GetInfo(_indexName).Indexing == 1)
                 {
                     Thread.Sleep(500);
                 }
