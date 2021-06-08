@@ -169,7 +169,7 @@ namespace RediSearchClient.IntegrationTests
             public async Task CanAddAliasAsync()
             {
                 var alias = Guid.NewGuid().ToString("n");
-                
+
                 var success = await _db.AddAliasAsync(alias, _indexName);
 
                 Assert.True(success);
@@ -219,7 +219,7 @@ namespace RediSearchClient.IntegrationTests
                 Assert.True(success);
             }
         }
- 
+
         public class TagValuesWill : BaseIntegrationTest
         {
             public override void Setup()
@@ -261,7 +261,7 @@ namespace RediSearchClient.IntegrationTests
                 var tags = await _db.TagValuesAsync(_indexName, "state");
 
                 Assert.Equal(0, tags.Length);
-            }            
+            }
 
             private void CreateTestSearchData()
             {
@@ -328,7 +328,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(1, firstResult);
                 Assert.Equal(2, secondResult);
-            }            
+            }
 
             [Fact]
             public void AddASuggestionToTheIndexWithPayload()
@@ -340,7 +340,7 @@ namespace RediSearchClient.IntegrationTests
             public async Task AddASuggestionToTheIndexWithPayloadAsync()
             {
                 var result = await _db.AddSuggestionAsync(_dictionaryName, "whoa", 1, payload: "hey there");
-            }            
+            }
         }
 
         public class GetSuggestionWill : BaseIntegrationTest
@@ -366,7 +366,7 @@ namespace RediSearchClient.IntegrationTests
                 var suggestions = await _db.GetSuggestionsAsync(_dictionaryName, "he");
 
                 Assert.Equal(3, suggestions.Length);
-            }            
+            }
 
             [Fact]
             public void ReturnSuggestionsWithScores()
@@ -388,7 +388,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(3, suggestions.Length);
                 Assert.True(hasScores);
-            }            
+            }
 
             [Fact]
             public void ReturnSuggestionsWithPayloads()
@@ -410,7 +410,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(3, suggestions.Length);
                 Assert.True(hasPayloads);
-            }            
+            }
 
             [Fact]
             public void ReturnSuggestionsWithScoresAndPayloads()
@@ -436,7 +436,7 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Equal(3, suggestions.Length);
                 Assert.True(hasScores);
                 Assert.True(hasPayloads);
-            }            
+            }
 
             private void SetupSuggestions()
             {
@@ -469,7 +469,7 @@ namespace RediSearchClient.IntegrationTests
                 var result = await _db.DeleteSuggestionAsync(_dictionaryName, "hello world");
 
                 Assert.True(result);
-            }            
+            }
 
             [Fact]
             public void NotRemoveSuggestionIfItDoesntExist()
@@ -485,7 +485,7 @@ namespace RediSearchClient.IntegrationTests
                 var result = await _db.DeleteSuggestionAsync(_dictionaryName, "hello lucas");
 
                 Assert.False(result);
-            }            
+            }
 
             private void SetupSuggestions()
             {
@@ -518,7 +518,7 @@ namespace RediSearchClient.IntegrationTests
                 var result = await _db.SuggestionsSizeAsync(_dictionaryName);
 
                 Assert.Equal(3, result);
-            }            
+            }
 
             private void SetupSuggestions()
             {
@@ -549,6 +549,14 @@ namespace RediSearchClient.IntegrationTests
                 Assert.NotNull(synonyms);
             }
 
+            [Fact]
+            public async Task WorksAsync()
+            {
+                var synonyms = await _db.DumpSynonymsAsync(_indexName);
+
+                Assert.NotNull(synonyms);
+            }
+
             private void CreateSynonyms()
             {
                 var index = RediSearchIndex
@@ -570,6 +578,46 @@ namespace RediSearchClient.IntegrationTests
                     ("child", "kid")
                 );
             }
+        }
+
+        public class SpellCheckWill : BaseIntegrationTest
+        {
+            public override void Setup()
+            {
+                base.Setup();
+
+                if (!_db.ListIndexes().Contains("simple_movie_index"))
+                {
+                    _db.CreateIndex("simple_movie_index",
+                        RediSearchIndex
+                            .On(RediSearchStructure.HASH)
+                            .ForKeysWithPrefix("movie::")
+                            .WithSchema(x => x.Text("Title"))
+                        .Build()
+                    );
+
+                    while(_db.GetInfo("simple_movie_index").Indexing == 1)
+                    {
+                        Thread.Sleep(500);
+                    }
+                }
+            }
+
+            [Fact]
+            public void CheckSpelling()
+            {
+                var result = _db.SpellCheck("simple_movie_index", "@title:Garam Masaluh", 5);
+
+                Assert.Equal(1, result.Length);
+            }
+
+            [Fact]
+            public async Task CheckSpellingAsync()
+            {
+                var result = await _db.SpellCheckAsync("simple_movie_index", "@title:Garam Masaluh", 5);
+
+                Assert.Equal(1, result.Length);
+            }            
         }
 
         public class GetInfoWill : BaseIntegrationTest

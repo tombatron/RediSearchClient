@@ -44,22 +44,27 @@ namespace RediSearchClient
 
             var results = new List<SpellCheckResult>();
 
-            for (var i = 0; i < redisResultArray.Length; i++)
+            foreach (RedisResult[] rr in redisResultArray)
             {
-                var result = new SpellCheckResult
+                for (var i = 0; i < rr.Length; i++)
                 {
-                    Term = (string)redisResultArray[++i]
-                };
-
-                var rawSuggestions = (RedisResult[])redisResultArray[++i];
-
-                for (var j = 0; j < rawSuggestions.Length; j++)
-                {
-                    var suggestion = new Suggestion
+                    var result = new SpellCheckResult
                     {
-                        Score = (double)rawSuggestions[j],
-                        Value = (string)rawSuggestions[++j]
+                        Term = (string)rr[++i]
                     };
+
+                    var rawSuggestions = (RedisResult[])rr[++i];
+
+                    for (var j = 0; j < rawSuggestions.Length; j++)
+                    {
+                        var suggestion = new Suggestion
+                        {
+                            Score = (double)rawSuggestions[j],
+                            Value = (string)rawSuggestions[++j]
+                        };
+                    }
+
+                    results.Add(result);
                 }
             }
 
