@@ -212,9 +212,9 @@ namespace RediSearchClient.IntegrationTests
             {
                 var alias = Guid.NewGuid().ToString("n");
 
-                _db.AddAlias(alias, _indexName);
+                await _db.AddAliasAsync(alias, _indexName);
 
-                var success = _db.DeleteAlias(alias);
+                var success = await _db.DeleteAliasAsync(alias);
 
                 Assert.True(success);
             }
@@ -321,10 +321,26 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task AddASuggestionToTheIndexAsync()
+            {
+                var firstResult = await _db.AddSuggestionAsync(_dictionaryName, "hello", 1);
+                var secondResult = await _db.AddSuggestionAsync(_dictionaryName, "goodnight", 1);
+
+                Assert.Equal(1, firstResult);
+                Assert.Equal(2, secondResult);
+            }            
+
+            [Fact]
             public void AddASuggestionToTheIndexWithPayload()
             {
                 var result = _db.AddSuggestion(_dictionaryName, "whoa", 1, payload: "hey there");
             }
+
+            [Fact]
+            public async Task AddASuggestionToTheIndexWithPayloadAsync()
+            {
+                var result = await _db.AddSuggestionAsync(_dictionaryName, "whoa", 1, payload: "hey there");
+            }            
         }
 
         public class GetSuggestionWill : BaseIntegrationTest
@@ -345,6 +361,14 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task ReturnSuggestionsAsync()
+            {
+                var suggestions = await _db.GetSuggestionsAsync(_dictionaryName, "he");
+
+                Assert.Equal(3, suggestions.Length);
+            }            
+
+            [Fact]
             public void ReturnSuggestionsWithScores()
             {
                 var suggestions = _db.GetSuggestions(_dictionaryName, "he", withScores: true);
@@ -354,6 +378,17 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Equal(3, suggestions.Length);
                 Assert.True(hasScores);
             }
+
+            [Fact]
+            public async Task ReturnSuggestionsWithScoresAsync()
+            {
+                var suggestions = await _db.GetSuggestionsAsync(_dictionaryName, "he", withScores: true);
+
+                var hasScores = suggestions.All(x => x.Score > 0);
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasScores);
+            }            
 
             [Fact]
             public void ReturnSuggestionsWithPayloads()
@@ -367,6 +402,17 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task ReturnSuggestionsWithPayloadsAsync()
+            {
+                var suggestions = await _db.GetSuggestionsAsync(_dictionaryName, "he", withPayloads: true);
+
+                var hasPayloads = suggestions.All(x => !string.IsNullOrEmpty(x.Payload));
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasPayloads);
+            }            
+
+            [Fact]
             public void ReturnSuggestionsWithScoresAndPayloads()
             {
                 var suggestions = _db.GetSuggestions(_dictionaryName, "he", withScores: true, withPayloads: true);
@@ -378,6 +424,19 @@ namespace RediSearchClient.IntegrationTests
                 Assert.True(hasScores);
                 Assert.True(hasPayloads);
             }
+
+            [Fact]
+            public async Task ReturnSuggestionsWithScoresAndPayloadsAsync()
+            {
+                var suggestions = await _db.GetSuggestionsAsync(_dictionaryName, "he", withScores: true, withPayloads: true);
+
+                var hasScores = suggestions.All(x => x.Score > 0);
+                var hasPayloads = suggestions.All(x => !string.IsNullOrEmpty(x.Payload));
+
+                Assert.Equal(3, suggestions.Length);
+                Assert.True(hasScores);
+                Assert.True(hasPayloads);
+            }            
 
             private void SetupSuggestions()
             {
@@ -405,12 +464,28 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task RemoveSuggestionIfItExistsAsync()
+            {
+                var result = await _db.DeleteSuggestionAsync(_dictionaryName, "hello world");
+
+                Assert.True(result);
+            }            
+
+            [Fact]
             public void NotRemoveSuggestionIfItDoesntExist()
             {
                 var result = _db.DeleteSuggestion(_dictionaryName, "hello lucas");
 
                 Assert.False(result);
             }
+
+            [Fact]
+            public async Task NotRemoveSuggestionIfItDoesntExistAsync()
+            {
+                var result = await _db.DeleteSuggestionAsync(_dictionaryName, "hello lucas");
+
+                Assert.False(result);
+            }            
 
             private void SetupSuggestions()
             {
@@ -436,6 +511,14 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal(3, result);
             }
+
+            [Fact]
+            public async Task ReturnLengthOfSuggestionDictionaryAsync()
+            {
+                var result = await _db.SuggestionsSizeAsync(_dictionaryName);
+
+                Assert.Equal(3, result);
+            }            
 
             private void SetupSuggestions()
             {
