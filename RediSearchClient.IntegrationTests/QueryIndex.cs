@@ -1,4 +1,5 @@
 using System.Threading;
+using System.Threading.Tasks;
 using System.Linq;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
@@ -28,6 +29,19 @@ namespace RediSearchClient.IntegrationTests
 
             Assert.NotNull(result.RawResult);
         }
+
+        [Fact]
+        public async Task CanCreateAndExecuteASimpleQueryAsync()
+        {
+            var query = RediSearchQuery
+                .On(_indexName)
+                .UsingQuery("@first_name:Tom")
+                .Build();
+
+            var result = await _db.SearchAsync(query);
+
+            Assert.NotNull(result.RawResult);
+        }        
 
         [Fact]
         public void CanParseQueryResult()

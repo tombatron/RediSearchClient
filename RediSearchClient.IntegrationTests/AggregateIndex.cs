@@ -2,6 +2,7 @@ using RediSearchClient.Aggregate;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests
@@ -18,16 +19,7 @@ namespace RediSearchClient.IntegrationTests
         [Fact]
         public void CanCreateAndExecuteASimpleAggregation()
         {
-            var aggregation = RediSearchAggregateQuery
-                .On(_indexName)
-                .Query("*")
-                .Load("@score")
-                .GroupBy(gb =>
-                {
-                    gb.Fields("@documentType");
-                    gb.Reduce(Reducer.Sum, "@score").As("total");
-                })
-                .Build();
+            var aggregation = CreateSampleAggregationQuery();
 
             var query = aggregation.ToString();
 
@@ -37,18 +29,21 @@ namespace RediSearchClient.IntegrationTests
         }
 
         [Fact]
+        public async Task CanCreateAndExecuteASimpleAggregationAsync()
+        {
+            var aggregation = CreateSampleAggregationQuery();
+
+            var query = aggregation.ToString();
+
+            var result = await _db.AggregateAsync(aggregation);
+
+            Assert.NotNull(result.RawResult);
+        }        
+
+        [Fact]
         public void CanParseQueryResult()
         {
-            var aggregation = RediSearchAggregateQuery
-                .On(_indexName)
-                .Query("*")
-                .Load("@score")
-                .GroupBy(gb =>
-                {
-                    gb.Fields("@documentType");
-                    gb.Reduce(Reducer.Sum, "@score").As("total");
-                })
-                .Build();
+            var aggregation = CreateSampleAggregationQuery();
 
             var result = _db.Aggregate(aggregation);
 
@@ -59,6 +54,20 @@ namespace RediSearchClient.IntegrationTests
 
             Assert.Equal("demo", (string)result.Records[0]["documentType"]);
             Assert.Equal(15, (int)result.Records[0]["total"]);
+        }
+
+        private RediSearchAggregateDefinition CreateSampleAggregationQuery()
+        {
+            return RediSearchAggregateQuery
+                .On(_indexName)
+                .Query("*")
+                .Load("@score")
+                .GroupBy(gb =>
+                {
+                    gb.Fields("@documentType");
+                    gb.Reduce(Reducer.Sum, "@score").As("total");
+                })
+                .Build();
         }
 
         private void CreateTestSearchData()
