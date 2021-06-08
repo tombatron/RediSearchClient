@@ -10,29 +10,48 @@ namespace RediSearchClient.IntegrationTests
         [Fact]
         public void WillCreateASimpleIndex()
         {
-            var indexName = Guid.NewGuid().ToString("n");
+            var indexDefinition = GetComplexIndexDefinition();
 
-            var index = RediSearchIndex
-                .On(RediSearchStructure.HASH)
-                .ForKeysWithPrefix("Bogus::")
-                .WithSchema(x => x.Text("field_one"))
-                .Build();
+            _db.CreateIndex(_indexName, indexDefinition);
 
-            _db.CreateIndex(indexName, index);
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(_indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateASimpleIndexAsync()
         {
-            var indexName = Guid.NewGuid().ToString("n");
+            var indexDefinition = GetComplexIndexDefinition();
 
-            var index = RediSearchIndex
+            var indexName = $"{_indexName}_async";
+            
+            await _db.CreateIndexAsync(indexName, indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+
+        private RediSearchIndexDefinition GetComplexIndexDefinition()
+        {
+            return RediSearchIndex
                 .On(RediSearchStructure.HASH)
-                .ForKeysWithPrefix("Bogus::")
-                .WithSchema(x=>x.Text("field_one"))
+                .ForKeysWithPrefix("zip::")
+                .UsingFilter("@State=='FL'")
+                .UsingLanguage("English")
+                .SetScore(0.5)
+                .Temporary(600)
+                .NoHighLights()
+                .WithSchema(
+                    x => x.Text("ZipCode", sortable: false, nostem: true),
+                    x => x.Text("City", sortable: true),
+                    x => x.Text("State", sortable: true, nostem: true),
+                    x => x.Geo("Coordinates"),
+                    x => x.Numeric("TimeZoneOffset"),
+                    x => x.Numeric("DaylightSavingsFlag")
+                )
                 .Build();
-
-            await _db.CreateIndexAsync(indexName, index);
         }
     }
 }

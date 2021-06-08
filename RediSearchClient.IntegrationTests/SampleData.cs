@@ -251,8 +251,7 @@ namespace RediSearchClient.IntegrationTests
                         new HashEntry("ZipCode", zip.ZipCode),
                         new HashEntry("City", zip.City),
                         new HashEntry("State", zip.State),
-                        new HashEntry("Latitude", zip.Latitude),
-                        new HashEntry("Longitude", zip.Longitude),
+                        new HashEntry("Coordinates", $"{zip.Latitude},{zip.Longitude}"),
                         new HashEntry("TimeZoneOffset", zip.TimeZoneOffset),
                         new HashEntry("DaylightSavingsFlag", zip.DaylightSavingsFlag),
                     };
