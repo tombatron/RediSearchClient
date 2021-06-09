@@ -596,7 +596,7 @@ namespace RediSearchClient.IntegrationTests
                         .Build()
                     );
 
-                    while(_db.GetInfo("simple_movie_index").Indexing == 1)
+                    while (_db.GetInfo("simple_movie_index").Indexing == 1)
                     {
                         Thread.Sleep(500);
                     }
@@ -617,7 +617,70 @@ namespace RediSearchClient.IntegrationTests
                 var result = await _db.SpellCheckAsync("simple_movie_index", "@title:Garam Masaluh", 5);
 
                 Assert.Equal(1, result.Length);
-            }            
+            }
+        }
+
+        public class DictionaryCommandsCan : BaseIntegrationTest
+        {
+            [Fact]
+            public void AddToDictionary()
+            {
+                var result = _db.AddToDictionary("test_dict", Guid.NewGuid().ToString("n"));
+
+                Assert.Equal(1, result);
+            }
+
+            [Fact]
+            public async Task AddToDictionaryAsync()
+            {
+                var result = await _db.AddToDictionaryAsync("test_dict", Guid.NewGuid().ToString("n"));
+
+                Assert.Equal(1, result);
+            }
+
+            [Fact]
+            public void DeleteFromDictionary()
+            {
+                var added = _db.AddToDictionary("test_dict", "delete_from_dictionary");
+                var deleted = _db.DeleteFromDictionary("test_dict", "delete_from_dictionary");
+
+                Assert.Equal(1, added);
+                Assert.Equal(1, deleted);
+            }
+
+            [Fact]
+            public async Task DeleteFromDictionaryAsync()
+            {
+                var added = await _db.AddToDictionaryAsync("test_dict", "delete_from_dictionary_async");
+                var deleted = await _db.DeleteFromDictionaryAsync("test_dict", "delete_from_dictionary_async");
+
+                Assert.Equal(1, added);
+                Assert.Equal(1, deleted);
+            }
+
+            [Fact]
+            public void DumpADictionary()
+            {
+                var terms = Enumerable.Range(0, 5).Select(x => Guid.NewGuid().ToString("n")).ToArray();
+
+                _db.AddToDictionary("test_dict", terms);
+
+                var dumped = _db.DumpDictionary("test_dict");
+
+                Assert.True(terms.All(t => dumped.Any(d => t == d)));
+            }
+
+            [Fact]
+            public async Task DumpADictionaryAsync()
+            {
+                var terms = Enumerable.Range(0, 5).Select(x => Guid.NewGuid().ToString("n")).ToArray();
+
+                await _db.AddToDictionaryAsync("test_dict", terms);
+
+                var dumped = await _db.DumpDictionaryAsync("test_dict");
+
+                Assert.True(terms.All(t => dumped.Any(d => t == d)));
+            }
         }
 
         public class GetInfoWill : BaseIntegrationTest
