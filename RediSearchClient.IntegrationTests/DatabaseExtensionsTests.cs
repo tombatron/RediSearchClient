@@ -25,7 +25,7 @@ namespace RediSearchClient.IntegrationTests
 
                 var fields = GetSchemaFields(indexInfo).ToList();
 
-                Assert.Equal(1, fields.Count);
+                Assert.Single(fields);
                 Assert.Contains("field_one", fields);
 
                 _db.AlterSchema(_indexName, f => f.Text("field_two"));
@@ -50,7 +50,7 @@ namespace RediSearchClient.IntegrationTests
 
                 var fields = GetSchemaFields(indexInfo).ToList();
 
-                Assert.Equal(1, fields.Count);
+                Assert.Single(fields);
                 Assert.Contains("field_one", fields);
 
                 await _db.AlterSchemaAsync(indexName, f => f.Text("field_two"));
@@ -252,7 +252,7 @@ namespace RediSearchClient.IntegrationTests
             {
                 var tags = _db.TagValues(_indexName, "state");
 
-                Assert.Equal(0, tags.Length);
+                Assert.Empty(tags);
             }
 
             [Fact]
@@ -260,7 +260,7 @@ namespace RediSearchClient.IntegrationTests
             {
                 var tags = await _db.TagValuesAsync(_indexName, "state");
 
-                Assert.Equal(0, tags.Length);
+                Assert.Empty(tags);
             }
 
             private void CreateTestSearchData()
@@ -608,7 +608,7 @@ namespace RediSearchClient.IntegrationTests
             {
                 var result = _db.SpellCheck("simple_movie_index", "@title:Garam Masaluh", 5);
 
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
             }
 
             [Fact]
@@ -616,7 +616,7 @@ namespace RediSearchClient.IntegrationTests
             {
                 var result = await _db.SpellCheckAsync("simple_movie_index", "@title:Garam Masaluh", 5);
 
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
             }
         }
 
@@ -703,6 +703,17 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Contains("NOOFFSETS", info.IndexOptions);
             }
 
+            [Fact]
+            public async Task ReturnInfoAboutAnIndexAsync()
+            {
+                var info = await _db.GetInfoAsync(_indexName);
+
+                Assert.Equal(_indexName, info.IndexName);
+
+                Assert.Contains("NOFREQS", info.IndexOptions);
+                Assert.Contains("NOOFFSETS", info.IndexOptions);
+            }            
+
             private void SetupTestIndex()
             {
                 var index = RediSearchIndex
@@ -723,6 +734,42 @@ namespace RediSearchClient.IntegrationTests
             }
         }
 
+        public class ListCommandWill : BaseIntegrationTest
+        {
+            public override void Setup()
+            {
+                base.Setup();
+
+                _db.CreateIndex(_indexName, RediSearchIndex
+                    .On(RediSearchStructure.HASH)
+                    .ForKeysWithPrefix("Whoa::")
+                    .WithSchema
+                    (
+                        x => x.Geo("whatever")
+                    )
+                    .NoFrequencies()
+                    .NoOffsets()
+                    .Build());
+
+            }
+
+            [Fact]
+            public void ListExistingIndexes()
+            {
+                var indexes = _db.ListIndexes();
+
+                Assert.Contains(_indexName, indexes);
+            }
+
+            [Fact]
+            public async Task ListExistingIndexesAsync()
+            {
+                var indexes = await _db.ListIndexesAsync();
+
+                Assert.Contains(_indexName, indexes);
+            }
+        }
+
         public class ConfigurationCommandsWill : BaseIntegrationTest
         {
             [Fact]
@@ -737,9 +784,28 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task GetAllConfigurationOptionsAsync()
+            {
+                var configuration = await _db.GetConfigurationAsync("*");
+
+                var maxExpansions = configuration.Where(x => x.Item1 == "MAXEXPANSIONS").FirstOrDefault();
+
+                Assert.NotNull(maxExpansions);
+                Assert.Equal("200", maxExpansions.Item2);
+            }            
+
+            [Fact]
             public void GetSpecificConfigurationOption()
             {
                 var timeoutConfiguration = _db.GetConfiguration("TIMEOUT");
+
+                Assert.Equal("TIMEOUT", timeoutConfiguration.First().Item1);
+            }
+            
+            [Fact]
+            public async Task GetSpecificConfigurationOptionAsync()
+            {
+                var timeoutConfiguration = await _db.GetConfigurationAsync("TIMEOUT");
 
                 Assert.Equal("TIMEOUT", timeoutConfiguration.First().Item1);
             }
@@ -751,6 +817,12 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public async Task SetConfigurationOptionAsync()
+            {
+                await _db.SetConfigurationAsync("TIMEOUT", "1000");
+            }            
+
+            [Fact]
             public void ThrowExceptionOnBadConfiguration()
             {
                 var exception = Assert.Throws<RediSearchConfigurationException>(() =>
@@ -760,6 +832,17 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal("Looks like `THIS ISNT GOING TO WORK` with `WHOA NELLY` wasn't valid.", exception.Message);
             }
+
+            [Fact]
+            public async Task ThrowExceptionOnBadConfigurationAsync()
+            {
+                var exception = await Assert.ThrowsAsync<RediSearchConfigurationException>(async () =>
+                {
+                    await _db.SetConfigurationAsync("THIS ISNT GOING TO WORK", "WHOA NELLY");
+                });
+
+                Assert.Equal("Looks like `THIS ISNT GOING TO WORK` with `WHOA NELLY` wasn't valid.", exception.Message);
+            }            
         }
     }
 }
