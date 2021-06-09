@@ -44,7 +44,7 @@ await _db.CreateIndexAsync("the-index-name", indexDefinition);
 
 ### Executing a Query
 
-```
+```csharp
 var result = await _db.SearchAsync(
     RediSearchQuery
         .On("the-index-name")
