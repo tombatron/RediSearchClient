@@ -124,7 +124,7 @@ namespace RediSearchClient
                             {
                                 var fieldName = (string)properties[k];
 
-                                if (fieldName == "SORTABLE" || fieldName == "NOSTEM")
+                                if (fieldName == "SORTABLE" || fieldName == "NOSTEM" || fieldName == "NOINDEX")
                                 {
                                     if (extraFieldOptions == default)
                                     {
