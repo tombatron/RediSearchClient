@@ -57,10 +57,12 @@ namespace RediSearchClient
 
                     for (var j = 0; j < rawSuggestions.Length; j++)
                     {
+                        var suggestionComponents = (RedisResult[])rawSuggestions[j];
+
                         var suggestion = new Suggestion
                         {
-                            Score = (double)rawSuggestions[j],
-                            Value = (string)rawSuggestions[++j]
+                            Score = (double)suggestionComponents[0],
+                            Value = (string)suggestionComponents[1]
                         };
                     }
 
