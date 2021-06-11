@@ -16,7 +16,7 @@ So here we are.
 ## Installation
 
 ```
-PM> Install-Package RediSearchClient -Version 0.1.1
+PM> Install-Package RediSearchClient
 ```
 
 ## Usage
