@@ -31,7 +31,7 @@ var indexDefinition = RediSearchIndex
     .ForKeysWithPrefix("zip::")
     .WithSchema(
         x => x.Text("ZipCode", sortable: false, nostem: true),
-        x => x.Text("City", sortable: true),
+        x => x.Text("City", sortable: true), 
         x => x.Text("State", sortable: true, nostem: true),
         x => x.Geo("Coordinates"),
         x => x.Numeric("TimeZoneOffset"),
