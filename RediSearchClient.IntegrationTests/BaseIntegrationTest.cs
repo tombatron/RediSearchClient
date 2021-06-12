@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using StackExchange.Redis;
 using static RediSearchClient.IntegrationTests.SampleData;
 
