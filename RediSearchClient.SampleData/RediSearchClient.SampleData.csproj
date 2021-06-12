@@ -5,4 +5,16 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RediSearchClient\RediSearchClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="zips.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>  
+
 </Project>

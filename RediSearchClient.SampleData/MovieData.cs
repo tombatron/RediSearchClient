@@ -1,11 +1,8 @@
-using System.IO;
-using System.Collections.Generic;
 using StackExchange.Redis;
-using System.Text.Json;
 
-namespace RediSearchClient.IntegrationTests
+namespace RediSearchClient.SampleData
 {
-    public static class SampleData
+    public static class MovieData
     {
         // Source: https://github.com/sckott/elastic_data/blob/master/data/omdb.json
         public static HashEntry[][] Movies = new[]

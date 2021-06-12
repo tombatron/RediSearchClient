@@ -29,8 +29,6 @@ namespace RediSearchClient.IntegrationTests
 
             SetupDemoMovieData();
 
-            // SetupZipCodeData();
-
             CleanupIndexes();
         }
 
@@ -60,22 +58,6 @@ namespace RediSearchClient.IntegrationTests
             for (var i = 0; i < Movies.Length; i++)
             {
                 _db.HashSet($"{MovieDataPrefix}{i + 1}", Movies[i]);
-            }
-        }
-
-        private void SetupZipCodeData()
-        {
-            if (_db.KeyExists("zip::32506"))
-            {
-                // Zipcodes are already loaded... probably. Bail anyway. 
-                return;
-            }
-
-            foreach (var zipHash in SampleData.ZipCodes)
-            {
-                var key = $"zip::{zipHash[0].Value}";
-
-                _db.HashSet(key, zipHash);
             }
         }
 
