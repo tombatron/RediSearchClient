@@ -606,17 +606,17 @@ namespace RediSearchClient.IntegrationTests
             [Fact]
             public void CheckSpelling()
             {
-                var result = _db.SpellCheck("simple_movie_index", "@title:Garam Masaluh", 5);
+                var result = _db.SpellCheck("simple_movie_index", "@Title:ghustbosters", 4);
 
-                Assert.Single(result);
+                Assert.Equal("ghostbusters", result[0].Suggestions[0].Value);
             }
 
             [Fact]
             public async Task CheckSpellingAsync()
             {
-                var result = await _db.SpellCheckAsync("simple_movie_index", "@title:Garam Masaluh", 5);
+                var result = await _db.SpellCheckAsync("simple_movie_index", "@Title:ghustbosters", 4);
 
-                Assert.Single(result);
+                Assert.Equal("ghostbusters", result[0].Suggestions[0].Value);
             }
         }
 
