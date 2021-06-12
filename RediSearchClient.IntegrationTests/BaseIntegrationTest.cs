@@ -29,7 +29,7 @@ namespace RediSearchClient.IntegrationTests
 
             SetupDemoMovieData();
 
-            SetupZipCodeData();
+            // SetupZipCodeData();
 
             CleanupIndexes();
         }
@@ -91,7 +91,10 @@ namespace RediSearchClient.IntegrationTests
                     {
                         foreach (var index in _db.ListIndexes())
                         {
-                            _db.DropIndex(index);
+                            if(Guid.TryParse(index, out var _))
+                            {
+                                _db.DropIndex(index);
+                            }
                         }
 
                         HasIndexCleanupRun = true;
