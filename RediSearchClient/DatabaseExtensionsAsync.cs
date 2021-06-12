@@ -432,6 +432,25 @@ namespace RediSearchClient
         }
 
         /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="queryDefinition">The search query.</param>
+        /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static Task<SpellCheckResult[]> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
+        {
+            return SpellCheckAsync(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
+        }        
+
+        /// <summary>
         /// `FT.DICTADD {dict} {term} [{term} ...]
         /// 
         /// Adds terms to a dictionary.

@@ -1,5 +1,6 @@
 using RediSearchClient.Exceptions;
 using RediSearchClient.Indexes;
+using RediSearchClient.Query;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -612,12 +613,38 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
+            public void CheckSpellingWithQueryDefinition()
+            {
+                var query = RediSearchQuery
+                    .On("simple_movie_index")
+                    .UsingQuery("@Title:ghustboster")
+                    .Build();
+
+                var result = _db.SpellCheck(query, 4);
+
+                Assert.Equal("ghostbusters", result[0].Suggestions[0].Value);
+            }
+
+            [Fact]
             public async Task CheckSpellingAsync()
             {
                 var result = await _db.SpellCheckAsync("simple_movie_index", "@Title:ghustbosters", 4);
 
                 Assert.Equal("ghostbusters", result[0].Suggestions[0].Value);
             }
+
+            [Fact]
+            public async Task CheckSpellingWithQueryDefinitionAsync()
+            {
+                var query = RediSearchQuery
+                    .On("simple_movie_index")
+                    .UsingQuery("@Title:ghustboster")
+                    .Build();
+
+                var result = await _db.SpellCheckAsync(query, 4);
+
+                Assert.Equal("ghostbusters", result[0].Suggestions[0].Value);
+            }            
         }
 
         public class DictionaryCommandsCan : BaseIntegrationTest
@@ -712,7 +739,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Contains("NOFREQS", info.IndexOptions);
                 Assert.Contains("NOOFFSETS", info.IndexOptions);
-            }            
+            }
 
             private void SetupTestIndex()
             {
@@ -792,7 +819,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.NotNull(maxExpansions);
                 Assert.Equal("200", maxExpansions.Item2);
-            }            
+            }
 
             [Fact]
             public void GetSpecificConfigurationOption()
@@ -801,7 +828,7 @@ namespace RediSearchClient.IntegrationTests
 
                 Assert.Equal("TIMEOUT", timeoutConfiguration.First().Item1);
             }
-            
+
             [Fact]
             public async Task GetSpecificConfigurationOptionAsync()
             {
@@ -820,7 +847,7 @@ namespace RediSearchClient.IntegrationTests
             public async Task SetConfigurationOptionAsync()
             {
                 await _db.SetConfigurationAsync("TIMEOUT", "1000");
-            }            
+            }
 
             [Fact]
             public void ThrowExceptionOnBadConfiguration()
@@ -842,7 +869,7 @@ namespace RediSearchClient.IntegrationTests
                 });
 
                 Assert.Equal("Looks like `THIS ISNT GOING TO WORK` with `WHOA NELLY` wasn't valid.", exception.Message);
-            }            
+            }
         }
     }
 }
