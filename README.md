@@ -62,6 +62,46 @@ var indexDefinition = RediSearchIndex
 await _db.CreateIndexAsync("zipcodes", indexDefinition);
 ```
 
+#### Dates and Times
+
+The only field types that RediSearch supports are "Text", "Tag", "Numeric", and "Geo". No dates and times.
+
+If you need to store and query date/time data I suggest you convert it to a numeric value and index it that way. 
+
+The sample "movies" index does this with the "Released" field. The value in that field represents the number of seconds that have elapsed since `DateTime.MinValue`. Why not use the standard "Unix epoch"?! There's nothing stopping you from doing that, it's just a number. In this specific case however, some of the movies in the index were released before 1970 so you'd have negative values in your index. Still not a deal breaker, but it'd require extra handling later (I think). 
+
+Here are a couple of helper methods that you could using to convert a DateTime back and forth to seconds:
+
+```csharp
+public static double ToSeconds(DateTime dateTime) =>
+	(dateTime - DateTime.MinValue).TotalSeconds;
+	
+public static DateTime FromSeconds(double seconds) =>
+	DateTime.MinValue.AddSeconds(seconds);
+```
+
+The following is what a query involving a date range might look like, again using the sample "movies" index...
+
+```csharp
+// Movies released in 1982.
+var startDate = new DateTime(1982, 1, 1);
+var endDate = startDate.AddYears(1);
+
+var query = RediSearchQuery
+    .On("movies")
+    .UsingQuery($"@Released:[{ToSeconds(startDate)} {ToSeconds(endDate)}]")
+    .Build();
+
+var result = _db.Search(query);
+
+var movies = result.Select(x => 
+    new {
+        Key = x.DocumentKey,
+        Title = (string)x.Fields["Title"],
+        Released = FromSeconds((double)x.Fields["Released"])
+    });
+```
+
 ### Executing a Query
 
 Searching an index is done by using the `RediSearchQuery` builder to create a RediSearch query and then executing the query using the `Search` or `SearchAsync` extension method. 
@@ -74,7 +114,6 @@ var queryDefinition = RediSearchQuery
     );
 
 var result = await _db.SearchAsync(queryDefinition);
-
 ```
 
 #### Handling the Result
