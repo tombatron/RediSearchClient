@@ -19,40 +19,6 @@ So here we are.
 PM> Install-Package RediSearchClient
 ```
 
-## Usage
-
-I intend to build out the Wiki with a cookbook of sorts for how you would interact with RediSearch using this package, but for now here are a few examples from the integration tests. 
-
-### Creating an Index.
-
-```csharp
-var indexDefinition = RediSearchIndex
-    .On(RediSearchStructure.HASH)
-    .ForKeysWithPrefix("zip::")
-    .WithSchema(
-        x => x.Text("ZipCode", sortable: false, nostem: true),
-        x => x.Text("City", sortable: true), 
-        x => x.Text("State", sortable: true, nostem: true),
-        x => x.Geo("Coordinates"),
-        x => x.Numeric("TimeZoneOffset"),
-        x => x.Numeric("DaylightSavingsFlag")
-    )
-    .Build();
-
-await _db.CreateIndexAsync("the-index-name", indexDefinition);
-```
-
-### Executing a Query
-
-```csharp
-var result = await _db.SearchAsync(
-    RediSearchQuery
-        .On("the-index-name")
-        .UsingQuery("@State:FL")
-        .Build()
-    );
-```
-
 ## Sample Data
 
 Just need some sample data to play with? Hey, we've all been there. 
@@ -69,4 +35,74 @@ You can load the sample data by following these steps:
 
 And that's pretty much it!
 
-I suggest before writing any code you play around with query language using the sample data/indexes that we just loaded using a tool like [RedisInsight](https://redislabs.com/redis-enterprise/redis-insight/) which has support for the RediSearch (and a few others) module. 
+I suggest before writing any code you play around with query language using the sample data/indexes that we just loaded using a tool like [RedisInsight](https://redislabs.com/redis-enterprise/redis-insight/) which has support for the RediSearch (and a few others) module.
+
+## Usage
+
+Where appropriate the following examples will use the sample data and indexes that are provided by the `RediSearchClient.SampleData` application.
+
+### Creating an Index.
+
+Creating an index is done by using the `RediSearchIndex` builder to create an index definitions and then invoking the `CreateIndex` or `CreateIndexAsync` extension method. 
+
+```csharp
+var indexDefinition = RediSearchIndex
+    .On(RediSearchStructure.HASH)
+    .ForKeysWithPrefix("zip::")
+    .WithSchema(
+        x => x.Text("ZipCode", sortable: false, nostem: true),
+        x => x.Text("City", sortable: true), 
+        x => x.Text("State", sortable: true, nostem: true),
+        x => x.Geo("Coordinates"),
+        x => x.Numeric("TimeZoneOffset"),
+        x => x.Numeric("DaylightSavingsFlag")
+    )
+    .Build();
+
+await _db.CreateIndexAsync("zipcodes", indexDefinition);
+```
+
+### Executing a Query
+
+Searching an index is done by using the `RediSearchQuery` builder to create a RediSearch query and then executing the query using the `Search` or `SearchAsync` extension method. 
+
+```csharp
+var queryDefinition = RediSearchQuery
+        .On("zipcodes")
+        .UsingQuery("@State:FL")
+        .Build()
+    );
+
+var result = await _db.SearchAsync(queryDefinition);
+
+```
+
+#### Handling the Result
+ 
+The result from the above query against the sample `zipcodes` index will yield an instance of the `SearchResult` class. The `SearchQuery` class is an implementation of `IEnumerable<SearchResultItem>`. Each instance of `SearchResultItem` represents a "row" in the result set, and gives you access to the Redis key as well as a dictionary of the stored fields for the search result. 
+
+The following example demonstrates handling the `result` from the "Executing a Query" sample above and projecting it into an anonymous type:
+
+```csharp
+var result = await _db.SearchAsync(queryDefinition);
+
+var floridaZipcodes = result.Select(x =>
+{
+    // This index defines "Coordinates" as "Geo" however when they are
+    // returned they come back as a string. So we have to do a little
+    // bit of post processing here. 
+    var coordinates = ((string)x.Fields["Coordinates"]).Split(",");
+
+    return new
+    {
+        x.DocumentKey,
+        ZipCode = (string)x.Fields["ZipCode"],
+        City = (string)x.Fields["City"],
+        State = (string)x.Fields["State"],
+        Latitude = double.Parse(coordinates[1]),
+        Longitude = double.Parse(coordinates[0]),
+        TimeZoneOffset = (int)x.Fields["TimeZoneOffset"],
+        DaylightSavingsFlag = (bool)x.Fields["DaylightSavingsFlag"]
+    };
+});
+```
