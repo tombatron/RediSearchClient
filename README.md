@@ -70,7 +70,7 @@ If you need to store and query date/time data I suggest you convert it to a nume
 
 The sample "movies" index does this with the "Released" field. The value in that field represents the number of seconds that have elapsed since `DateTime.MinValue`. Why not use the standard "Unix epoch"?! There's nothing stopping you from doing that, it's just a number. In this specific case however, some of the movies in the index were released before 1970 so you'd have negative values in your index. Still not a deal breaker, but it'd require extra handling later (I think). 
 
-Here are a couple of helper methods that you could using to convert a DateTime back and forth to seconds:
+Here are a couple of helper methods that you could use to convert a DateTime back and forth to seconds:
 
 ```csharp
 public static double ToSeconds(DateTime dateTime) =>
