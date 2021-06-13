@@ -1,3 +1,4 @@
+using System;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +13,7 @@ namespace RediSearchClient.SampleData
         {
             get
             {
-                var zipDataPath = Path.Combine(Directory.GetCurrentDirectory(), "zips.txt");
+                var zipDataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "zips.txt");
                 var zipDataStream = File.OpenRead(zipDataPath);
 
                 var deserializedZipData = JsonSerializer.DeserializeAsync<IEnumerable<ZipData>>(zipDataStream).GetAwaiter().GetResult();
@@ -24,7 +25,7 @@ namespace RediSearchClient.SampleData
                         new HashEntry("ZipCode", zip.ZipCode),
                         new HashEntry("City", zip.City),
                         new HashEntry("State", zip.State),
-                        new HashEntry("Coordinates", $"{zip.Latitude},{zip.Longitude}"),
+                        new HashEntry("Coordinates", $"{zip.Longitude},{zip.Latitude}"),
                         new HashEntry("TimeZoneOffset", zip.TimeZoneOffset),
                         new HashEntry("DaylightSavingsFlag", zip.DaylightSavingsFlag),
                     });
