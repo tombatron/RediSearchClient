@@ -1,6 +1,7 @@
 using RediSearchClient.Aggregate;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -38,7 +39,7 @@ namespace RediSearchClient.IntegrationTests
             var result = await _db.AggregateAsync(aggregation);
 
             Assert.NotNull(result.RawResult);
-        }        
+        }
 
         [Fact]
         public void CanParseQueryResult()
@@ -49,11 +50,12 @@ namespace RediSearchClient.IntegrationTests
 
             Assert.NotNull(result);
             Assert.NotNull(result.RawResult);
-            Assert.NotNull(result.Records);
             Assert.Equal(1, result.RecordCount);
 
-            Assert.Equal("demo", (string)result.Records[0]["documentType"]);
-            Assert.Equal(15, (int)result.Records[0]["total"]);
+            var firstResult = result.First();
+
+            Assert.Equal("demo", (string)firstResult.First(x => x.Key == "documentType").Value);
+            Assert.Equal(15, (int)firstResult.First(x => x.Key == "total").Value);
         }
 
         private RediSearchAggregateDefinition CreateSampleAggregationQuery()
