@@ -54,8 +54,8 @@ namespace RediSearchClient.IntegrationTests
 
             var firstResult = result.First();
 
-            Assert.Equal("demo", (string)firstResult.First(x => x.Key == "documentType").Value);
-            Assert.Equal(15, (int)firstResult.First(x => x.Key == "total").Value);
+            Assert.Equal("demo", (string)firstResult["documentType"]);
+            Assert.Equal(15, (int)firstResult["total"]);
         }
 
         private RediSearchAggregateDefinition CreateSampleAggregationQuery()

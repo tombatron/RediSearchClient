@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using StackExchange.Redis;
@@ -7,7 +8,7 @@ namespace RediSearchClient
     /// <summary>
     /// Describes a result from the `FT.AGGREGATE` command.
     /// </summary>
-    public class AggregateResult : IEnumerable<KeyValuePair<string, RedisResult>[]>
+    public class AggregateResult : IEnumerable<AggregateResultCollection>
     {
         /// <summary>
         /// The unparsed value returned from Redis.
@@ -27,31 +28,21 @@ namespace RediSearchClient
         internal static AggregateResult From(RedisResult redisResult) =>
             new AggregateResult(redisResult);
 
-        public IEnumerator<KeyValuePair<string, RedisResult>[]> GetEnumerator() =>
+        public IEnumerator<AggregateResultCollection> GetEnumerator() =>
             ResultProcessor().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() =>
             ResultProcessor().GetEnumerator();
 
-        private IEnumerable<KeyValuePair<string, RedisResult>[]> ResultProcessor()
+        private IEnumerable<AggregateResultCollection> ResultProcessor()
         {
             if (RawResult != default && RecordCount > 0)
             {
                 for (var i = 1; i < RawResult.Length; i++)
                 {
-                    var aggregation = new List<KeyValuePair<string, RedisResult>>();
-
                     var recordFields = (RedisResult[])RawResult[i];
 
-                    for (var j = 0; j < recordFields.Length; j++)
-                    {
-                        var key = (string)recordFields[j];
-                        var value = recordFields[++j];
-
-                        aggregation.Add(new KeyValuePair<string, RedisResult>(key, value));
-                    }
-
-                    yield return aggregation.ToArray();
+                    yield return new AggregateResultCollection(recordFields);
                 }
             }
 
