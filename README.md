@@ -97,8 +97,8 @@ var result = _db.Search(query);
 var movies = result.Select(x => 
     new {
         Key = x.DocumentKey,
-        Title = (string)x.Fields["Title"],
-        Released = FromSeconds((double)x.Fields["Released"])
+        Title = (string)x["Title"],
+        Released = FromSeconds((double)x["Released"])
     });
 ```
 
