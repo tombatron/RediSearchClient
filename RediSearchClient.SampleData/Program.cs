@@ -108,3 +108,19 @@ else
 
     Console.WriteLine("`zips` index created.");
 }
+
+Console.WriteLine("Creating auto suggest dictionaries.");
+
+if (db.SuggestionsSize("cities") == 0)
+{
+    foreach(var (_, hash) in ZipCodeData.ZipCodes)
+    {
+        db.AddSuggestion("cities", (string)hash[1].Value, 1, false, (String)hash[3].Value);
+    }
+
+    Console.WriteLine("`cities` auto suggest dictionary created.");
+}
+else
+{
+    Console.WriteLine("`cities` auto suggestion dictionary already exists.");
+}

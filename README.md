@@ -23,7 +23,7 @@ PM> Install-Package RediSearchClient
 
 Just need some sample data to play with? Hey, we've all been there. 
 
-Included in this repository is a small console application that will load a local Redis instance with two sample datasets and create two sample indexes for you to mess around with. 
+Included in this repository is a small console application that will load a local Redis instance with two sample datasets and create two samples indexes and an auto-suggest dictionary for you to mess around with. 
 
 You can load the sample data by following these steps:
 
