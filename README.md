@@ -130,18 +130,18 @@ var floridaZipcodes = result.Select(x =>
     // This index defines "Coordinates" as "Geo" however when they are
     // returned they come back as a string. So we have to do a little
     // bit of post processing here. 
-    var coordinates = ((string)x.Fields["Coordinates"]).Split(",");
+    var coordinates = ((string)x["Coordinates"]).Split(",");
 
     return new
     {
         x.DocumentKey,
-        ZipCode = (string)x.Fields["ZipCode"],
-        City = (string)x.Fields["City"],
-        State = (string)x.Fields["State"],
+        ZipCode = (string)x["ZipCode"],
+        City = (string)x["City"],
+        State = (string)x["State"],
         Latitude = double.Parse(coordinates[1]),
         Longitude = double.Parse(coordinates[0]),
-        TimeZoneOffset = (int)x.Fields["TimeZoneOffset"],
-        DaylightSavingsFlag = (bool)x.Fields["DaylightSavingsFlag"]
+        TimeZoneOffset = (int)x["TimeZoneOffset"],
+        DaylightSavingsFlag = (bool)x["DaylightSavingsFlag"]
     };
 });
 ```

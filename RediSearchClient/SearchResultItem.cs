@@ -41,5 +41,7 @@ namespace RediSearchClient
 
             return result;
         }
+
+        public RedisResult this[string key] => Fields.TryGetValue(key, out var value) ? value : default;
     }
 }

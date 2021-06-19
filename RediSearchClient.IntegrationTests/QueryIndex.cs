@@ -57,7 +57,7 @@ namespace RediSearchClient.IntegrationTests
             Assert.NotNull(result.RawResult);
             Assert.Equal(5, result.RecordCount);
 
-            var tom = result.FirstOrDefault(x => (string)x.Fields["first_name"] == "Tom");
+            var tom = result.FirstOrDefault(x => (string)x["first_name"] == "Tom");
 
             Assert.NotNull(tom);
         }
