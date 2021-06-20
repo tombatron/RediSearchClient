@@ -1,5 +1,6 @@
 using RediSearchClient.Aggregate;
 using RediSearchClient.Indexes;
+using RediSearchClient.Query;
 using StackExchange.Redis;
 using System.Linq;
 using System.Threading;
@@ -68,6 +69,12 @@ namespace RediSearchClient.IntegrationTests
                 {
                     gb.Fields("@documentType");
                     gb.Reduce(Reducer.Sum, "@score").As("total");
+                })
+                .SortBy(sb => 
+                {
+                    sb.Field("@documentType", Direction.Ascending);
+                    sb.Field("@total", Direction.Descending);
+                    sb.Max(100);
                 })
                 .Build();
         }

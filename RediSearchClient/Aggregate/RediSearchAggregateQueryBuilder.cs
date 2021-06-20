@@ -5,6 +5,9 @@ using RediSearchClient.Query;
 
 namespace RediSearchClient.Aggregate
 {
+    /// <summary>
+    /// This is the builder wherein a majority of an aggreagtion query is defined.
+    /// </summary>
     public sealed class RediSearchAggregateQueryBuilder
     {
         private Queue<Func<object[]>> _queryComponents;
@@ -15,6 +18,11 @@ namespace RediSearchClient.Aggregate
             _queryComponents.Enqueue(() => new[] { indexName });
         }
 
+        /// <summary>
+        /// Builder method for specifying the initial filtering query.
+        /// </summary>
+        /// <param name="query">Query that follows the exact syntax as a standard search query.</param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Query(string query)
         {
             _queryComponents.Enqueue(() => new[] { query });
@@ -22,6 +30,10 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// Invoking this method will set the query so that no stemming is used for query expansion.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Verbatim()
         {
             _queryComponents.Enqueue(() => new[] { "VERBATIM" });
@@ -29,6 +41,14 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// Builder method for specifying which fields to load from the underlying hash objects.
+        /// 
+        /// In general you should avoid using this. Instead you should try and only work with fields that are indexed as
+        /// "sortable" as those queries will be executed with much less overhead.
+        /// </summary>
+        /// <param name="loadProperties">The field(s) to be loaded from the indexed hash objects.</param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Load(params object[] loadProperties)
         {
             _queryComponents.Enqueue(() =>
@@ -47,6 +67,11 @@ namespace RediSearchClient.Aggregate
 
         private static readonly GroupByBuilder _groupByBuilder = new GroupByBuilder();
 
+        /// <summary>
+        /// Builder method for specifying the grouping operation on the results pipeline. 
+        /// </summary>
+        /// <param name="groupBy">The GROUPBY is specified by a builder.</param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder GroupBy(Action<GroupByBuilder> groupBy)
         {
             _queryComponents.Enqueue(() =>
@@ -61,30 +86,21 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
-        public RediSearchAggregateQueryBuilder SortBy(string field, Direction direction)
+        /// <summary>
+        /// Builder method that provides access to the "SORTBY" builder.
+        /// </summary>
+        /// <param name="sortBy"></param>
+        /// <returns></returns>
+        public RediSearchAggregateQueryBuilder SortBy(Action<SortByBuilder> sortBy)
         {
             _queryComponents.Enqueue(() =>
             {
-                var result = new object[3];
 
-                result[0] = "SORTBY";
-                result[1] = field;
-                result[2] = direction == Direction.Ascending ? "ASC" : "DESC";
+                var builder = new SortByBuilder();
 
-                return result;
-            });
-            return this;
-        }
+                sortBy(builder);
 
-        public RediSearchAggregateQueryBuilder Max(int maxRecords)
-        {
-            _queryComponents.Enqueue(() =>
-            {
-                return new object[]
-                {
-                "MAX",
-                maxRecords
-                };
+                return builder.Build();
             });
 
             return this;
