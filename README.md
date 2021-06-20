@@ -13,6 +13,12 @@ NRediSearch is woefully behind in terms of support for the latest functionality 
 
 So here we are. 
 
+## Table of Contents
+
+* [Installation](#installation)
+* [Sample Data](#sample-data)
+* [Creating an Index](#creating-an-index)
+
 ## Installation
 
 ```
