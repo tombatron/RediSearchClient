@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace RediSearchClient.Aggregate
 {
+    /// <summary>
+    /// This is the builder class used to construct a `GROUPBY` clause for an aggregation query.
+    /// </summary>
     public sealed class GroupByBuilder
     {
         internal GroupByBuilder()
@@ -10,6 +13,11 @@ namespace RediSearchClient.Aggregate
 
         private string[] _fields;
 
+        /// <summary>
+        /// Builder method for specifying which fields from a query result that you want to include in the "GROUPBY" 
+        /// section of the aggregation query.
+        /// </summary>
+        /// <param name="fields">The field(s) to be included in the aggregation query.</param>
         public void Fields(params string[] fields)
         {
             _fields = fields;
@@ -17,6 +25,12 @@ namespace RediSearchClient.Aggregate
 
         private ReduceSpec _reduceSpec;
 
+        /// <summary>
+        /// Builder method for specifying the reducer and any associated properties. 
+        /// </summary>
+        /// <param name="func">The reducer function that is to be applied to the grouped fields.</param>
+        /// <param name="args">Any arguments that are required by the specified reducer.</param>
+        /// <returns></returns>
         public ReduceSpec Reduce(Reducer func, params string[] args)
         {
             _reduceSpec = new ReduceSpec(func, args);
@@ -43,6 +57,10 @@ namespace RediSearchClient.Aggregate
             return result.ToArray();
         }
 
+        /// <summary>
+        /// This is a continuation of the `GROUPBY` builder that allows us to better define a reducer by giving us the
+        /// ability to optionally specify a field alias.
+        /// </summary>
         public sealed class ReduceSpec
         {
             private readonly string _func;
@@ -56,6 +74,10 @@ namespace RediSearchClient.Aggregate
 
             private string _alias;
 
+            /// <summary>
+            /// Builder method for specifying an alias for a reduced field.
+            /// </summary>
+            /// <param name="alias">The alias for the reduced field.</param>
             public void As(string alias)
             {
                 _alias = alias;
