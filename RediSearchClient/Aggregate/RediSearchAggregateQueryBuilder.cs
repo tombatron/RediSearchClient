@@ -106,6 +106,12 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// Builder method for applying (APPLY) a transformation to results.
+        /// </summary>
+        /// <param name="expression">The transformation to apply.</param>
+        /// <param name="alias">The alias of the transformation.</param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Apply(string expression, string alias)
         {
             _queryComponents.Enqueue(() =>
@@ -122,6 +128,12 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// Builder method for limiting (LIMIT) the number of results.
+        /// </summary>
+        /// <param name="offset">Result offset (0 based) to start limiting the result at.</param>
+        /// <param name="limit">The number of records to limit the result to.</param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Limit(int offset, int limit)
         {
             _queryComponents.Enqueue(() =>
@@ -136,6 +148,11 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// Builder method for filtering (FILTER) the results.
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public RediSearchAggregateQueryBuilder Filter(string expression)
         {
             _queryComponents.Enqueue(() =>
@@ -150,6 +167,10 @@ namespace RediSearchClient.Aggregate
             return this;
         }
 
+        /// <summary>
+        /// The end of the line. Invoking this method will process all of the fields for the aggregation query.
+        /// </summary>
+        /// <returns>An aggregate definition object to be passed to RediSearch.</returns>
         public RediSearchAggregateDefinition Build() =>
             new RediSearchAggregateDefinition(_queryComponents.SelectMany(x => x()).ToArray());
     }
