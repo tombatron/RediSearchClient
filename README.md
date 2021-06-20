@@ -18,6 +18,9 @@ So here we are.
 * [Installation](#installation)
 * [Sample Data](#sample-data)
 * [Creating an Index](#creating-an-index)
+* [Executing a Query](#executing-a-query)
+* [Executing an Aggregation](#executing-an-aggregation)
+* [Auto-Complete Suggestions](#auto-complete-suggestions)
 
 ## Installation
 
