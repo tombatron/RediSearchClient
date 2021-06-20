@@ -169,6 +169,12 @@ var zipCodeCountByProximity = RediSearchAggregateQuery.On("zips")
         gb.Fields("@City");
         gb.Reduce(Reducer.Count).As("Count");
     })
+    .SortBy(sb => 
+    {
+        sb.Field("@City", Direction.Ascending);
+        sb.Field("@Count", Direction.Descending);
+        sb.Max(100);
+    })
     .Build();
 
 var result = await _db.AggregateAsync(zipCodeCountByProximity);
