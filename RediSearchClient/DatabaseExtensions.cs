@@ -415,7 +415,7 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResult[] SpellCheck(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
         {
             var parameters = new List<object>(2)
             {
@@ -431,7 +431,7 @@ namespace RediSearchClient
 
             var result = db.Execute(RediSearchCommand.SPELLCHECK, parameters.ToArray());
 
-            return SpellCheckResult.CreateArray(result);
+            return new SpellCheckResultCollection(SpellCheckResult.CreateArray(result));
         }
 
         /// <summary>
@@ -448,7 +448,7 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResult[] SpellCheck(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
         {
             return SpellCheck(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
         }

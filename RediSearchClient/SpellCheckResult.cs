@@ -12,13 +12,13 @@ namespace RediSearchClient
         /// The term that the suggestion is for. 
         /// </summary>
         /// <value></value>
-        public string Term { get; private set; }
+        public string Term { get; }
 
         /// <summary>
         /// Suggestions for a term.
         /// </summary>
         /// <value></value>
-        public Suggestion[] Suggestions { get; private set; }
+        public Suggestion[] Suggestions { get; }
 
         /// <summary>
         /// Represents a term's suggestion with confidence. 
@@ -38,6 +38,35 @@ namespace RediSearchClient
             public string Value { get; internal set; }
         }
 
+        internal SpellCheckResult(string term, Suggestion[] suggestions)
+        {
+            Term = term;
+            Suggestions = suggestions;
+        }
+
+        internal static SpellCheckResult Create(RedisResult[] redisResult)
+        {
+            var term = (string)redisResult[1];
+
+            var rawSuggestions = (RedisResult[])redisResult[2];
+
+            var suggestions = new Suggestion[rawSuggestions.Length];
+
+            for (var i = 0; i < rawSuggestions.Length; i++)
+            {
+                var suggestionComponents = (RedisResult[])rawSuggestions[i];
+
+                suggestions[i] = new Suggestion
+                {
+                    Score = (double)suggestionComponents[0],
+                    Value = (string)suggestionComponents[1]
+                };
+            }
+
+            return new SpellCheckResult(term, suggestions);
+
+        }
+
         internal static SpellCheckResult[] CreateArray(RedisResult redisResult)
         {
             var redisResultArray = (RedisResult[])redisResult;
@@ -48,30 +77,7 @@ namespace RediSearchClient
             {
                 var rr = (RedisResult[])redisResultArray[i];
 
-                for (var j = 0; j < rr.Length; j++)
-                {
-                    var result = new SpellCheckResult
-                    {
-                        Term = (string)rr[++j]
-                    };
-
-                    var rawSuggestions = (RedisResult[])rr[++j];
-
-                    result.Suggestions = new Suggestion[rawSuggestions.Length];
-
-                    for (var k = 0; k < rawSuggestions.Length; k++)
-                    {
-                        var suggestionComponents = (RedisResult[])rawSuggestions[k];
-
-                        result.Suggestions[k] = new Suggestion
-                        {
-                            Score = (double)suggestionComponents[0],
-                            Value = (string)suggestionComponents[1]
-                        };
-                    }
-
-                    results[i] = result;
-                }
+                results[i] = Create(rr);
             }
 
             return results;

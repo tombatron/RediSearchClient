@@ -412,7 +412,7 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static async Task<SpellCheckResult[]> SpellCheckAsync(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
+        public static async Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
         {
             var parameters = new List<object>(2)
             {
@@ -428,7 +428,7 @@ namespace RediSearchClient
 
             var result = await db.ExecuteAsync(RediSearchCommand.SPELLCHECK, parameters.ToArray());
 
-            return SpellCheckResult.CreateArray(result);
+            return new SpellCheckResultCollection(SpellCheckResult.CreateArray(result));
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static Task<SpellCheckResult[]> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
+        public static Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
         {
             return SpellCheckAsync(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
         }        
