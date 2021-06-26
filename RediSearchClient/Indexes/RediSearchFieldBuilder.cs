@@ -32,7 +32,7 @@ namespace RediSearchClient.Indexes
         /// <summary>
         /// Create a "NUMERIC" field on the schema.
         /// </summary>
-        /// <param name="fieldName"></param>
+        /// <param name="fieldName">Name of the hash key being indexed.</param>
         /// <param name="sortable">Allows for the indexed value to be sorted later.</param>
         /// <param name="noindex">If set to true, this field will not be indexed.</param>
         /// <returns></returns>
@@ -42,7 +42,7 @@ namespace RediSearchClient.Indexes
         /// <summary>
         /// Create a "GEO" field on the schema.
         /// </summary>
-        /// <param name="fieldName"></param>
+        /// <param name="fieldName">Name of the hash key being indexed.</param>
         /// <returns></returns>
         public IRediSearchSchemaField Geo(string fieldName) =>
             new GeoSchemaField(fieldName);

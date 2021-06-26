@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RediSearchClient.Query;
 
 namespace RediSearchClient.Aggregate
 {

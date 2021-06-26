@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace RediSearchClient.Indexes
 {
+    /// <summary>
+    /// This is the builder wherein a majority of an index is defined.
+    /// </summary>
     public sealed class RediSearchIndexBuilder
     {
         private readonly RediSearchStructure _structure;
@@ -13,6 +16,11 @@ namespace RediSearchClient.Indexes
 
         private List<string> _prefixes;
 
+        /// <summary>
+        /// Builder method for defining the key pattern to index.
+        /// </summary>
+        /// <param name="prefix">Key pattern for which items to index.</param>
+        /// <returns></returns>
         public RediSearchIndexBuilder ForKeysWithPrefix(string prefix)
         {
             if (_prefixes == null)
@@ -27,6 +35,11 @@ namespace RediSearchClient.Indexes
 
         private string _filter;
 
+        /// <summary>
+        /// Allows for specifying a filter for indexable items.
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder UsingFilter(string filter)
         {
             _filter = filter;
@@ -36,6 +49,11 @@ namespace RediSearchClient.Indexes
 
         private string _language;
 
+        /// <summary>
+        /// Sets the language for the index, defaults to English.
+        /// </summary>
+        /// <param name="language"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder UsingLanguage(string language)
         {
             _language = language;
@@ -45,6 +63,11 @@ namespace RediSearchClient.Indexes
 
         private string _languageField;
 
+        /// <summary>
+        /// Sets the field to source the document language from.
+        /// </summary>
+        /// <param name="languageField"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder UsingLanguageField(string languageField)
         {
             _languageField = languageField;
@@ -54,6 +77,11 @@ namespace RediSearchClient.Indexes
 
         private double _score = 1;
 
+        /// <summary>
+        /// Sets the default score for documents.
+        /// </summary>
+        /// <param name="score"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder SetScore(double score)
         {
             _score = score;
@@ -63,6 +91,11 @@ namespace RediSearchClient.Indexes
 
         private string _scoreField;
 
+        /// <summary>
+        /// Sets the field to source the document score from.
+        /// </summary>
+        /// <param name="scoreField"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder SetScoreField(string scoreField)
         {
             _scoreField = scoreField;
@@ -72,6 +105,11 @@ namespace RediSearchClient.Indexes
 
         private string _payloadField;
 
+        /// <summary>
+        /// Sets the field that should be used as a binary safe payload string for the document.
+        /// </summary>
+        /// <param name="payloadField"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder SetPayloadField(string payloadField)
         {
             _payloadField = payloadField;
@@ -81,6 +119,13 @@ namespace RediSearchClient.Indexes
 
         private bool _maxTextFields;
 
+        /// <summary>
+        /// For efficiency, RediSearch encodes indexes differently if they are created with less 
+        /// than 32 text fields. This option forces RediSearch to encode indexes as if there were 
+        /// more than 32 text fields, which allows you to add additional fields (beyond 32) using 
+        /// `AlterSchema` or `AlterSchemaAsync`.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder MaxTextFields()
         {
             _maxTextFields = true;
@@ -90,6 +135,11 @@ namespace RediSearchClient.Indexes
 
         private bool _noOffsets;
 
+        /// <summary>
+        /// If set, we do not store term offsets for documents (saves memory, does not allow 
+        /// exact searches or highlighting).
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder NoOffsets()
         {
             _noOffsets = true;
@@ -99,6 +149,11 @@ namespace RediSearchClient.Indexes
 
         private bool _noHighLights;
 
+        /// <summary>
+        /// Conserves storage space and memory by disabling highlighting support. If set, we 
+        /// do not store corresponding byte offsets for term positions.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder NoHighLights()
         {
             _noHighLights = true;
@@ -108,6 +163,15 @@ namespace RediSearchClient.Indexes
 
         private int _lifespanInSeconds;
 
+        /// <summary>
+        /// Create a lightweight temporary index which will expire after the specified period 
+        /// of inactivity. The internal idle timer is reset whenever the index is searched or 
+        /// added to. Because such indexes are lightweight, you can create thousands of such 
+        /// indexes without negative performance implications and therefore you should consider 
+        /// using `.SkipInitialScan()` to avoid costly scanning.
+        /// </summary>
+        /// <param name="lifespanInSeconds"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder Temporary(int lifespanInSeconds)
         {
             _lifespanInSeconds = lifespanInSeconds;
@@ -117,6 +181,11 @@ namespace RediSearchClient.Indexes
 
         private bool _noFields;
 
+        /// <summary>
+        /// If set, we do not store field bits for each term. Saves memory, does not allow 
+        /// filtering by specific fields.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder NoFields()
         {
             _noFields = true;
@@ -126,6 +195,11 @@ namespace RediSearchClient.Indexes
 
         private bool _noFrequencies;
 
+        /// <summary>
+        /// If set, we avoid saving the term frequencies in the index. This saves memory 
+        /// but does not allow sorting based on the frequencies of a given term within the document.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder NoFrequencies()
         {
             _noFrequencies = true;
@@ -135,6 +209,10 @@ namespace RediSearchClient.Indexes
 
         private bool _skipInitialScan;
 
+        /// <summary>
+        /// If set, we do not scan and index.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexBuilder SkipInitialScan()
         {
             _skipInitialScan = true;
@@ -144,6 +222,11 @@ namespace RediSearchClient.Indexes
 
         private Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] _fields;
 
+        /// <summary>
+        /// Allows for defining the schema of the search index. 
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
         public RediSearchIndexBuilder WithSchema(params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
         {
             _fields = fields;
@@ -153,6 +236,10 @@ namespace RediSearchClient.Indexes
 
         private static readonly RediSearchSchemaFieldBuilder _fieldBuilder = new RediSearchSchemaFieldBuilder();
 
+        /// <summary>
+        /// Builds the index definition. 
+        /// </summary>
+        /// <returns></returns>
         public RediSearchIndexDefinition Build()
         {
             var argumentLength = 2; // ON {structure}
