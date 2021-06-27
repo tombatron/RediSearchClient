@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace RediSearchClient.Query
 {
+    /// <summary>
+    /// Primary builder for queries.
+    /// </summary>
     public sealed class RediSearchQueryBuilder
     {
         private readonly string _indexName;
@@ -13,6 +16,13 @@ namespace RediSearchClient.Query
 
         private string _query;
 
+        /// <summary>
+        /// Builder method for applying a query string.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Query_Syntax/
+        /// </summary>
+        /// <param name="query">Valid query syntax goes here.</param>
+        /// <returns></returns>
         public RediSearchQueryBuilder UsingQuery(string query)
         {
             _query = query;
@@ -22,6 +32,11 @@ namespace RediSearchClient.Query
 
         private Func<RediSearchNumericFilterBuilder, IRediSearchNumericFilter>[] _numericFilters;
 
+        /// <summary>
+        /// Builder method for applying numeric filter(s) to a query.
+        /// </summary>
+        /// <param name="numericFilters"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder WithNumericFilters(params Func<RediSearchNumericFilterBuilder, IRediSearchNumericFilter>[] numericFilters)
         {
             _numericFilters = numericFilters;
@@ -31,6 +46,15 @@ namespace RediSearchClient.Query
 
         private GeoFilterDefinition _geoFilterDefinition;
 
+        /// <summary>
+        /// Builder method for applying a geo filter to a query.
+        /// </summary>
+        /// <param name="fieldName">Name of the geo field to filter on.</param>
+        /// <param name="latitude">The latitude to filter with.</param>
+        /// <param name="longitude">The longitude to filter with.</param>
+        /// <param name="radius">The radius around the coordinates to include.</param>
+        /// <param name="unit">The unit of measurement to apply to the radius.</param>
+        /// <returns></returns>
         public RediSearchQueryBuilder WithGeoFilter(string fieldName, double latitude, double longitude, double radius, Unit unit)
         {
             _geoFilterDefinition = new GeoFilterDefinition(fieldName, latitude, longitude, radius, unit);
@@ -40,6 +64,12 @@ namespace RediSearchClient.Query
 
         private string[] _inKeys;
 
+        /// <summary>
+        /// If set, we limit the result to a given set of keys specified in the list. Non-
+        /// existent keys are ignored.
+        /// </summary>
+        /// <param name="inKeys">The key(s) to include in the result.</param>
+        /// <returns></returns>
         public RediSearchQueryBuilder InKeys(params string[] inKeys)
         {
             _inKeys = inKeys;
@@ -49,6 +79,11 @@ namespace RediSearchClient.Query
 
         private string[] _inFields;
 
+        /// <summary>
+        /// If set, filter the results to ones appearing only in specific fields of the document, like title or URL.
+        /// </summary>
+        /// <param name="inFields">The field(s) to filter on.</param>
+        /// <returns></returns>
         public RediSearchQueryBuilder InFields(params string[] inFields)
         {
             _inFields = inFields;
@@ -58,6 +93,11 @@ namespace RediSearchClient.Query
 
         private string[] _returnFields;
 
+        /// <summary>
+        /// Builder method for specifying the document fields to return.
+        /// </summary>
+        /// <param name="returnFields">The names of the fields to return.</param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Return(params string[] returnFields)
         {
             _returnFields = returnFields;
@@ -67,6 +107,12 @@ namespace RediSearchClient.Query
 
         private Action<SummarizeBuilder> _summarizeBuilderAction;
 
+        /// <summary>
+        /// Builder method to configure the returning of only the sections of a field
+        /// that contain matched text.
+        /// </summary>
+        /// <param name="summarizeBuilder"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Summarize(Action<SummarizeBuilder> summarizeBuilder)
         {
             _summarizeBuilderAction = summarizeBuilder;
@@ -76,6 +122,11 @@ namespace RediSearchClient.Query
 
         private Action<HighlightBuilder> _highlightBuilderAction;
 
+        /// <summary>
+        /// Builder method for configuring the formatting of matched sections of text.
+        /// </summary>
+        /// <param name="highlightBuilder"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Highlight(Action<HighlightBuilder> highlightBuilder)
         {
             _highlightBuilderAction = highlightBuilder;
@@ -85,6 +136,11 @@ namespace RediSearchClient.Query
 
         private int _slop;
 
+        /// <summary>
+        /// Builder method for specifying the maximum number of unmatched offsets between phrase terms.
+        /// </summary>
+        /// <param name="slop"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Slop(int slop)
         {
             _slop = slop;
@@ -94,6 +150,11 @@ namespace RediSearchClient.Query
 
         private bool _inOrder;
 
+        /// <summary>
+        /// Builder method for specifying that matches to a query term appear in the same order in the document
+        /// as in the query. Usually used with "Slop".
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder InOrder()
         {
             _inOrder = true;
@@ -103,6 +164,11 @@ namespace RediSearchClient.Query
 
         private string _language;
 
+        /// <summary>
+        /// Builder method for specifying the language stemmer to be used during query expansion.
+        /// </summary>
+        /// <param name="language"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Language(SearchLanguage language)
         {
             _language = language;
@@ -112,6 +178,11 @@ namespace RediSearchClient.Query
 
         private string _expander;
 
+        /// <summary>
+        /// Builder method for specifying a custome expander for a query.
+        /// </summary>
+        /// <param name="expander"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Expander(string expander)
         {
             _expander = expander;
@@ -121,6 +192,11 @@ namespace RediSearchClient.Query
 
         private string _scorer;
 
+        /// <summary>
+        /// Builder method for specifying a custom scorer for a query.
+        /// </summary>
+        /// <param name="scorer"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Scorer(string scorer)
         {
             _scorer = scorer;
@@ -130,6 +206,12 @@ namespace RediSearchClient.Query
 
         private string _payload;
 
+        /// <summary>
+        /// Builder method for specifying an abritary, binary safe payload that will be 
+        /// exposed to the scoring functions.
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Payload(string payload)
         {
             _payload = payload;
@@ -139,6 +221,13 @@ namespace RediSearchClient.Query
 
         private (string fieldName, Direction direction) _sortBy;
 
+        /// <summary>
+        /// Builder method for specifying that results should be sorted in a specific order by
+        /// a specified field.
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder SortBy(string fieldName, Direction direction)
         {
             _sortBy = (fieldName, direction);
@@ -148,6 +237,14 @@ namespace RediSearchClient.Query
 
         private (int offset, int limit) _limit;
 
+        /// <summary>
+        /// Builder method for specifying how to limit the returned results.
+        /// 
+        /// The default is "0" offset with a limit of "10" items.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
         public RediSearchQueryBuilder Limit(int offset, int limit)
         {
             _limit = (offset, limit);
@@ -157,6 +254,11 @@ namespace RediSearchClient.Query
 
         private bool _noContent;
 
+        /// <summary>
+        /// Builder method for specifying "NOCONTENT". If set the query will only return
+        /// document IDs with no content.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder NoContent()
         {
             _noContent = true;
@@ -166,6 +268,11 @@ namespace RediSearchClient.Query
 
         private bool _verbatim;
 
+        /// <summary>
+        /// Builder method for specifying "VERBATIM". If set, no stemming will be applied
+        /// to the query.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder Verbatim()
         {
             _verbatim = true;
@@ -175,6 +282,11 @@ namespace RediSearchClient.Query
 
         private bool _noStopWords;
 
+        /// <summary>
+        /// Builder method for specifying "NOSTOPWORD". If set, stopwords will not be filtered from the 
+        /// query.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder NoStopWords()
         {
             _noStopWords = true;
@@ -184,6 +296,11 @@ namespace RediSearchClient.Query
 
         private bool _withScores;
 
+        /// <summary>
+        /// Builder method for specifying "WITHSCORES". If set, the query results will also include the 
+        /// internal score of the result.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder WithScores()
         {
             _withScores = true;
@@ -193,6 +310,13 @@ namespace RediSearchClient.Query
 
         private bool _withSortKeys;
 
+        /// <summary>
+        /// Builder method for specifying "WITHSORTKEYS". Only relevant in conjunction with SORTBY . 
+        /// Returns the value of the sorting key, right after the id and score and /or payload if 
+        /// requested. This is usually not needed by users, and exists for distributed search 
+        /// coordination purposes.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder WithSortKeys()
         {
             _withSortKeys = true;
@@ -202,6 +326,10 @@ namespace RediSearchClient.Query
 
         private bool _withPayloads;
 
+        /// <summary>
+        /// Builder method for specifying "WITHPAYLOADS". If set, we retrieve optional document payloads.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryBuilder WithPayloads()
         {
             _withPayloads = true;
@@ -213,6 +341,10 @@ namespace RediSearchClient.Query
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
 
+        /// <summary>
+        /// Builds the query definition.
+        /// </summary>
+        /// <returns></returns>
         public RediSearchQueryDefinition Build()
         {
             var argumentLength = 2; // {index} {query}
@@ -347,8 +479,8 @@ namespace RediSearchClient.Query
             {
                 result[++currentArgumentIndex] = "GEOFILTER";
                 result[++currentArgumentIndex] = _geoFilterDefinition.FieldName;
-                result[++currentArgumentIndex] = _geoFilterDefinition.Latitude.ToString();
                 result[++currentArgumentIndex] = _geoFilterDefinition.Longitude.ToString();
+                result[++currentArgumentIndex] = _geoFilterDefinition.Latitude.ToString();
                 result[++currentArgumentIndex] = _geoFilterDefinition.Radius.ToString();
                 result[++currentArgumentIndex] = _geoFilterDefinition.DistanceUnit.ToString();
             }
