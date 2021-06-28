@@ -37,34 +37,94 @@ namespace RediSearchClient
         /// <value></value>
         public Dictionary<string, object>[] Fields { get; private set; }
 
+        /// <summary>
+        /// Count of documents in the index.
+        /// </summary>
+        /// <value></value>
         public int NumberOfDocuments { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `MaxDocumentId` summary.
+        /// </summary>
+        /// <value></value>
         public int MaxDocumentId { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `NumberOfTerms` summary.
+        /// </summary>
+        /// <value></value>
         public int NumberOfTerms { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `NumberOfRecords` summary.
+        /// </summary>
+        /// <value></value>
         public int NumberOfRecords { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `InvertedSizeMegabytes` summary.
+        /// </summary>
+        /// <value></value>
         public double InvertedSizeMegabytes { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `TotalInvertedIndexBlocks` summary.
+        /// </summary>
+        /// <value></value>
         public int TotalInvertedIndexBlocks { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `OffsetVectorsSizeMegabytes` summary.
+        /// </summary>
+        /// <value></value>
         public double OffsetVectorsSizeMegabytes { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `DocumentTableSizeMegabytes` summary.
+        /// </summary>
+        /// <value></value>
         public double DocumentTableSizeMegabytes { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `SortableVluesSizeMegabytes` summary.
+        /// </summary>
+        /// <value></value>
         public double SortableValuesSizeMegabytes { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `KeyTableSizeMegabytes` summary.
+        /// </summary>
+        /// <value></value>
         public double KeyTableSizeMegabytes { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `RecordsPerDocumentAverage` summary.
+        /// </summary>
+        /// <value></value>
         public double RecordsPerDocumentAverage { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `BytesPerRecordAverage` summary.
+        /// </summary>
+        /// <value></value>
         public double BytesPerRecordAverage { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `OffsetsPerTermAverage` summary.
+        /// </summary>
+        /// <value></value>
         public double OffsetsPerTermAverage { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `OffsetBitsPerRecordAverage` summary.
+        /// </summary>
+        /// <value></value>
         public double OffsetBitsPerRecordAverage { get; private set; }
 
+        /// <summary>
+        /// The count of documents (hashes) that couldn't be index.
+        /// </summary>
+        /// <value></value>
         public int HashIndexingFailures { get; private set; }
 
         /// <summary>
@@ -79,13 +139,22 @@ namespace RediSearchClient
         /// <value></value>
         public double PercentIndexed { get; private set; }
 
-        // gc stats
+        /// <summary>
+        /// The garbage collection statistics portion of the info result.
+        /// </summary>
+        /// <value></value>
         public GarbageCollectionStatistics GarbageCollectionStatistics { get; private set; }
 
-        // cursor stats
+        /// <summary>
+        /// The cursor statistcis portion of the info result.
+        /// </summary>
+        /// <value></value>
         public CursorStatistics CursorStatistics { get; private set; }
 
-        // stopwords list
+        /// <summary>
+        /// The list of stop words overrides provided when the index was created.
+        /// </summary>
+        /// <value></value>
         public string[] StopWordsList { get; private set; }
 
         internal static InfoResult Create(RedisResult[] redisResult)

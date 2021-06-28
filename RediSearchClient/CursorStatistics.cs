@@ -9,12 +9,28 @@ namespace RediSearchClient
     {
         internal CursorStatistics() { }
 
+        /// <summary>
+        /// TODO: Populate `GlobalIdle` summary.
+        /// </summary>
+        /// <value></value>
         public int GlobalIdle { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `GlobalTotal` summary.
+        /// </summary>
+        /// <value></value>
         public int GlobalTotal { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `IndexCapacity` summary.
+        /// </summary>
+        /// <value></value>
         public int IndexCapacity { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `IndexTotal` summary.
+        /// </summary>
+        /// <value></value>
         public int IndexTotal { get; private set; }
 
         internal static CursorStatistics Create(RedisResult[] redisResult)

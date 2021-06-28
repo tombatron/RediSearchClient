@@ -10,18 +10,47 @@ namespace RediSearchClient
     {
         internal GarbageCollectionStatistics() { }
 
+        /// <summary>
+        /// Total bytes collected by the GC.
+        /// </summary>
+        /// <value></value>
         public int BytesCollected { get; private set; }
 
+        /// <summary>
+        /// Total time (in milliseconds) that GC has run.
+        /// </summary>
+        /// <value></value>
         public int TotalMillisecondsRun { get; private set; }
 
+        /// <summary>
+        /// Total number of GC cycles run.
+        /// </summary>
+        /// <value></value>
         public int TotalCycles { get; private set; }
 
+        /// <summary>
+        /// Average GC cycle time: TotalMillisecondsRun / TotalCycles
+        /// </summary>
+        /// <value></value>
         public int AverageCycleTimeMilliseconds { get; private set; }
 
+        /// <summary>
+        /// In relation to the start time of the RediSearch/Redis process when was the 
+        /// last time GC was run? (I think...)
+        /// </summary>
+        /// <value></value>
         public int LastRunTimeMilliseconds { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `GcNumericTreesMissed` summary.
+        /// </summary>
+        /// <value></value>
         public int GcNumericTreesMissed { get; private set; }
 
+        /// <summary>
+        /// TODO: Populate `GcBlocksDenied` summary.
+        /// </summary>
+        /// <value></value>
         public int GcBlocksDenied { get; private set; }
 
         internal static GarbageCollectionStatistics Create(RedisResult[] redisResult)
