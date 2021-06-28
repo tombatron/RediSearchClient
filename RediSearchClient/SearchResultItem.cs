@@ -42,6 +42,10 @@ namespace RediSearchClient
             return result;
         }
 
+        /// <summary>
+        /// Access a field by key name.
+        /// </summary>
+        /// <returns></returns>
         public RedisResult this[string key] => Fields.TryGetValue(key, out var value) ? value : default;
     }
 }

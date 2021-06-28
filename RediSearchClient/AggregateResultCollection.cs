@@ -5,6 +5,11 @@ using System.Linq;
 
 namespace RediSearchClient
 {
+    /// <summary>
+    /// This class serves as an abstraction around a collection of `AggregateResultItem`'s.
+    /// 
+    /// The value add here is the ability to access aggreg
+    /// </summary>
     public class AggregateResultCollection : IReadOnlyCollection<AggregateResultItem>
     {
         private readonly RedisResult[] _internalResult;
@@ -12,8 +17,16 @@ namespace RediSearchClient
         internal AggregateResultCollection(RedisResult[] internalResult) =>
             _internalResult = internalResult;
 
+        /// <summary>
+        /// The count of results in the collection. 
+        /// </summary>
+        /// <returns></returns>
         public int Count => (_internalResult?.Length ?? 0 / 2);
 
+        /// <summary>
+        /// It's the... enumerator.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<AggregateResultItem> GetEnumerator() =>
             GetItems().GetEnumerator();
 
@@ -40,8 +53,17 @@ namespace RediSearchClient
             return _parsedItems;
         }
 
+        /// <summary>
+        /// Access results by index. 
+        /// </summary>
+        /// <returns>The RedisResult at the specified index or "default".</returns>
         public RedisResult this[int index] => GetItems().ElementAtOrDefault(index)?.Value;
 
+        /// <summary>
+        /// Access a single result by the result key. If more than one key exists for a name the
+        /// first value is returned.
+        /// </summary>
+        /// <returns>The first RedisResult having the specified key name.</returns>
         public RedisResult this[string key] => GetItems().FirstOrDefault(x => x.Key == key)?.Value;
     }
 }

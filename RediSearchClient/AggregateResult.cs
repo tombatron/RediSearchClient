@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using StackExchange.Redis;
@@ -28,6 +27,10 @@ namespace RediSearchClient
         internal static AggregateResult From(RedisResult redisResult) =>
             new AggregateResult(redisResult);
 
+        /// <summary>
+        /// Get the result enumerator for the `AggregateResult`.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<AggregateResultCollection> GetEnumerator() =>
             ResultProcessor().GetEnumerator();
 
