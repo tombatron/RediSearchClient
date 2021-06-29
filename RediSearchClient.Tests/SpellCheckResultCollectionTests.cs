@@ -9,7 +9,7 @@ namespace RediSearchClient.Tests
         {
             var collection = new SpellCheckResultCollection(null);
 
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }   
 
         [Fact]

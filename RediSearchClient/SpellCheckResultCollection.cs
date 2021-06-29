@@ -25,11 +25,22 @@ namespace RediSearchClient
         /// Enumerator linked to the underlying collection of spell check responses. 
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<SpellCheckResult> GetEnumerator() =>
-            ((IEnumerable<SpellCheckResult>)_inner).GetEnumerator();
+        public IEnumerator<SpellCheckResult> GetEnumerator()
+        {
+            if (_inner == default)
+            {
+                return Enumerable.Empty<SpellCheckResult>().GetEnumerator();
+            }
+            else
+            {
+                var inner = _inner as IEnumerable<SpellCheckResult>;
+
+                return inner.GetEnumerator();
+            }
+        }
 
         IEnumerator IEnumerable.GetEnumerator() =>
-            ((IEnumerable<SpellCheckResult>)_inner).GetEnumerator();
+            this.GetEnumerator();
 
         /// <summary>
         /// Access suggestion result by index.
