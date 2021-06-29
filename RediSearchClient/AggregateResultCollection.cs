@@ -41,12 +41,15 @@ namespace RediSearchClient
             {
                 _parsedItems = new List<AggregateResultItem>();
 
-                for (var i = 0; i < _internalResult.Length; i++)
+                if (_internalResult != default)
                 {
-                    var key = (string)_internalResult[i];
-                    var value = _internalResult[++i];
+                    for (var i = 0; i < _internalResult.Length; i++)
+                    {
+                        var key = (string)_internalResult[i];
+                        var value = _internalResult[++i];
 
-                    _parsedItems.Add(new AggregateResultItem(key, value));
+                        _parsedItems.Add(new AggregateResultItem(key, value));
+                    }
                 }
             }
 

@@ -140,7 +140,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class AliasCommands : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -223,7 +223,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class TagValuesWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -346,7 +346,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class GetSuggestionWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -449,7 +449,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class DeleteSuggestionWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -498,7 +498,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class SuggestionSizeWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -533,7 +533,7 @@ namespace RediSearchClient.IntegrationTests
         {
             private string _synonymGroupId;
 
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -583,7 +583,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class SpellCheckWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -712,7 +712,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class GetInfoWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 
@@ -763,7 +763,7 @@ namespace RediSearchClient.IntegrationTests
 
         public class ListCommandWill : BaseIntegrationTest
         {
-            public override void Setup()
+            protected override void Setup()
             {
                 base.Setup();
 

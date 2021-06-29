@@ -1,6 +1,5 @@
-using Xunit;
-using RediSearchClient;
 using StackExchange.Redis;
+using Xunit;
 
 namespace RediSearchClient.Tests
 {
@@ -11,8 +10,8 @@ namespace RediSearchClient.Tests
         {
             var result = new AggregateResultCollection(null);
 
-            Assert.Equal(0, result.Count);
-        }   
+            Assert.Empty(result);
+        }
 
         [Fact]
         public void ItCanHandleEmptyAggregationResult()
@@ -21,7 +20,7 @@ namespace RediSearchClient.Tests
 
             var result = new AggregateResultCollection(emptyRedisResult);
 
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Fact]

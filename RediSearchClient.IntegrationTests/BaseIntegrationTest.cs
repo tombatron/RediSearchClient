@@ -16,7 +16,7 @@ namespace RediSearchClient.IntegrationTests
         protected string _recordPrefix;
         protected string _dictionaryName;
 
-        public virtual void Setup()
+        protected virtual void Setup()
         {
             _muxr = ConnectionMultiplexer.Connect("localhost");
 

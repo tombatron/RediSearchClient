@@ -10,7 +10,7 @@ namespace RediSearchClient.IntegrationTests
 {
     public class QueryIndex : BaseIntegrationTest
     {
-        public override void Setup()
+        protected override void Setup()
         {
             base.Setup();
 
