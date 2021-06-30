@@ -67,7 +67,7 @@ namespace RediSearchClient
         {
             var redisResult = db.Execute(RediSearchCommand.AGGREGATE, aggregateDefinition.Fields);
 
-            return AggregateResult.From(redisResult); ;
+            return AggregateResult.From(redisResult);
         }
 
         /// <summary>
