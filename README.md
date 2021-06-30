@@ -18,6 +18,7 @@ So here we are.
 * [Installation](#installation)
 * [Sample Data](#sample-data)
 * [Creating an Index](#creating-an-index)
+* [Updating Index Schema](#updating-index-schema)
 * [Deleting and Index](#deleting-an-index)
 * [Executing a Query](#executing-a-query)
 * [Executing an Aggregation](#executing-an-aggregation)
@@ -111,6 +112,19 @@ var movies = result.Select(x =>
         Title = (string)x["Title"],
         Released = FromSeconds((double)x["Released"])
     });
+```
+
+### Updating Index Schema
+
+You can utilize the `AlterSchema` or `AlterSchemaAsync` to expand the schema of an existing index. The method takes an index name and leverages the same schema builder that is used when creating an index. 
+
+Let's take a look at an example where I'm adding a TEXT field and a GEO field to an existing index.
+
+```csharp
+_db.AlterSchemaAsync("existing_index", 
+    fb => fb.Text("NewTextField", noindex: true), 
+    fb => fb.Numeric("NewNumericField", sortable: true)
+);
 ```
 
 ### Deleting an Index
