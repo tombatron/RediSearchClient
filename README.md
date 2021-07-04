@@ -25,6 +25,8 @@ So here we are.
 * [Executing an Aggregation](#executing-an-aggregation)
 * [Auto-Complete Suggestions](#auto-complete-suggestions)
 * [Spell Check](#spell-check)
+* [Tag Values](#tag-values)
+* [Synonyms](#synonyms)
 
 ## Installation
 
@@ -388,3 +390,45 @@ public (string movieName, long released) FindReleaseYear(string movieName)
 	}
 }
 ```
+
+### Tag Values
+
+When you are defining a schema, one of the field types available to you is the `TAG` field type. This field type allows for exact-match queries against values like categories or primary keys. 
+
+RediSearch gives you access to enumerate all of the tag values by index and field by using the `FT.TAGVALS` command.
+
+The following example demonstrates how to leverage the `FT.TAGVALS` command with RediSearchClient by issuing the command against the [sample](#sample-data) "movies" index and the "Genre" field.
+
+```csharp
+var tagValues = await _db.TagValuesAsync("movies", "Genre");
+```
+
+#### Handling the Result
+
+The result of the `FT.TAGVALS` command is a simple, unpaged, unordered, lower-cased, stripped of whitespaces array of strings representing all of the tags applied to the specified field on the specified index.
+
+### Synonyms
+
+RediSearch allows for defining synonym groups which can make your full-text queries a bit more useful. For example, if you defined a synonym group for the words "boy", "girl", "child", a search for the world "child" would also yield results for "boy" and "girl".
+
+#### Updating a Synonym Group
+
+Defining or updating a synonym group are both done with the `FT.SYNUPDATE` command. 
+
+For the RediSearchClient you'll use the `UpdateSynonyms` or `UpdateSynonymsAsync` command.
+
+For example...
+
+```csharp
+await _db.UpdateSynonymsAsync("sample_index", "example_group_id", "boy", "girl", "child");
+```
+
+#### Dumping a Synonym Group
+
+In order to retrieve previously defined synonyms you'd execute the `FT.SYNDUMP` command with the name of the index that the synonymn groups were defined on. 
+
+```csharp
+var result = await _db.DumpSynonymsAsync("sample_index");
+```
+
+The result is an array of `SynonymGroupElement` objects which define the synonym and the synonym groups that the synonym belongs to.
