@@ -25,6 +25,7 @@ So here we are.
 * [Executing an Aggregation](#executing-an-aggregation)
 * [Auto-Complete Suggestions](#auto-complete-suggestions)
 * [Spell Check](#spell-check)
+    - [Custom Dictionaries](#custom-dictionaries)
 * [Tag Values](#tag-values)
 * [Synonyms](#synonyms)
 
@@ -307,6 +308,8 @@ await _db.DeleteSuggestionAsync("cities", "Destin");
 
 RediSearch gives us the ability to "spell check" our queries.  This is useful when a query is being executed based on user input.  If the initial query yields no results we can use the spell check functionality to get suggestions to either return to the user or to use when re-executing the query. 
 
+For more information about the spelling correction functionality see the official documentation [here](https://oss.redislabs.com/redisearch/Spellcheck/).
+
 #### Invoking "SpellCheck" for Suggestions
 
 The `SpellCheck` and `SpellCheckAsync` methods can accept a query definition or a plain string-based query. 
@@ -390,6 +393,44 @@ public (string movieName, long released) FindReleaseYear(string movieName)
 	}
 }
 ```
+
+#### Custom Dictionaries
+
+Dictionaries can be used to include and exlude terms from potential spell check results.
+
+For more information about this functionality, see the [official documentation](https://oss.redislabs.com/redisearch/Spellcheck/#custom_dictionaries).
+
+##### Adding to a Dictionary
+
+To create a new dictionary or add to an existing dictionary you'll use the `AddToDictionary` or `AddToDictionaryAsync` methods. 
+
+```csharp
+var result = await _db.AddToDictionaryAsync("test_dictionary", "super", "cool", "example", "term");
+```
+
+The `result` in the above example will be equal to the number of terms that were added to the dictionary. ie If the dictionary didn't contain the words "super", "cool", "example", and "term" then the result would be `4`.
+
+##### Removing from a Dictionary
+
+In order to remove terms from a dictionary you'll use the `DeleteFromDictionary` or `DeleteFromDictionaryAsync` methods.
+
+```csharp
+var result = await _db.DeleteFromDictionaryAsync("test_dictionary", "example");
+```
+
+Just like adding to a dictionary, the result here will be an integer representing the number of terms affected (or in this case deleted).
+
+##### Dumping a Dictionary
+
+If you want to examine the contents of an **existing** dictionary you'll use the `DumpDictionary` or `DumpDictionaryAsync` methods.
+
+```csharp
+var result = await _db.DumpDictionaryAsync("test_dictionary");
+```
+
+The result will be an array of strings representing all of the terms that exist in the dictionary. If you provide the name of a dictionary that doesn't exist you'll encounter a `RedisServerException` with a message of "could not open dict key".
+
+##### Using a Dictionary
 
 ### Tag Values
 
