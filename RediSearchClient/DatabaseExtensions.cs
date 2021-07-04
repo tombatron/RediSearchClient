@@ -6,6 +6,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static RediSearchClient.SpellCheckTerm;
 
 namespace RediSearchClient
 {
@@ -412,6 +413,23 @@ namespace RediSearchClient
         /// <param name="db"></param>
         /// <param name="indexName">The index with the indexed terms.</param>
         /// <param name="query">The search query.</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query, params SpellCheckTerm[] terms) =>
+            SpellCheck(db, indexName, query, 4, terms);
+
+        /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName">The index with the indexed terms.</param>
+        /// <param name="query">The search query.</param>
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
@@ -429,10 +447,36 @@ namespace RediSearchClient
                 parameters.Add(distance);
             }
 
+            if (terms != null)
+            {
+                foreach (var t in terms)
+                {
+                    parameters.Add("TERMS");
+                    parameters.Add(t.Treatment.ToString().ToUpper());
+                    parameters.Add(t.DictionaryName);
+                }
+            }
+
             var result = db.Execute(RediSearchCommand.SPELLCHECK, parameters.ToArray());
 
             return new SpellCheckResultCollection(SpellCheckResult.CreateArray(result));
         }
+
+        /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="queryDefinition">The search query.</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, RediSearchQueryDefinition queryDefinition, params SpellCheckTerm[] terms) =>
+            SpellCheck(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], 4, terms);
 
         /// <summary>
         /// `FT.SPELLCHECK`

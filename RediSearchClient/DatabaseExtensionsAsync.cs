@@ -409,6 +409,23 @@ namespace RediSearchClient
         /// <param name="db"></param>
         /// <param name="indexName">The index with the indexed terms.</param>
         /// <param name="query">The search query.</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, string indexName, string query, params SpellCheckTerm[] terms) =>
+            SpellCheckAsync(db, indexName, query, 4, terms);
+
+        /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName">The index with the indexed terms.</param>
+        /// <param name="query">The search query.</param>
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
@@ -424,6 +441,16 @@ namespace RediSearchClient
             {
                 parameters.Add("DISTANCE");
                 parameters.Add(distance);
+            }
+
+            if (terms != null)
+            {
+                foreach (var t in terms)
+                {
+                    parameters.Add("TERMS");
+                    parameters.Add(t.Treatment.ToString().ToUpper());
+                    parameters.Add(t.DictionaryName);
+                }
             }
 
             var result = await db.ExecuteAsync(RediSearchCommand.SPELLCHECK, parameters.ToArray());
@@ -442,13 +469,27 @@ namespace RediSearchClient
         /// </summary>
         /// <param name="db"></param>
         /// <param name="queryDefinition">The search query.</param>
+        /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
+        /// <returns></returns>
+        public static Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, params SpellCheckTerm[] terms) =>
+            SpellCheckAsync(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], 4, terms);
+
+        /// <summary>
+        /// `FT.SPELLCHECK`
+        /// 
+        /// Performs spelling correction on a query, returning suggestions for misspelled terms.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Spellcheck/
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftspellcheck
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="queryDefinition">The search query.</param>
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
-        {
-            return SpellCheckAsync(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
-        }        
+        public static Task<SpellCheckResultCollection> SpellCheckAsync(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms) =>
+            SpellCheckAsync(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
 
         /// <summary>
         /// `FT.DICTADD {dict} {term} [{term} ...]
