@@ -432,6 +432,24 @@ The result will be an array of strings representing all of the terms that exist 
 
 ##### Using a Dictionary
 
+In order leverage a custom dictionary with your call to spell check you'll create an instance of the `SpellCheckTerm` class to specify the name of the dictionary and whether or not it should be included or excluded from analysis.
+
+You can pass one or more dictionaries into the `SpellCheck` or `SpellCheckAsync` function(s). 
+
+```csharp
+var testDictionary = new SpellCheckTerm 
+{ 
+    DictionaryName = "test_dictionary", 
+    Treatment = TermTreatment.Include 
+};
+
+var result = await _db.SpellCheckAsync(query, testDictionary);
+```
+
+The above call to `SpellCheckAsync` will include terms from the "test_dictionary" in its analysis. 
+
+For information on handling the result from `SpellCheckAsync` check [this](#handling-spellcheck-results) out. 
+
 ### Tag Values
 
 When you are defining a schema, one of the field types available to you is the `TAG` field type. This field type allows for exact-match queries against values like categories or primary keys. 
