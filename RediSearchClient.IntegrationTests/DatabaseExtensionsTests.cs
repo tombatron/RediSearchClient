@@ -572,11 +572,11 @@ namespace RediSearchClient.IntegrationTests
                 _db.CreateIndex(_indexName, index);
 
                 _db.UpdateSynonyms(_indexName, _synonymGroupId,
-                    ("poop", "dookie"),
-                    ("pee pee", "tink tink"),
-                    ("dog", "dag"),
-                    ("toliet", "head"),
-                    ("child", "kid")
+                    "poop", "dookie",
+                    "pee pee", "tink tink",
+                    "dog", "dag",
+                    "toliet", "head",
+                    "child", "kid"
                 );
             }
         }

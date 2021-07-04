@@ -347,7 +347,7 @@ namespace RediSearchClient
         /// <param name="indexName"></param>
         /// <param name="synonymGroupId"></param>
         /// <param name="terms"></param>
-        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, params (string term1, string term2)[] terms) =>
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, params string[] terms) =>
             db.UpdateSynonyms(indexName, synonymGroupId, false, terms);
 
         /// <summary>
@@ -365,20 +365,20 @@ namespace RediSearchClient
         /// <param name="synonymGroupId"></param>
         /// <param name="skipInitialScan">If set, we do not scan and index.</param>
         /// <param name="terms"></param>
-        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, bool skipInitialScan, params (string term1, string term2)[] terms)
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, bool skipInitialScan, params string[] terms)
         {
-            var parameters = new List<object>(5)
+            var parameters = new List<object>()
             {
                 indexName,
-                synonymGroupId,
-                skipInitialScan
+                synonymGroupId
             };
 
-            foreach (var (term1, term2) in terms)
+            if (skipInitialScan)
             {
-                parameters.Add(term1);
-                parameters.Add(term2);
+                parameters.Add("SKIPINITIALSCAN");
             }
+
+            parameters.AddRange(terms);
 
             db.Execute(RediSearchCommand.SYNUPDATE, parameters.ToArray());
         }
