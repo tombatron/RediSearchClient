@@ -2,12 +2,12 @@ name: Publish Dotnet Package
 
 on:
   workflow_dispatch:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 5.0.x
     - name: Clean
       run: dotnet clean ./RediSearchClient.sln --configuration Release && dotnet nuget locals all --clear
     - name: Restore dependencies
