@@ -2,7 +2,6 @@ using StackExchange.Redis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RediSearchClient
 {
@@ -71,44 +70,7 @@ namespace RediSearchClient
         /// <returns></returns>
         public IEnumerable<TMapped> As<TMapped>(
             params (string sourceFieldName, string destinationPropertyName, Func<RedisResult, object> converter)[] mappers
-        ) where TMapped : new()
-        {
-            foreach (var r in this)
-            {
-                var mappedResult = new TMapped();
-
-                foreach (var p in mappedResult.GetType().GetProperties())
-                {
-                    if (mappers?.Any(x => x.destinationPropertyName == p.Name) ?? false)
-                    {
-                        var mapper = mappers.First(x => x.destinationPropertyName == p.Name);
-
-                        p.SetValue(mappedResult, mapper.converter(r[mapper.sourceFieldName]));
-
-                        continue;
-                    }
-                    else
-                    {
-                        var mappedValue = r[p.Name];
-
-                        switch (p.GetValue(default))
-                        {
-                            case string v:
-                                p.SetValue(mappedResult, (string)mappedValue);
-                                break;
-                            case int v:
-                                p.SetValue(mappedResult, (int)mappedValue);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                yield return mappedResult;
-            }
-
-            yield break;
-        }
+        ) where TMapped : new() =>
+            ResultMapper.MapTo<TMapped>(this);
     }
 }

@@ -30,6 +30,17 @@ namespace RediSearchClient.Tests
                 ("Genre", "Genre", (r) => r.ToString().Split(",")),
                 ("Released", "Released", (r) => DateTime.MinValue.AddSeconds((double)r))
             );
+
+            var searchResult = SearchResult.From(FakeSearchResult);
+
+            var mappedResult = searchResult.As<MovieExtended>();
+
+            var firstResult = mappedResult.First();
+
+            Assert.Equal("Some movie that doesn't exist", firstResult.Title);
+            Assert.Equal(128, firstResult.Runtime);
+            Assert.Equal(new[] { "That thing", " this things", " that other thing" }, firstResult.Genre);
+            Assert.Equal(new DateTime(2014, 11, 21), firstResult.Released);
         }
 
         private static RedisResult FakeSearchResult = RedisResult.Create(new[]
