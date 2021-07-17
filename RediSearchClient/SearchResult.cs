@@ -2,6 +2,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using static RediSearchClient.ResultMapper;
 
 namespace RediSearchClient
 {
@@ -68,9 +69,7 @@ namespace RediSearchClient
         /// <param name="mappers"></param>
         /// <typeparam name="TMapped">Destination type that we're mapping the collection of results to.</typeparam>
         /// <returns></returns>
-        public IEnumerable<TMapped> As<TMapped>(
-            params (string sourceFieldName, string destinationPropertyName, Func<RedisResult, object> converter)[] mappers
-        ) where TMapped : new() =>
-            ResultMapper.MapTo<TMapped>(this);
+        public IEnumerable<TMapped> As<TMapped>(params MapperDefinition[] mappers) where TMapped : new() =>
+            ResultMapper.MapTo<TMapped>(this, mappers);
     }
 }

@@ -84,6 +84,27 @@ namespace RediSearchClient
 
                 return result;
             }
+
+            public TTarget Apply<TTarget>(AggregateResultCollection aggregateCollection) where TTarget : new()
+            {
+                var result = new TTarget();
+
+                if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
+                {
+                    foreach (var m in mapper.Mappers)
+                    {
+                        var prop = typeof(TTarget).GetProperty(m.DestinationPropertyName);
+
+                        prop.SetValue(result, m.Converter(aggregateCollection[m.SourceField]));
+                    }
+                }
+                else
+                {
+                    // TODO: Throw an exception here if the mapper isn't found. It should have been created by now though...
+                }
+
+                return result;
+            }            
         }
 
         private static ConcurrentDictionary<Type, MapperDefinitionContainer> _mapperDefinitions =
@@ -147,24 +168,60 @@ namespace RediSearchClient
             }
         }
 
+        private static void RegisterMapper<TTarget>(MapperDefinition[] mappers) where TTarget : new()
+        {
+            if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
+            {
+                if (mappers == default)
+                {
+                    SynthesizeMapFor<TTarget>();
+                }
+                else
+                {
+                    CreateMapFor<TTarget>(mappers);
+                }
+
+            }
+        }
+
         /// <summary>
         /// Maps a SearchResult collection to a collection of... whatever you want.
         /// </summary>
         /// <param name="searchResult">The search result.</param>
+        /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
         /// <typeparam name="TTarget">The type to map to.</typeparam>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo<TTarget>(SearchResult searchResult) where TTarget : new()
+        public static IEnumerable<TTarget> MapTo<TTarget>(SearchResult searchResult, params MapperDefinition[] mappers) where TTarget : new()
         {
-            if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
-            {
-                SynthesizeMapFor<TTarget>();
-            }
+            RegisterMapper<TTarget>(mappers);
 
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
                 foreach (var sr in searchResult)
                 {
                     yield return mapper.Apply<TTarget>(sr);
+                }
+            }
+
+            yield break;
+        }
+
+        /// <summary>
+        /// Maps an AggregateResult collection to a collection of custom types. 
+        /// </summary>
+        /// <param name="aggregateResult">The aggregate result.</param>
+        /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
+        /// <typeparam name="TTarget">The type to map to.</typeparam>
+        /// <returns></returns>
+        public static IEnumerable<TTarget> MapTo<TTarget>(AggregateResult aggregateResult, params MapperDefinition[] mappers) where TTarget : new()
+        {
+            RegisterMapper<TTarget>(mappers);
+
+            if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
+            {
+                foreach (var ar in aggregateResult)
+                {
+                    yield return mapper.Apply<TTarget>(ar);
                 }
             }
 
