@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using StackExchange.Redis;
+using static RediSearchClient.ResultMapper;
 
 namespace RediSearchClient
 {
@@ -51,5 +52,14 @@ namespace RediSearchClient
 
             yield break;
         }
+
+        /// <summary>
+        /// Convenience method for mapping search results to a collection of local types.
+        /// </summary>
+        /// <param name="mappers"></param>
+        /// <typeparam name="TMapped">Destination type that we're mapping the collection of results to.</typeparam>
+        /// <returns></returns>
+        public IEnumerable<TMapped> As<TMapped>(params MapperDefinition[] mappers) where TMapped : new() =>
+            ResultMapper.MapTo<TMapped>(this, mappers);
     }
 }

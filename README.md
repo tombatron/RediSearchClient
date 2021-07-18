@@ -215,6 +215,55 @@ var floridaZipcodes = result.Select(x =>
 });
 ```
 
+#### Mapping the Result
+
+The `SearchResult` type contains a generic method called `As<TMapped>` which allows you to map a result from RediSearch to a custom type. Let's define a custom type to map the result of that query to:
+
+```csharp
+public class ZipCode
+{
+    public string ZipCode { get; set; }
+
+    public string City  {get; set; }
+
+    public string State { get; set; }
+
+    public double Latitude { get; set; }
+
+    public double Longitude { get; set; }
+
+    public int TimeZoneOffset { get; set; }
+
+    public bool DaylightSavingsFlag { get; set; }
+}
+```
+
+Next, we'll define a mapping for this custom type. 
+
+```csharp
+ResultMapper.CreateMapFor<ZipCode>(
+    ("ZipCode", "ZipCode", (r) => (string)r),
+    ("City", "City", (r) => (string)r),
+    ("State", "State", (r) => (string)r),
+    ("Coordinates", "Latitude", (r) => double.Parse(((string)r).Split(",")[1])),
+    ("Coordinates", "Longitude", (r) => double.Parse(((string)r).Split(",")[0])),
+    ("TimeZoneOffset", "TimeZoneOffset", (r) => (string)r),
+    ("DaylightSavingsFlag", "DaylightSavingsFlag", (r) => (string)r),
+);
+```
+
+In the above example I used a `(string, string, Func<RedisResult, object>)` tuple for convenience, that tuple is implicitly converted to a `MapperDefinition` that is used when actually converting the `RedisResult` to your custom type. **ALSO**, `ResultMapper.CreateMapFor` only needs to be called once, so I'd recommend defining your mappings during application startup.
+
+With the appropriate mapping defined you can now map the result like...
+
+```csharp
+var result = await _db.SearchAsync(queryDefinition);
+
+var mappedResult = result.As<ZipCode>();
+```
+
+The variable `mappedResult` will be of type `IEnumerable<ZipCode>`.
+
 ### Executing an Aggregation
 
 Executing an aggregation is a lot like doing a standard search, except we'll be using the `RediSearchAggregateQuery` builder in order to create the aggregation query and then using the `Aggregate` or `AggregateAsync` extension methods to invoke the actual aggregation.
@@ -255,6 +304,40 @@ var cityZipCodes = result.Select(x => new
     Count = (int)x["Count"]
 });
 ```
+
+#### Mapping the Result
+
+The `AggregateResult` type contains a generic method called `As<TMapped>` which allows you to map a result from RediSearch to a custom type. Let's define a custom type to map the result of that query to:
+
+```csharp
+public class CityCount
+{
+    public string City  {get; set; }
+
+    public int Count { get; set; }
+}
+```
+
+Next, we'll define a mapping for this custom type. 
+
+```csharp
+ResultMapper.CreateMapFor<CityCount>(
+    ("City", "City", (r) => (string)r),
+    ("Count", "Count", (r) => (int)r),
+);
+```
+
+In the above example I used a `(string, string, Func<RedisResult, object>)` tuple for convenience, that tuple is implicitly converted to a `MapperDefinition` that is used when actually converting the `RedisResult` to your custom type. **ALSO**, `ResultMapper.CreateMapFor` only needs to be called once, so I'd recommend defining your mappings during application startup.
+
+With the appropriate mapping defined you can now map the result like...
+
+```csharp
+var result = await _db.AggregateAsync(zipCodeCountByProximity);
+
+var mappedResult = result.As<CityCount>();
+```
+
+The variable `mappedResult` will be of type `IEnumerable<CityCount>`.
 
 ### Auto-Complete Suggestions
 
