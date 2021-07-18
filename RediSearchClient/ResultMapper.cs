@@ -2,6 +2,7 @@ using System.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Linq;
 using StackExchange.Redis;
 
 namespace RediSearchClient
@@ -172,7 +173,7 @@ namespace RediSearchClient
         {
             if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
             {
-                if (mappers == default)
+                if (!mappers?.Any() ?? true)
                 {
                     SynthesizeMapFor<TTarget>();
                 }
