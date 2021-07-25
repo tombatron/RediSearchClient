@@ -25,8 +25,8 @@ namespace RediSearchClient.Tests
         public void CanProvideResultMapping()
         {
             ResultMapper<MovieExtended>.CreateMap()
-                .ForStringMember(p => p.Title)
-                .ForIntegerMember(p => p.Runtime)
+                .ForMember(p => p.Title)
+                .ForMember(p => p.Runtime)
                 .ForMember(p => p.Genre, r => r.ToString().Split(","))
                 .ForMember(p => p.Released, r => DateTime.MinValue.AddSeconds((double)r));
 

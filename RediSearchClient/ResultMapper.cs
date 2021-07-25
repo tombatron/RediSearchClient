@@ -1,10 +1,11 @@
-using System.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Linq;
+using RediSearchClient.Exceptions;
 using StackExchange.Redis;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace RediSearchClient
 {
@@ -181,37 +182,21 @@ namespace RediSearchClient
             }
         }
 
-        private static object ConvertRedisResultToString(RedisResult result) => (string)result;
-
-        private static object ConvertRedisResultToInteger(RedisResult result) => (int)result;
-
-        private static object ConvertRedisResultToDouble(RedisResult result) => (double)result;
-
         public class MapperBuilder
         {
             internal MapperBuilder() { }
 
-            public MapperBuilder ForStringMember(Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(destinationProperty, ConvertRedisResultToString);
+            public MapperBuilder ForMember<_>(Expression<Func<TTarget, _>> destinationPropertyExpression)
+            {
+                var destinationPropertyInfo = GetPropertyInfoByExpression(destinationPropertyExpression);
+                var converter = GetConverterByPropertyInfo(destinationPropertyInfo);
 
-            public MapperBuilder ForStringMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(sourceField, destinationProperty, ConvertRedisResultToString);
-
-            public MapperBuilder ForIntegerMember(Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(destinationProperty, ConvertRedisResultToInteger);
-
-            public MapperBuilder ForIntegerMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(sourceField, destinationProperty, ConvertRedisResultToInteger);
-
-            public MapperBuilder ForDoubleMember(Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(destinationProperty, ConvertRedisResultToDouble);
-
-            public MapperBuilder ForDoubleMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
-                ForMember(sourceField, destinationProperty, ConvertRedisResultToDouble);
+                return this;
+            }
 
             public MapperBuilder ForMember(Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
             {
-                var destinationPropertyInfo = GetByExpression(destinationProperty);
+                var destinationPropertyInfo = GetPropertyInfoByExpression(destinationProperty);
                 var sourceField = destinationPropertyInfo.Name;
 
                 AppendMap(sourceField, destinationPropertyInfo, converter);
@@ -221,14 +206,14 @@ namespace RediSearchClient
 
             public MapperBuilder ForMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
             {
-                var propertyInfo = GetByExpression(destinationProperty);
+                var propertyInfo = GetPropertyInfoByExpression(destinationProperty);
 
                 AppendMap(sourceField, propertyInfo, converter);
 
                 return this;
             }
 
-            private static PropertyInfo GetByExpression<TPropertyType>(Expression<Func<TTarget, TPropertyType>> destinationPropertyExpression)
+            private static PropertyInfo GetPropertyInfoByExpression<TPropertyType>(Expression<Func<TTarget, TPropertyType>> destinationPropertyExpression)
             {
                 if (destinationPropertyExpression == default)
                 {
@@ -261,6 +246,130 @@ namespace RediSearchClient
 
                 return propertyInfo;
             }
+
+            private static Func<RedisResult, object> GetConverterByPropertyInfo(PropertyInfo propertyInfo)
+            {
+                var type = propertyInfo.GetType();
+
+                if (type == typeof(bool))
+                {
+                    return ConvertRedisResultToBoolean;
+                }
+                else if (type == typeof(bool[]))
+                {
+                    return ConvertRedisResultToBooleanArray;
+                }
+                else if (type == typeof(byte[]))
+                {
+                    return ConvertRedisResultToByteArray;
+                }
+                else if (type == typeof(byte[][]))
+                {
+                    return ConvertRedisResultToByteArrayArray;
+                }
+                else if (type == typeof(double))
+                {
+                    return ConvertRedisResultToDouble;
+                }
+                else if (type == typeof(double[]))
+                {
+                    return ConvertRedisResultToDoubleArray;
+                }
+                else if (type == typeof(int))
+                {
+                    return ConvertRedisResultToInteger;
+                }
+                else if (type == typeof(int[]))
+                {
+                    return ConvertRedisResultToIntegerArray;
+                }
+                else if (type == typeof(long))
+                {
+                    return ConvertRedisResultToLongInteger;
+                }
+                else if (type == typeof(long[]))
+                {
+                    return ConvertRedisResultToLongIntegerArray;
+                }
+                else if (type == typeof(ulong))
+                {
+                    return ConvertRedisResultToUnsignedLongInteger;
+                }
+                else if (type == typeof(ulong[]))
+                {
+                    return ConvertRedisResultToUnsignedLongIntegerArray;
+                }
+                else if (type == typeof(bool?))
+                {
+                    return ConvertRedisResultToNullableBoolean;
+                }
+                else if (type == typeof(double?))
+                {
+                    return ConvertRedisResultToNullableDouble;
+                }
+                else if (type == typeof(int?))
+                {
+                    return ConvertRedisResultToNullableInteger;
+                }
+                else if (type == typeof(long?))
+                {
+                    return ConvertRedisResultToNullableLongInteger;
+                }
+                else if (type == typeof(ulong?))
+                {
+                    return ConvertRedisResultToNullableUnsignedLongInteger;
+                }
+                else if (type == typeof(string))
+                {
+                    return ConvertRedisResultToString;
+                }
+                else if (type == typeof(string[]))
+                {
+                    return ConvertRedisResultToStringArray;
+                }
+                else
+                {
+                    throw new ResultMapperConfigurationException("Couldn't resolve a converter by type, you should try to create the mapping using `.ForMember(x => x.PropertyName, r => ConversionCode(r))`.");
+                }
+            }
+
+            private static object ConvertRedisResultToBoolean(RedisResult result) => (bool)result;
+
+            private static object ConvertRedisResultToBooleanArray(RedisResult result) => (bool[])result;
+
+            private static object ConvertRedisResultToByteArray(RedisResult result) => (byte[])result;
+
+            private static object ConvertRedisResultToByteArrayArray(RedisResult result) => (byte[][])result;
+
+            private static object ConvertRedisResultToString(RedisResult result) => (string)result;
+
+            private static object ConvertRedisResultToStringArray(RedisResult result) => (string[])result;
+
+            private static object ConvertRedisResultToInteger(RedisResult result) => (int)result;
+
+            private static object ConvertRedisResultToIntegerArray(RedisResult result) => (int[])result;
+
+            private static object ConvertRedisResultToLongInteger(RedisResult result) => (long)result;
+
+            private static object ConvertRedisResultToLongIntegerArray(RedisResult result) => (long[])result;
+
+            private static object ConvertRedisResultToUnsignedLongInteger(RedisResult result) => (ulong)result;
+
+            private static object ConvertRedisResultToUnsignedLongIntegerArray(RedisResult result) => (ulong[])result;
+
+            private static object ConvertRedisResultToDouble(RedisResult result) => (double)result;
+
+            private static object ConvertRedisResultToDoubleArray(RedisResult result) => (double[])result;
+
+            private static object ConvertRedisResultToNullableBoolean(RedisResult result) => (bool?)result;
+
+            private static object ConvertRedisResultToNullableDouble(RedisResult result) => (double?)result;
+
+            private static object ConvertRedisResultToNullableInteger(RedisResult result) => (int?)result;
+
+            private static object ConvertRedisResultToNullableLongInteger(RedisResult result) => (long?)result;
+
+            private static object ConvertRedisResultToNullableUnsignedLongInteger(RedisResult result) => (ulong?)result;
         }
 
         public static MapperBuilder CreateMap()
