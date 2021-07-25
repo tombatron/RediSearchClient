@@ -8,9 +8,27 @@ using StackExchange.Redis;
 namespace RediSearchClient
 {
     /// <summary>
+    /// 
+    /// </summary>
+    [Obsolete("Use the generic ResultMapper<TTarget> instead.")]
+    public static class ResultMapper
+    {
+        /// <summary>
+        /// [Obsolete] Use `CreateMap` from `ResultMapper&lt;TTarget&gt;` instead.
+        /// 
+        /// This method is for providing the type mappings ahead of time.
+        /// </summary>
+        /// <param name="mappers"></param>
+        /// <typeparam name="TTarget"></typeparam>
+        [Obsolete("Use `CreateMap` from `ResultMapper<TTarget>` instead.")]
+        public static void CreateMapFor<TTarget>(params ResultMapper<TTarget>.MapperDefinition[] mappers) where TTarget : new() =>
+            ResultMapper<TTarget>.CreateMap(mappers);
+    }
+
+    /// <summary>
     /// Utility class for mapping a search result to a custom type.
     /// </summary>
-    public static class ResultMapper
+    public static class ResultMapper<TTarget> where TTarget : new()
     {
         /// <summary>
         /// Defines a mapping.
@@ -65,7 +83,7 @@ namespace RediSearchClient
             public MapperDefinitionContainer(MapperDefinition[] mappers) =>
                 Mappers = mappers;
 
-            public TTarget Apply<TTarget>(SearchResultItem searchResultItem) where TTarget : new()
+            public TTarget Apply(SearchResultItem searchResultItem)
             {
                 var result = new TTarget();
 
@@ -86,7 +104,7 @@ namespace RediSearchClient
                 return result;
             }
 
-            public TTarget Apply<TTarget>(AggregateResultCollection aggregateCollection) where TTarget : new()
+            public TTarget Apply(AggregateResultCollection aggregateCollection)
             {
                 var result = new TTarget();
 
@@ -105,7 +123,7 @@ namespace RediSearchClient
                 }
 
                 return result;
-            }            
+            }
         }
 
         private static ConcurrentDictionary<Type, MapperDefinitionContainer> _mapperDefinitions =
@@ -115,8 +133,7 @@ namespace RediSearchClient
         /// This method is for providing the type mappings ahead of time.
         /// </summary>
         /// <param name="mappers"></param>
-        /// <typeparam name="TTarget"></typeparam>
-        public static void CreateMapFor<TTarget>(params MapperDefinition[] mappers) where TTarget : new()
+        public static void CreateMap(params MapperDefinition[] mappers)
         {
             if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
             {
@@ -127,8 +144,7 @@ namespace RediSearchClient
         /// <summary>
         /// Creates a type mapping for types that... don't have type mappings.
         /// </summary>
-        /// <typeparam name="TTarget"></typeparam>
-        internal static void SynthesizeMapFor<TTarget>() where TTarget : new()
+        internal static void SynthesizeMapFor()
         {
             var mappers = new List<MapperDefinition>();
 
@@ -137,7 +153,7 @@ namespace RediSearchClient
                 mappers.Add((p.Name, p.Name, CreateConverter(p)));
             }
 
-            CreateMapFor<TTarget>(mappers.ToArray());
+            CreateMap(mappers.ToArray());
         }
 
         /// <summary>
@@ -169,17 +185,17 @@ namespace RediSearchClient
             }
         }
 
-        private static void RegisterMapper<TTarget>(MapperDefinition[] mappers) where TTarget : new()
+        private static void RegisterMapper(MapperDefinition[] mappers)
         {
             if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
             {
                 if (!mappers?.Any() ?? true)
                 {
-                    SynthesizeMapFor<TTarget>();
+                    SynthesizeMapFor();
                 }
                 else
                 {
-                    CreateMapFor<TTarget>(mappers);
+                    CreateMap(mappers.ToArray());
                 }
 
             }
@@ -190,17 +206,16 @@ namespace RediSearchClient
         /// </summary>
         /// <param name="searchResult">The search result.</param>
         /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
-        /// <typeparam name="TTarget">The type to map to.</typeparam>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo<TTarget>(SearchResult searchResult, params MapperDefinition[] mappers) where TTarget : new()
+        public static IEnumerable<TTarget> MapTo(SearchResult searchResult, params MapperDefinition[] mappers)
         {
-            RegisterMapper<TTarget>(mappers);
+            RegisterMapper(mappers);
 
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
                 foreach (var sr in searchResult)
                 {
-                    yield return mapper.Apply<TTarget>(sr);
+                    yield return mapper.Apply(sr);
                 }
             }
 
@@ -212,17 +227,16 @@ namespace RediSearchClient
         /// </summary>
         /// <param name="aggregateResult">The aggregate result.</param>
         /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
-        /// <typeparam name="TTarget">The type to map to.</typeparam>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo<TTarget>(AggregateResult aggregateResult, params MapperDefinition[] mappers) where TTarget : new()
+        public static IEnumerable<TTarget> MapTo(AggregateResult aggregateResult, params MapperDefinition[] mappers)
         {
-            RegisterMapper<TTarget>(mappers);
+            RegisterMapper(mappers);
 
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
                 foreach (var ar in aggregateResult)
                 {
-                    yield return mapper.Apply<TTarget>(ar);
+                    yield return mapper.Apply(ar);
                 }
             }
 

@@ -22,7 +22,7 @@ namespace RediSearchClient.Tests
         [Fact]
         public void CanProvideResultMapping()
         {
-            ResultMapper.CreateMapFor<SomeAggregateModel>(
+            ResultMapper<SomeAggregateModel>.CreateMap(
                 ("ag_field1", "Label", (r) => (string)r),
                 ("ag_field2", "Value", (r) => (int)r)
             );
