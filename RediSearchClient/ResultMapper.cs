@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using StackExchange.Redis;
+using System.Linq.Expressions;
 
 namespace RediSearchClient
 {
@@ -30,6 +31,9 @@ namespace RediSearchClient
     /// </summary>
     public static class ResultMapper<TTarget> where TTarget : new()
     {
+        private static readonly Type TargetType = typeof(TTarget);
+        private static readonly PropertyInfo[] TargetTypeProperties = TargetType.GetProperties();
+
         /// <summary>
         /// Defines a mapping.
         /// </summary>
@@ -42,10 +46,10 @@ namespace RediSearchClient
             public string SourceField { get; }
 
             /// <summary>
-            /// The name of the property in the custom type to map the value to.
+            /// The property in the custom type to map the value to.
             /// </summary>
             /// <value></value>
-            public string DestinationPropertyName { get; }
+            public PropertyInfo DestinationProperty { get; }
 
             /// <summary>
             /// Converter function used to convert the RedisResult to whatever type is needed.
@@ -62,7 +66,31 @@ namespace RediSearchClient
             public MapperDefinition(string sourceField, string destinationPropertyName, Func<RedisResult, object> converter)
             {
                 SourceField = sourceField;
-                DestinationPropertyName = destinationPropertyName;
+                Converter = converter;
+
+                var props = typeof(TTarget).GetProperties();
+                var prop = props.FirstOrDefault(x => x.Name == destinationPropertyName);
+
+                if (prop == default)
+                {
+                    throw new Exception($"Couldn't find a property called: {destinationPropertyName}");
+                }
+                else
+                {
+                    DestinationProperty = prop;
+                }
+            }
+
+            /// <summary>
+            /// Initializes a MapperDefinition.
+            /// </summary>
+            /// <param name="sourceField"></param>
+            /// <param name="destinationProperty"></param>
+            /// <param name="converter"></param>
+            public MapperDefinition(string sourceField, PropertyInfo destinationProperty, Func<RedisResult, object> converter)
+            {
+                SourceField = sourceField;
+                DestinationProperty = destinationProperty;
                 Converter = converter;
             }
 
@@ -78,10 +106,12 @@ namespace RediSearchClient
 
         internal class MapperDefinitionContainer
         {
-            public MapperDefinition[] Mappers { get; }
+            public List<MapperDefinition> Mappers { get; }
 
-            public MapperDefinitionContainer(MapperDefinition[] mappers) =>
-                Mappers = mappers;
+            public MapperDefinitionContainer(MapperDefinition[] mappers)
+            {
+                Mappers = new List<MapperDefinition>(mappers);
+            }
 
             public TTarget Apply(SearchResultItem searchResultItem)
             {
@@ -91,9 +121,7 @@ namespace RediSearchClient
                 {
                     foreach (var m in mapper.Mappers)
                     {
-                        var prop = typeof(TTarget).GetProperty(m.DestinationPropertyName);
-
-                        prop.SetValue(result, m.Converter(searchResultItem[m.SourceField]));
+                        m.DestinationProperty.SetValue(result, m.Converter(searchResultItem[m.SourceField]));
                     }
                 }
                 else
@@ -112,9 +140,7 @@ namespace RediSearchClient
                 {
                     foreach (var m in mapper.Mappers)
                     {
-                        var prop = typeof(TTarget).GetProperty(m.DestinationPropertyName);
-
-                        prop.SetValue(result, m.Converter(aggregateCollection[m.SourceField]));
+                        m.DestinationProperty.SetValue(result, m.Converter(aggregateCollection[m.SourceField]));
                     }
                 }
                 else
@@ -139,6 +165,107 @@ namespace RediSearchClient
             {
                 _mapperDefinitions.TryAdd(typeof(TTarget), new MapperDefinitionContainer(mappers));
             }
+        }
+
+        internal static void AppendMap(string sourceField, PropertyInfo destinationProperty, Func<RedisResult, object> converter)
+        {
+            var mapperDefinition = new MapperDefinition(sourceField, destinationProperty, converter);
+
+            if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapperDefinitionContainer))
+            {
+                mapperDefinitionContainer.Mappers.Add(mapperDefinition);
+            }
+            else
+            {
+                CreateMap(mapperDefinition);
+            }
+        }
+
+        private static object ConvertRedisResultToString(RedisResult result) => (string)result;
+
+        private static object ConvertRedisResultToInteger(RedisResult result) => (int)result;
+
+        private static object ConvertRedisResultToDouble(RedisResult result) => (double)result;
+
+        public class MapperBuilder
+        {
+            internal MapperBuilder() { }
+
+            public MapperBuilder ForStringMember(Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(destinationProperty, ConvertRedisResultToString);
+
+            public MapperBuilder ForStringMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(sourceField, destinationProperty, ConvertRedisResultToString);
+
+            public MapperBuilder ForIntegerMember(Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(destinationProperty, ConvertRedisResultToInteger);
+
+            public MapperBuilder ForIntegerMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(sourceField, destinationProperty, ConvertRedisResultToInteger);
+
+            public MapperBuilder ForDoubleMember(Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(destinationProperty, ConvertRedisResultToDouble);
+
+            public MapperBuilder ForDoubleMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty) =>
+                ForMember(sourceField, destinationProperty, ConvertRedisResultToDouble);
+
+            public MapperBuilder ForMember(Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
+            {
+                var destinationPropertyInfo = GetByExpression(destinationProperty);
+                var sourceField = destinationPropertyInfo.Name;
+
+                AppendMap(sourceField, destinationPropertyInfo, converter);
+
+                return this;
+            }
+
+            public MapperBuilder ForMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
+            {
+                var propertyInfo = GetByExpression(destinationProperty);
+
+                AppendMap(sourceField, propertyInfo, converter);
+
+                return this;
+            }
+
+            private static PropertyInfo GetByExpression<TPropertyType>(Expression<Func<TTarget, TPropertyType>> destinationPropertyExpression)
+            {
+                if (destinationPropertyExpression == default)
+                {
+                    throw new ArgumentNullException(nameof(destinationPropertyExpression));
+                }
+
+                var property = default(MemberExpression);
+
+                if (destinationPropertyExpression.Body.NodeType == ExpressionType.Convert)
+                {
+                    var convert = destinationPropertyExpression.Body as UnaryExpression;
+
+                    if (convert != default)
+                    {
+                        property = convert.Operand as MemberExpression;
+                    }
+                }
+
+                if (property == default)
+                {
+                    property = destinationPropertyExpression.Body as MemberExpression;
+                }
+
+                if (property == default)
+                {
+                    throw new ArgumentException("The expression cannot be null and should be passed in the format of: x => x.PropertyName");
+                }
+
+                var propertyInfo = property.Member as PropertyInfo;
+
+                return propertyInfo;
+            }
+        }
+
+        public static MapperBuilder CreateMap()
+        {
+            return new MapperBuilder();
         }
 
         /// <summary>

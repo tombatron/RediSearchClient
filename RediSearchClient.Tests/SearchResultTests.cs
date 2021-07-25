@@ -24,12 +24,11 @@ namespace RediSearchClient.Tests
         [Fact]
         public void CanProvideResultMapping()
         {
-            ResultMapper.CreateMapFor<MovieExtended>(
-                ("Title", "Title", (r) => (string)r),
-                ("Runtime", "Runtime", (r) => (int)r),
-                ("Genre", "Genre", (r) => r.ToString().Split(",")),
-                ("Released", "Released", (r) => DateTime.MinValue.AddSeconds((double)r))
-            );
+            ResultMapper<MovieExtended>.CreateMap()
+                .ForStringMember(p => p.Title)
+                .ForIntegerMember(p => p.Runtime)
+                .ForMember(p => p.Genre, r => r.ToString().Split(","))
+                .ForMember(p => p.Released, r => DateTime.MinValue.AddSeconds((double)r));
 
             var searchResult = SearchResult.From(FakeSearchResult);
 
