@@ -182,10 +182,22 @@ namespace RediSearchClient
             }
         }
 
+        /// <summary>
+        /// Builder class for configuring mappings. 
+        /// </summary>
         public class MapperBuilder
         {
             internal MapperBuilder() { }
 
+            /// <summary>
+            /// Designate a property from the custom type to be mapped. 
+            /// 
+            /// This overload will assume that the key of the result and property name are exactly the same, and will attempt
+            /// to convert the value of the result to the same type as the property.
+            /// </summary>
+            /// <param name="destinationPropertyExpression"></param>
+            /// <typeparam name="_"></typeparam>
+            /// <returns></returns>
             public MapperBuilder ForMember<_>(Expression<Func<TTarget, _>> destinationPropertyExpression)
             {
                 var destinationPropertyInfo = GetPropertyInfoByExpression(destinationPropertyExpression);
@@ -194,6 +206,13 @@ namespace RediSearchClient
                 return this;
             }
 
+            /// <summary>
+            /// Designate a property from the custom type to be mapped, along with a delegate that will convert the record value
+            /// to the appropriate type for the property being mapped to.
+            /// </summary>
+            /// <param name="destinationProperty"></param>
+            /// <param name="converter"></param>
+            /// <returns></returns>
             public MapperBuilder ForMember(Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
             {
                 var destinationPropertyInfo = GetPropertyInfoByExpression(destinationProperty);
@@ -204,6 +223,13 @@ namespace RediSearchClient
                 return this;
             }
 
+            /// <summary>
+            /// Setup an explict mapping between a result key/value and a destination property, with a converter.
+            /// </summary>
+            /// <param name="sourceField">Key name of the result entry.</param>
+            /// <param name="destinationProperty">The property being mapped to.</param>
+            /// <param name="converter">A delegate that will convert the result value to the appropriate type.</param>
+            /// <returns></returns>
             public MapperBuilder ForMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty, Func<RedisResult, object> converter)
             {
                 var propertyInfo = GetPropertyInfoByExpression(destinationProperty);
@@ -372,6 +398,10 @@ namespace RediSearchClient
             private static object ConvertRedisResultToNullableUnsignedLongInteger(RedisResult result) => (ulong?)result;
         }
 
+        /// <summary>
+        /// Static factory method for creating a mapper builder. 
+        /// </summary>
+        /// <returns></returns>
         public static MapperBuilder CreateMap()
         {
             return new MapperBuilder();
