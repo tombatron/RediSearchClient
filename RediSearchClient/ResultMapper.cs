@@ -203,6 +203,8 @@ namespace RediSearchClient
                 var destinationPropertyInfo = GetPropertyInfoByExpression(destinationPropertyExpression);
                 var converter = GetConverterByPropertyInfo(destinationPropertyInfo);
 
+                AppendMap(destinationPropertyInfo.Name, destinationPropertyInfo, converter);
+
                 return this;
             }
 
@@ -217,6 +219,23 @@ namespace RediSearchClient
             {
                 var destinationPropertyInfo = GetPropertyInfoByExpression(destinationProperty);
                 var sourceField = destinationPropertyInfo.Name;
+
+                AppendMap(sourceField, destinationPropertyInfo, converter);
+
+                return this;
+            }
+
+            /// <summary>
+            /// Setup an explicit mapping between a result key/value and a destination property, the value from the result and we'll attempt
+            /// to automatically convert the value to the type of the destination property.
+            /// </summary>
+            /// <param name="sourceField"></param>
+            /// <param name="destinationProperty"></param>
+            /// <returns></returns>
+            public MapperBuilder ForMember(string sourceField, Expression<Func<TTarget, object>> destinationProperty)
+            {
+                var destinationPropertyInfo = GetPropertyInfoByExpression(destinationProperty);
+                var converter = GetConverterByPropertyInfo(destinationPropertyInfo);
 
                 AppendMap(sourceField, destinationPropertyInfo, converter);
 
@@ -275,7 +294,7 @@ namespace RediSearchClient
 
             private static Func<RedisResult, object> GetConverterByPropertyInfo(PropertyInfo propertyInfo)
             {
-                var type = propertyInfo.GetType();
+                var type = propertyInfo.PropertyType;
 
                 if (type == typeof(bool))
                 {
