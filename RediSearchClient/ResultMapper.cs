@@ -32,9 +32,6 @@ namespace RediSearchClient
     /// </summary>
     public static class ResultMapper<TTarget> where TTarget : new()
     {
-        private static readonly Type TargetType = typeof(TTarget);
-        private static readonly PropertyInfo[] TargetTypeProperties = TargetType.GetProperties();
-
         /// <summary>
         /// Defines a mapping.
         /// </summary>
@@ -470,17 +467,17 @@ namespace RediSearchClient
             }
         }
 
-        private static void RegisterMapper(MapperDefinition[] mappers)
+        private static void RegisterMapper(Action<MapperBuilder> inlineBuilder)
         {
             if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
             {
-                if (!mappers?.Any() ?? true)
+                if (inlineBuilder == default)
                 {
                     SynthesizeMapFor();
                 }
                 else
                 {
-                    CreateMap(mappers.ToArray());
+                    inlineBuilder(CreateMap());
                 }
 
             }
@@ -490,11 +487,11 @@ namespace RediSearchClient
         /// Maps a SearchResult collection to a collection of... whatever you want.
         /// </summary>
         /// <param name="searchResult">The search result.</param>
-        /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
+        /// <param name="inlineBuilder">Optional builder for declaring a type mapping inline.</param>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo(SearchResult searchResult, params MapperDefinition[] mappers)
+        public static IEnumerable<TTarget> MapTo(SearchResult searchResult, Action<MapperBuilder> inlineBuilder = default)
         {
-            RegisterMapper(mappers);
+            RegisterMapper(inlineBuilder);
 
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
@@ -503,20 +500,18 @@ namespace RediSearchClient
                     yield return mapper.Apply(sr);
                 }
             }
-
-            yield break;
         }
 
         /// <summary>
         /// Maps an AggregateResult collection to a collection of custom types. 
         /// </summary>
         /// <param name="aggregateResult">The aggregate result.</param>
-        /// <param name="mappers">Optional instructions for mapping the result to a custom type.</param>
+        /// <param name="inlineBuilder">Optional builder for declaring a type mapping inline.</param>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo(AggregateResult aggregateResult, params MapperDefinition[] mappers)
+        public static IEnumerable<TTarget> MapTo(AggregateResult aggregateResult, Action<MapperBuilder> inlineBuilder = default)
         {
-            RegisterMapper(mappers);
-
+            RegisterMapper(inlineBuilder);
+            
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
                 foreach (var ar in aggregateResult)
@@ -524,8 +519,6 @@ namespace RediSearchClient
                     yield return mapper.Apply(ar);
                 }
             }
-
-            yield break;
         }
     }
 }
