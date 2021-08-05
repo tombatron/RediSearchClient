@@ -603,11 +603,18 @@ namespace RediSearchClient
         /// <param name="value"></param>
         public static async Task SetConfigurationAsync(this IDatabase db, string option, string value)
         {
-            var result = await db.ExecuteAsync(RediSearchCommand.CONFIG, "SET", option, value);
-
-            if ((string)result != "OK")
+            try
             {
-                throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.");
+                var result = await db.ExecuteAsync(RediSearchCommand.CONFIG, "SET", option, value);
+
+                if ((string)result != "OK")
+                {
+                    throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.");
+                }
+            }
+            catch (RedisServerException redisServerException)
+            {
+                throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.", redisServerException);
             }
         }
 
