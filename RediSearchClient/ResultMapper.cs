@@ -73,10 +73,8 @@ namespace RediSearchClient
                 {
                     throw new Exception($"Couldn't find a property called: {destinationPropertyName}");
                 }
-                else
-                {
-                    DestinationProperty = prop;
-                }
+
+                DestinationProperty = prop;
             }
 
             /// <summary>
