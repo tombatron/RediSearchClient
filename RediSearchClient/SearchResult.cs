@@ -65,10 +65,9 @@ namespace RediSearchClient
         /// <summary>
         /// Convenience method for mapping search results to a collection of local types.
         /// </summary>
-        /// <param name="inlineBuilder">Optional builder for declaring a type mapping inline.</param>
         /// <typeparam name="TMapped">Destination type that we're mapping the collection of results to.</typeparam>
         /// <returns></returns>
-        public IEnumerable<TMapped> As<TMapped>(Action<ResultMapper<TMapped>.MapperBuilder> inlineBuilder = default) where TMapped : new() =>
-            ResultMapper<TMapped>.MapTo(this, inlineBuilder);
+        public IEnumerable<TMapped> As<TMapped>() where TMapped : new() =>
+            ResultMapper<TMapped>.MapTo(this);
     }
 }

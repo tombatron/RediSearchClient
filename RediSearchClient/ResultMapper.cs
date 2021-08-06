@@ -410,8 +410,6 @@ namespace RediSearchClient
             private static object ConvertRedisResultToNullableLongInteger(RedisResult result) => (long?)result;
 
             private static object ConvertRedisResultToNullableUnsignedLongInteger(RedisResult result) => (ulong?)result;
-            
-            
         }
 
         /// <summary>
@@ -467,19 +465,11 @@ namespace RediSearchClient
             }
         }
 
-        private static void RegisterMapper(Action<MapperBuilder> inlineBuilder)
+        private static void RegisterMapper()
         {
             if (!_mapperDefinitions.ContainsKey(typeof(TTarget)))
             {
-                if (inlineBuilder == default)
-                {
-                    SynthesizeMapFor();
-                }
-                else
-                {
-                    inlineBuilder(CreateMap());
-                }
-
+                SynthesizeMapFor();
             }
         }
 
@@ -487,11 +477,10 @@ namespace RediSearchClient
         /// Maps a SearchResult collection to a collection of... whatever you want.
         /// </summary>
         /// <param name="searchResult">The search result.</param>
-        /// <param name="inlineBuilder">Optional builder for declaring a type mapping inline.</param>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo(SearchResult searchResult, Action<MapperBuilder> inlineBuilder = default)
+        public static IEnumerable<TTarget> MapTo(SearchResult searchResult)
         {
-            RegisterMapper(inlineBuilder);
+            RegisterMapper();
 
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
@@ -506,12 +495,9 @@ namespace RediSearchClient
         /// Maps an AggregateResult collection to a collection of custom types. 
         /// </summary>
         /// <param name="aggregateResult">The aggregate result.</param>
-        /// <param name="inlineBuilder">Optional builder for declaring a type mapping inline.</param>
         /// <returns></returns>
-        public static IEnumerable<TTarget> MapTo(AggregateResult aggregateResult, Action<MapperBuilder> inlineBuilder = default)
+        public static IEnumerable<TTarget> MapTo(AggregateResult aggregateResult)
         {
-            RegisterMapper(inlineBuilder);
-            
             if (_mapperDefinitions.TryGetValue(typeof(TTarget), out var mapper))
             {
                 foreach (var ar in aggregateResult)
