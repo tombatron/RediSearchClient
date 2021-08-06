@@ -61,7 +61,7 @@ namespace RediSearchClient
             /// <param name="sourceField"></param>
             /// <param name="destinationPropertyName"></param>
             /// <param name="converter"></param>
-            public MapperDefinition(string sourceField, string destinationPropertyName, Func<RedisResult, object> converter)
+            private MapperDefinition(string sourceField, string destinationPropertyName, Func<RedisResult, object> converter)
             {
                 SourceField = sourceField;
                 Converter = converter;
@@ -91,7 +91,7 @@ namespace RediSearchClient
             }
 
             /// <summary>
-            /// Allows for the implict conversion between a (string, string, Func&lt;RedisResult, object&gt;) tuple to a "MapperDefinition".
+            /// Allows for the implicit conversion between a (string, string, Func&lt;RedisResult, object&gt;) tuple to a "MapperDefinition".
             /// </summary>
             /// <param name="source"></param>
             public static implicit operator MapperDefinition((string sourceField, string destinationPropertyName, Func<RedisResult, object> converter) source)
@@ -100,7 +100,7 @@ namespace RediSearchClient
             }
         }
 
-        internal class MapperDefinitionContainer
+        private class MapperDefinitionContainer
         {
             public List<MapperDefinition> Mappers { get; }
 
@@ -163,7 +163,7 @@ namespace RediSearchClient
             }
         }
 
-        internal static void AppendMap(string sourceField, PropertyInfo destinationProperty, Func<RedisResult, object> converter)
+        private static void AppendMap(string sourceField, PropertyInfo destinationProperty, Func<RedisResult, object> converter)
         {
             var mapperDefinition = new MapperDefinition(sourceField, destinationProperty, converter);
 
@@ -410,6 +410,8 @@ namespace RediSearchClient
             private static object ConvertRedisResultToNullableLongInteger(RedisResult result) => (long?)result;
 
             private static object ConvertRedisResultToNullableUnsignedLongInteger(RedisResult result) => (ulong?)result;
+            
+            
         }
 
         /// <summary>
