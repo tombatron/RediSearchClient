@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediSearchClient.Tests", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediSearchClient.IntegrationTests", "RediSearchClient.IntegrationTests\RediSearchClient.IntegrationTests.csproj", "{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project Documents", "Project Documents", "{29A83265-24B9-4D31-B82C-DF1F2B80C266}"
+ProjectSection(SolutionItems) = preProject
+	README.md = README.md
+	License = License
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

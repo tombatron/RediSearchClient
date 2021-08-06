@@ -1,6 +1,10 @@
 # RediSearchClient
 [![Build Status](https://github.com/tombatron/RedisSearchClient/actions/workflows/dotnet.yml/badge.svg)](https://github.com/tombatron/RedisSearchClient/actions/workflows/dotnet.yml)
 
+Special thanks to [JetBrains](https://jb.gg/OpenSource) for providing the project with an open source license for all of the JetBrains products!
+
+![](jetbrains.svg)
+
 ## Overview
 
 What you have here is a set of extensions for the [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) Redis client that allows for interacting with version 2.x of the RediSearch Redis module. 
@@ -217,42 +221,7 @@ var floridaZipcodes = result.Select(x =>
 
 #### Mapping the Result
 
-The `SearchResult` type contains a generic method called `As<TMapped>` which allows you to map a result from RediSearch to a custom type. Let's define a custom type to map the result of that query to:
-
-```csharp
-public class ZipCode
-{
-    public string ZipCode { get; set; }
-
-    public string City  {get; set; }
-
-    public string State { get; set; }
-
-    public double Latitude { get; set; }
-
-    public double Longitude { get; set; }
-
-    public int TimeZoneOffset { get; set; }
-
-    public bool DaylightSavingsFlag { get; set; }
-}
-```
-
-Next, we'll define a mapping for this custom type. 
-
-```csharp
-ResultMapper.CreateMapFor<ZipCode>(
-    ("ZipCode", "ZipCode", (r) => (string)r),
-    ("City", "City", (r) => (string)r),
-    ("State", "State", (r) => (string)r),
-    ("Coordinates", "Latitude", (r) => double.Parse(((string)r).Split(",")[1])),
-    ("Coordinates", "Longitude", (r) => double.Parse(((string)r).Split(",")[0])),
-    ("TimeZoneOffset", "TimeZoneOffset", (r) => (string)r),
-    ("DaylightSavingsFlag", "DaylightSavingsFlag", (r) => (string)r),
-);
-```
-
-In the above example I used a `(string, string, Func<RedisResult, object>)` tuple for convenience, that tuple is implicitly converted to a `MapperDefinition` that is used when actually converting the `RedisResult` to your custom type. **ALSO**, `ResultMapper.CreateMapFor` only needs to be called once, so I'd recommend defining your mappings during application startup.
+See [this](https://github.com/tombatron/RediSearchClient/wiki/ResultMapping) documentation for defining a type mapping.
 
 With the appropriate mapping defined you can now map the result like...
 
@@ -307,27 +276,7 @@ var cityZipCodes = result.Select(x => new
 
 #### Mapping the Result
 
-The `AggregateResult` type contains a generic method called `As<TMapped>` which allows you to map a result from RediSearch to a custom type. Let's define a custom type to map the result of that query to:
-
-```csharp
-public class CityCount
-{
-    public string City  {get; set; }
-
-    public int Count { get; set; }
-}
-```
-
-Next, we'll define a mapping for this custom type. 
-
-```csharp
-ResultMapper.CreateMapFor<CityCount>(
-    ("City", "City", (r) => (string)r),
-    ("Count", "Count", (r) => (int)r),
-);
-```
-
-In the above example I used a `(string, string, Func<RedisResult, object>)` tuple for convenience, that tuple is implicitly converted to a `MapperDefinition` that is used when actually converting the `RedisResult` to your custom type. **ALSO**, `ResultMapper.CreateMapFor` only needs to be called once, so I'd recommend defining your mappings during application startup.
+See [this](https://github.com/tombatron/RediSearchClient/wiki/ResultMapping) documentation for defining a type mapping.
 
 With the appropriate mapping defined you can now map the result like...
 
