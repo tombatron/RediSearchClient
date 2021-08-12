@@ -234,7 +234,24 @@ namespace RediSearchClient.Indexes
             return this;
         }
 
+        private Func<RediSearchJsonSchemaFieldBuilder, IRediSearchSchemaField>[] _jsonFields;
+        
+        /// <summary>
+        /// Allows for defining the schema of a search index for JSON documents.
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public RediSearchIndexBuilder WithJsonSchema(params Func<RediSearchJsonSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
+        {
+            _jsonFields = fields;
+
+            return this;
+        }
+
         private static readonly RediSearchSchemaFieldBuilder _fieldBuilder = new RediSearchSchemaFieldBuilder();
+
+        private static readonly RediSearchJsonSchemaFieldBuilder _jsonFieldBuilder =
+            new RediSearchJsonSchemaFieldBuilder();
 
         /// <summary>
         /// Builds the index definition. 
@@ -261,6 +278,8 @@ namespace RediSearchClient.Indexes
 
             // If there are no schema fields we should probably throw an exception eh?
             var schemaFields = _fields.Select(x => x(_fieldBuilder)).ToList();
+
+            var jsonSchemaFields = _jsonFields.Select(x => x(_jsonFieldBuilder)).ToList();
 
             argumentLength += schemaFields.Sum(x => x.FieldArguments.Length) + 1;
 

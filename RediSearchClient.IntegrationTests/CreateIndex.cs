@@ -10,7 +10,7 @@ namespace RediSearchClient.IntegrationTests
         [Fact]
         public void WillCreateASimpleIndex()
         {
-            var indexDefinition = GetComplexIndexDefinition();
+            var indexDefinition = GetIndexDefinition();
 
             _db.CreateIndex(_indexName, indexDefinition);
 
@@ -22,7 +22,7 @@ namespace RediSearchClient.IntegrationTests
         [Fact]
         public async Task WillCreateASimpleIndexAsync()
         {
-            var indexDefinition = GetComplexIndexDefinition();
+            var indexDefinition = GetIndexDefinition();
 
             var indexName = $"{_indexName}_async";
             
@@ -33,7 +33,7 @@ namespace RediSearchClient.IntegrationTests
             Assert.Contains(indexName, indexes);
         }
 
-        private RediSearchIndexDefinition GetComplexIndexDefinition()
+        private RediSearchIndexDefinition GetIndexDefinition()
         {
             return RediSearchIndex
                 .On(RediSearchStructure.HASH)
@@ -50,6 +50,16 @@ namespace RediSearchClient.IntegrationTests
                     x => x.Geo("Coordinates"),
                     x => x.Numeric("TimeZoneOffset"),
                     x => x.Numeric("DaylightSavingsFlag")
+                )
+                .Build();
+        }
+
+        private RediSearchIndexDefinition GetJsonIndexDefinition()
+        {
+            return RediSearchIndex
+                .On(RediSearchStructure.JSON)
+                .ForKeysWithPrefix("laureate::")
+                .WithJsonSchema(
                 )
                 .Build();
         }

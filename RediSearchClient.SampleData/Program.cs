@@ -4,10 +4,14 @@ using RediSearchClient.SampleData;
 using StackExchange.Redis;
 using System;
 using System.Linq;
+using NReJSON;
 
 using var muxr = ConnectionMultiplexer.Connect("localhost");
 var db = muxr.GetDatabase();
 
+NReJSONSerializer.SerializerProxy = new SerializerProxy();
+
+/*
 Console.WriteLine("Loading movie data into Redis.");
 
 if (db.KeyExists("movie::1"))
@@ -123,4 +127,12 @@ if (db.SuggestionsSize("cities") == 0)
 else
 {
     Console.WriteLine("`cities` auto suggestion dictionary already exists.");
+}
+*/
+
+Console.WriteLine($"Loading Nobel Laureate (JSON) data into Redis.");
+
+foreach (var p in NobelLaureate.People)
+{
+    db.JsonSet($"laureate::{p.Id}", p);
 }
