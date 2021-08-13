@@ -25,7 +25,7 @@ namespace RediSearchClient.IntegrationTests
             var indexDefinition = GetIndexDefinition();
 
             var indexName = $"{_indexName}_async";
-            
+
             await _db.CreateIndexAsync(indexName, indexDefinition);
 
             var indexes = await _db.ListIndexesAsync();
@@ -60,6 +60,11 @@ namespace RediSearchClient.IntegrationTests
                 .On(RediSearchStructure.JSON)
                 .ForKeysWithPrefix("laureate::")
                 .WithJsonSchema(
+                    x => x.Numeric("$.Id", "Id"),
+                    x => x.Text("$.FirstName", "FirstName", sortable: true),
+                    x => x.Text("$.LastName", "LastName", sortable: true),
+                    x => x.Numeric("$.BornSeconds", "Born", sortable: true),
+                    x => x.Numeric("$.DiedSeconds", "Died", sortable: true)
                 )
                 .Build();
         }
