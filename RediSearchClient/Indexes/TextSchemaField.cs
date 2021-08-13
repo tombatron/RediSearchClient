@@ -73,25 +73,25 @@ namespace RediSearchClient.Indexes
             return _fieldArguments;
         }
 
-        private const string DoubleMetaphoneForEnglish = "dm:en";
-        private const string DoubleMetaphoneForFrench = "dm:fr";
-        private const string DoubleMetaphoneForPortuguese = "dm:pt";
-        private const string DoubleMetaphoneForSpanish = "dm:es";
+        private const string DOUBLE_METAPHONE_FOR_ENGLISH = "dm:en";
+        private const string DOUBLE_METAPHONE_FOR_FRENCH = "dm:fr";
+        private const string DOUBLE_METAPHONE_FOR_PORTUGUESE = "dm:pt";
+        private const string DOUBLE_METAPHONE_FOR_SPANISH = "dm:es";
 
         private static string GetMatcherForLanguage(Language language)
         {
             switch (language)
             {
                 case Language.English:
-                    return DoubleMetaphoneForEnglish;
+                    return DOUBLE_METAPHONE_FOR_ENGLISH;
                 case Language.French:
-                    return DoubleMetaphoneForFrench;
+                    return DOUBLE_METAPHONE_FOR_FRENCH;
                 case Language.Portuguese:
-                    return DoubleMetaphoneForPortuguese;
+                    return DOUBLE_METAPHONE_FOR_PORTUGUESE;
                 case Language.Spanish:
-                    return DoubleMetaphoneForSpanish;
+                    return DOUBLE_METAPHONE_FOR_SPANISH;
                 default:
-                    return DoubleMetaphoneForEnglish;
+                    return DOUBLE_METAPHONE_FOR_ENGLISH;
             }
         }
     }
