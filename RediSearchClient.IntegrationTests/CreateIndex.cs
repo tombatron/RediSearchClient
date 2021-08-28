@@ -38,7 +38,7 @@ namespace RediSearchClient.IntegrationTests
         {
             var indexDefinition = GetJsonIndexDefinition();
 
-            var indexName = $"nobel_laureates_async";
+            var indexName = $"nobel";
 
             await _db.CreateIndexAsync(indexName, indexDefinition);
 
@@ -72,11 +72,11 @@ namespace RediSearchClient.IntegrationTests
         {
             return RediSearchIndex
                 .On(RediSearchStructure.JSON)
-                .ForKeysWithPrefix("laureate::*")
+                .ForKeysWithPrefix("laureate::")
                 .WithJsonSchema(
-                    x => x.Numeric("$.Id", "Id"),
+                    x => x.Text("$.Id", "Id"),
                     x => x.Text("$.FirstName", "FirstName", sortable: true),
-                    x => x.Text("$.LastName", "LastName", sortable: true),
+                    x => x.Text("$.Surname", "LastName", sortable: true),
                     x => x.Numeric("$.BornSeconds", "Born", sortable: true),
                     x => x.Numeric("$.DiedSeconds", "Died", sortable: true)
                 )
