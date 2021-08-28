@@ -8,7 +8,7 @@ namespace RediSearchClient.IntegrationTests
     public class CreateIndex : BaseIntegrationTest
     {
         [Fact]
-        public void WillCreateASimpleIndex()
+        public void WillCreateAHashIndex()
         {
             var indexDefinition = GetIndexDefinition();
 
@@ -20,11 +20,25 @@ namespace RediSearchClient.IntegrationTests
         }
 
         [Fact]
-        public async Task WillCreateASimpleIndexAsync()
+        public async Task WillCreateAHashIndexAsync()
         {
             var indexDefinition = GetIndexDefinition();
 
             var indexName = $"{_indexName}_async";
+
+            await _db.CreateIndexAsync(indexName, indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+
+        [Fact]
+        public async Task WillCreateAJsonIndex()
+        {
+            var indexDefinition = GetJsonIndexDefinition();
+
+            var indexName = $"nobel_laureates_async";
 
             await _db.CreateIndexAsync(indexName, indexDefinition);
 
@@ -58,7 +72,7 @@ namespace RediSearchClient.IntegrationTests
         {
             return RediSearchIndex
                 .On(RediSearchStructure.JSON)
-                .ForKeysWithPrefix("laureate::")
+                .ForKeysWithPrefix("laureate::*")
                 .WithJsonSchema(
                     x => x.Numeric("$.Id", "Id"),
                     x => x.Text("$.FirstName", "FirstName", sortable: true),

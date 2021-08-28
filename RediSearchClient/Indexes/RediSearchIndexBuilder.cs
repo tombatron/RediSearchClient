@@ -277,9 +277,16 @@ namespace RediSearchClient.Indexes
             argumentLength += _skipInitialScan ? 1 : 0; // [SKIPINITIALSCAN]
 
             // If there are no schema fields we should probably throw an exception eh?
-            var schemaFields = _fields.Select(x => x(_fieldBuilder)).ToList();
+            var hashSchemaFields = _fields?.Select(x => x(_fieldBuilder)).ToList();
 
-            var jsonSchemaFields = _jsonFields.Select(x => x(_jsonFieldBuilder)).ToList();
+            var jsonSchemaFields = _jsonFields?.Select(x => x(_jsonFieldBuilder)).ToList();
+
+            var schemaFields = hashSchemaFields ?? jsonSchemaFields;
+
+            if (schemaFields == default)
+            {
+                throw new Exception("It doesn't look like you've actually defined a schema.");
+            }
 
             argumentLength += schemaFields.Sum(x => x.FieldArguments.Length) + 1;
 
