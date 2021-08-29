@@ -37,7 +37,7 @@ else
 {
     db.CreateIndex("movies",
         RediSearchIndex
-            .On(RediSearchStructure.HASH)
+            .OnHash()
             .ForKeysWithPrefix("movie::")
             .WithSchema(
                 x => x.Text("Plot"),
@@ -92,7 +92,7 @@ else
 {
     db.CreateIndex("zips",
         RediSearchIndex
-            .On(RediSearchStructure.HASH)
+            .OnHash()
             .ForKeysWithPrefix("zip::")
             .WithSchema(
                 x => x.Text("ZipCode"),
