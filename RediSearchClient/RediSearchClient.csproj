@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/tombatron/RediSearchClient</RepositoryUrl>
     <PackageProjectUrl>https://github.com/tombatron/RediSearchClient</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageVersion>0.13.0</PackageVersion>
+    <PackageVersion>0.14.0</PackageVersion>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
