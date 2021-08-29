@@ -49,8 +49,6 @@ namespace RediSearchClient
                     yield return new AggregateResultCollection(recordFields);
                 }
             }
-
-            yield break;
         }
 
         /// <summary>
