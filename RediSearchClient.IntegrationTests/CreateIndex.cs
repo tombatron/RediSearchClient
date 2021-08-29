@@ -38,7 +38,21 @@ namespace RediSearchClient.IntegrationTests
         {
             var indexDefinition = GetJsonIndexDefinition();
 
-            var indexName = $"nobel";
+            var indexName = $"json_{_indexName}";
+
+            await _db.CreateIndexAsync(indexName, indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+        
+        [Fact]
+        public async Task WillCreateAJsonIndexAsync()
+        {
+            var indexDefinition = GetJsonIndexDefinition();
+
+            var indexName = $"json_{_indexName}_async";
 
             await _db.CreateIndexAsync(indexName, indexDefinition);
 
@@ -50,7 +64,7 @@ namespace RediSearchClient.IntegrationTests
         private RediSearchIndexDefinition GetIndexDefinition()
         {
             return RediSearchIndex
-                .On(RediSearchStructure.HASH)
+                .OnHash()
                 .ForKeysWithPrefix("zip::")
                 .UsingFilter("@State=='FL'")
                 .UsingLanguage("English")
@@ -71,9 +85,9 @@ namespace RediSearchClient.IntegrationTests
         private RediSearchIndexDefinition GetJsonIndexDefinition()
         {
             return RediSearchIndex
-                .On(RediSearchStructure.JSON)
+                .OnJson()
                 .ForKeysWithPrefix("laureate::")
-                .WithJsonSchema(
+                .WithSchema(
                     x => x.Text("$.Id", "Id"),
                     x => x.Text("$.FirstName", "FirstName", sortable: true),
                     x => x.Text("$.Surname", "LastName", sortable: true),
