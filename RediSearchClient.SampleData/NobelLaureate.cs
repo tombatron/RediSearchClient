@@ -34,11 +34,14 @@ namespace RediSearchClient.SampleData
 
         public sealed class Affiliation
         {
-            [JsonPropertyName("name")] public string Name { get; set; }
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
 
-            [JsonPropertyName("city")] public string City { get; set; }
+            [JsonPropertyName("city")]
+            public string City { get; set; }
 
-            [JsonPropertyName("country")] public string Country { get; set; }
+            [JsonPropertyName("country")]
+            public string Country { get; set; }
         }
 
         public sealed class Prize
@@ -53,7 +56,8 @@ namespace RediSearchClient.SampleData
 
             public string Motivation { get; set; }
 
-            [JsonPropertyName("affiliations")] public Affiliation[] Affiliations { get; set; }
+            [JsonPropertyName("affiliations")]
+            public Affiliation[] Affiliations { get; set; }
         }
 
         public sealed class Person
