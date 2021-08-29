@@ -11,7 +11,6 @@ var db = muxr.GetDatabase();
 
 NReJSONSerializer.SerializerProxy = new SerializerProxy();
 
-/*
 Console.WriteLine("Loading movie data into Redis.");
 
 if (db.KeyExists("movie::1"))
@@ -40,7 +39,6 @@ else
         RediSearchIndex
             .On(RediSearchStructure.HASH)
             .ForKeysWithPrefix("movie::")
-
             .WithSchema(
                 x => x.Text("Plot"),
                 x => x.Tag("Type"),
@@ -62,7 +60,6 @@ else
                 x => x.Numeric("Year"),
                 x => x.Text("Actors")
             )
-
             .Build()
     );
 
@@ -97,7 +94,6 @@ else
         RediSearchIndex
             .On(RediSearchStructure.HASH)
             .ForKeysWithPrefix("zip::")
-
             .WithSchema(
                 x => x.Text("ZipCode"),
                 x => x.Text("City"),
@@ -106,7 +102,6 @@ else
                 x => x.Numeric("TimeZoneOffset"),
                 x => x.Numeric("DaylightSavingsFlag")
             )
-
             .Build()
     );
 
@@ -117,9 +112,9 @@ Console.WriteLine("Creating auto suggest dictionaries.");
 
 if (db.SuggestionsSize("cities") == 0)
 {
-    foreach(var (_, hash) in ZipCodeData.ZipCodes)
+    foreach (var (_, hash) in ZipCodeData.ZipCodes)
     {
-        db.AddSuggestion("cities", (string)hash[1].Value, 1, false, (String)hash[3].Value);
+        db.AddSuggestion("cities", (string) hash[1].Value, 1, false, (String) hash[3].Value);
     }
 
     Console.WriteLine("`cities` auto suggest dictionary created.");
@@ -128,11 +123,51 @@ else
 {
     Console.WriteLine("`cities` auto suggestion dictionary already exists.");
 }
-*/
 
 Console.WriteLine($"Loading Nobel Laureate (JSON) data into Redis.");
 
-foreach (var p in NobelLaureate.People)
+if (db.KeyExists("laureate::459"))
 {
-    db.JsonSet($"laureate::{p.Id}", p);
+    Console.WriteLine("Looks like we've already got Nobel laureate data loaded.");
 }
+else
+{
+    foreach (var p in NobelLaureate.People)
+    {
+        db.JsonSet($"laureate::{p.Id}", p);
+    }
+}
+
+Console.WriteLine("Nobel laureate data loaded.");
+
+if (db.ListIndexes().Any(x => x == "nobel"))
+{
+    db.DropIndex("nobel");
+}
+
+db.CreateIndex("nobel",
+    RediSearchIndex
+        .OnJson()
+        .ForKeysWithPrefix("laureate::")
+        .WithSchema(
+            x => x.Text("$.Id", "Id")
+            , x => x.Text("$.FirstName", "FirstName", sortable: true)
+            , x => x.Text("$.Surname", "LastName", sortable: true)
+            , x => x.Numeric("$.BornSeconds", "Born", sortable: true)
+            , x => x.Numeric("$.DiedSeconds", "Died", sortable: true)
+            , x => x.Text("$.BornCountry", "BornCountry")
+            , x => x.Text("$.BornCountyCode", "BornCountryCode")
+            , x => x.Text("$.DiedCountry", "DiedCountry")
+            , x => x.Text("$.DiedCountryCode", "DiedCountryCode")
+            , x => x.Text("$.DiedCity", "DiedCity")
+            , x => x.Text("$.Gender", "Gender")
+            , x => x.Numeric("$.Prizes[*].YearInt", "YearAwarded")
+            , x => x.Text("$.Prizes[*].Category", "AwardCategory")
+            , x => x.Text("$.Prizes[*].Share", "AwardSharedWith")
+            , x => x.Text("$.Prizes[*].Motivation", "Motivation")
+            , x => x.Text("$.Prizes[*].affiliations[*].name", "InstitutionName")
+            , x => x.Text("$.Prizes[*].affiliations[*].city", "InstitutionCity")
+            , x => x.Text("$.Prizes[*].affiliations[*].country", "InstitutionCountry")
+        )
+        .Build()
+);
