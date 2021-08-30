@@ -84,9 +84,54 @@ namespace RediSearchClient
         /// <param name="db"></param>
         /// <param name="indexName"></param>
         /// <param name="fields"></param>
-        public static void AlterSchema(this IDatabase db, string indexName, params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
+        [Obsolete(
+            "This method has been deprecated in favor of the `AlterHashSchema` method. For altering a JSON based schema use `AlterJsonSchema`.")]
+        public static void AlterSchema(this IDatabase db, string indexName,
+            params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterHashSchema(db, indexName, fields);
+
+        /// <summary>
+        /// **FOR HASH BASED INDEXES**
+        /// 
+        /// `FT.ALTER {index} SCHEMA ADD {field} {options} ...`
+        /// 
+        /// Adds a new field to the index.
+        ///
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing 
+        /// and reindexing of existing documents.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="fields"></param>
+        public static void AlterHashSchema(this IDatabase db, string indexName,
+            params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterSchema<RediSearchSchemaFieldBuilder>(db, indexName, fields);
+
+        /// <summary>
+        /// **FOR JSON BASED INDEXES**
+        /// 
+        /// `FT.ALTER {index} SCHEMA ADD {field} {options} ...`
+        /// 
+        /// Adds a new field to the index.
+        ///
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing 
+        /// and reindexing of existing documents.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="fields"></param>
+        public static void AlterJsonSchema(this IDatabase db, string indexName,
+            params Func<RediSearchJsonSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterSchema(db, indexName, fields);
+
+        private static void AlterSchema<TBuilderType>(IDatabase db, string indexName,
+            params Func<TBuilderType, IRediSearchSchemaField>[] fields) where TBuilderType : new()
         {
-            var builder = new RediSearchSchemaFieldBuilder();
+            var builder = new TBuilderType();
 
             var builtFields = fields.Select(x => x(builder)).SelectMany(x => x.FieldArguments).ToArray();
 
@@ -101,6 +146,7 @@ namespace RediSearchClient
 
             db.Execute(RediSearchCommand.ALTER, commandArguments.ToArray());
         }
+
 
         /// <summary>
         /// `FT.DROPINDEX`
@@ -209,7 +255,7 @@ namespace RediSearchClient
         {
             var result = db.Execute(RediSearchCommand.TAGVALS, index, fieldName);
 
-            return ((RedisResult[])result).Select(x => x.ToString()).ToArray();
+            return ((RedisResult[]) result).Select(x => x.ToString()).ToArray();
         }
 
         /// <summary>
@@ -227,7 +273,8 @@ namespace RediSearchClient
         /// <param name="increment">If set, we increment the existing entry of the suggestion by the given score, instead of replacing the score. This is useful for updating the dictionary based on user queries in real time.</param>
         /// <param name="payload">If set, we save an extra payload with the suggestion, that can be fetched by adding the WITHPAYLOADS argument to FT.SUGGET.</param>
         /// <returns>The current size of the suggestion dictionary.</returns>
-        public static int AddSuggestion(this IDatabase db, string key, string value, double score, bool increment = false, string payload = default)
+        public static int AddSuggestion(this IDatabase db, string key, string value, double score,
+            bool increment = false, string payload = default)
         {
             var parameters = new List<object>(5)
             {
@@ -249,7 +296,7 @@ namespace RediSearchClient
 
             var result = db.Execute(RediSearchCommand.SUGADD, parameters.ToArray());
 
-            return (int)result;
+            return (int) result;
         }
 
         /// <summary>
@@ -267,7 +314,8 @@ namespace RediSearchClient
         /// <param name="withPayloads">If set, we return optional payloads saved along with the suggestions. If no payload is present for an entry, we return a Null Reply.</param>
         /// <param name="max">If set, we limit the results to a maximum of num (default: 5).</param>
         /// <returns>A list of the top suggestions matching the prefix, optionally with score after each entry.</returns>
-        public static SuggestionResult[] GetSuggestions(this IDatabase db, string key, string prefix, bool fuzzy = false, bool withScores = false, bool withPayloads = false, int max = 5)
+        public static SuggestionResult[] GetSuggestions(this IDatabase db, string key, string prefix,
+            bool fuzzy = false, bool withScores = false, bool withPayloads = false, int max = 5)
         {
             var parameters = new List<object>(7)
             {
@@ -316,7 +364,7 @@ namespace RediSearchClient
         {
             var result = db.Execute(RediSearchCommand.SUGDEL, key, value);
 
-            return (int)result == 1;
+            return (int) result == 1;
         }
 
         /// <summary>
@@ -331,7 +379,7 @@ namespace RediSearchClient
         /// <returns>The current size of the suggestion dictionary.</returns>
         public static int SuggestionsSize(this IDatabase db, string key)
         {
-            return (int)db.Execute(RediSearchCommand.SUGLEN, key);
+            return (int) db.Execute(RediSearchCommand.SUGLEN, key);
         }
 
         /// <summary>
@@ -348,7 +396,8 @@ namespace RediSearchClient
         /// <param name="indexName"></param>
         /// <param name="synonymGroupId"></param>
         /// <param name="terms"></param>
-        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, params string[] terms) =>
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId,
+            params string[] terms) =>
             db.UpdateSynonyms(indexName, synonymGroupId, false, terms);
 
         /// <summary>
@@ -366,7 +415,8 @@ namespace RediSearchClient
         /// <param name="synonymGroupId"></param>
         /// <param name="skipInitialScan">If set, we do not scan and index.</param>
         /// <param name="terms"></param>
-        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId, bool skipInitialScan, params string[] terms)
+        public static void UpdateSynonyms(this IDatabase db, string indexName, string synonymGroupId,
+            bool skipInitialScan, params string[] terms)
         {
             var parameters = new List<object>()
             {
@@ -415,7 +465,8 @@ namespace RediSearchClient
         /// <param name="query">The search query.</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query, params SpellCheckTerm[] terms) =>
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query,
+            params SpellCheckTerm[] terms) =>
             SpellCheck(db, indexName, query, 4, terms);
 
         /// <summary>
@@ -433,7 +484,8 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query, int distance = 1, params SpellCheckTerm[] terms)
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db, string indexName, string query,
+            int distance = 1, params SpellCheckTerm[] terms)
         {
             var parameters = new List<object>(2)
             {
@@ -475,8 +527,9 @@ namespace RediSearchClient
         /// <param name="queryDefinition">The search query.</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResultCollection SpellCheck(this IDatabase db, RediSearchQueryDefinition queryDefinition, params SpellCheckTerm[] terms) =>
-            SpellCheck(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], 4, terms);
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db,
+            RediSearchQueryDefinition queryDefinition, params SpellCheckTerm[] terms) =>
+            SpellCheck(db, (string) queryDefinition.Fields[0], (string) queryDefinition.Fields[1], 4, terms);
 
         /// <summary>
         /// `FT.SPELLCHECK`
@@ -492,9 +545,11 @@ namespace RediSearchClient
         /// <param name="distance">The maximal Levenshtein distance for spelling suggestions (default: 1, max: 4).</param>
         /// <param name="terms">Specifies an inclusion or exclusion custom dictionary named.</param>
         /// <returns></returns>
-        public static SpellCheckResultCollection SpellCheck(this IDatabase db, RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
+        public static SpellCheckResultCollection SpellCheck(this IDatabase db,
+            RediSearchQueryDefinition queryDefinition, int distance = 1, params SpellCheckTerm[] terms)
         {
-            return SpellCheck(db, (string)queryDefinition.Fields[0], (string)queryDefinition.Fields[1], distance, terms);
+            return SpellCheck(db, (string) queryDefinition.Fields[0], (string) queryDefinition.Fields[1], distance,
+                terms);
         }
 
         /// <summary>
@@ -519,7 +574,7 @@ namespace RediSearchClient
 
             var result = db.Execute(RediSearchCommand.DICTADD, parameters.ToArray());
 
-            return (int)result;
+            return (int) result;
         }
 
         /// <summary>
@@ -544,7 +599,7 @@ namespace RediSearchClient
 
             var result = db.Execute(RediSearchCommand.DICTDEL, parameters.ToArray());
 
-            return (int)result;
+            return (int) result;
         }
 
         /// <summary>
@@ -561,7 +616,7 @@ namespace RediSearchClient
         {
             var result = db.Execute(RediSearchCommand.DICTDUMP, dictionaryName);
 
-            return (string[])result;
+            return (string[]) result;
         }
 
         /// <summary>
@@ -578,7 +633,7 @@ namespace RediSearchClient
         {
             var result = db.Execute(RediSearchCommand.INFO, indexName);
 
-            return InfoResult.Create((RedisResult[])result);
+            return InfoResult.Create((RedisResult[]) result);
         }
 
         /// <summary>
@@ -592,7 +647,7 @@ namespace RediSearchClient
         /// <returns>An array with index names.</returns>
         public static string[] ListIndexes(this IDatabase db)
         {
-            var result = (RedisResult[])db.Execute(RediSearchCommand.LIST);
+            var result = (RedisResult[]) db.Execute(RediSearchCommand.LIST);
 
             return result.Select(x => x.ToString()).ToArray();
         }
@@ -613,14 +668,15 @@ namespace RediSearchClient
             {
                 var result = db.Execute(RediSearchCommand.CONFIG, "SET", option, value);
 
-                if ((string)result != "OK")
+                if ((string) result != "OK")
                 {
                     throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.");
                 }
             }
             catch (RedisServerException redisServerException)
             {
-                throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.", redisServerException);
+                throw new RediSearchConfigurationException($"Looks like `{option}` with `{value}` wasn't valid.",
+                    redisServerException);
             }
         }
 
@@ -636,15 +692,15 @@ namespace RediSearchClient
         /// <returns></returns>
         public static Tuple<string, string>[] GetConfiguration(this IDatabase db, string option)
         {
-            var result = (RedisResult[])db.Execute(RediSearchCommand.CONFIG, "GET", option);
+            var result = (RedisResult[]) db.Execute(RediSearchCommand.CONFIG, "GET", option);
 
             return result.Select(x =>
-            {
-                var pair = (RedisResult[])x;
+                {
+                    var pair = (RedisResult[]) x;
 
-                return new Tuple<string, string>((string)pair[0], (string)pair[1]);
-            })
-            .ToArray();
+                    return new Tuple<string, string>((string) pair[0], (string) pair[1]);
+                })
+                .ToArray();
         }
     }
 }
