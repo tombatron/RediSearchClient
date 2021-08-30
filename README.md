@@ -67,7 +67,7 @@ Creating an index is done by using the `RediSearchIndex` builder to create an in
 
 ```csharp
 var indexDefinition = RediSearchIndex
-    .On(RediSearchStructure.HASH)
+    .OnHash()
     .ForKeysWithPrefix("zip::")
     .WithSchema(
         x => x.Text("ZipCode", sortable: false, nostem: true),
