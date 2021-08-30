@@ -609,7 +609,6 @@ namespace RediSearchClient
         /// <param name="value"></param>
         public static void SetConfiguration(this IDatabase db, string option, string value)
         {
-
             try
             {
                 var result = db.Execute(RediSearchCommand.CONFIG, "SET", option, value);
