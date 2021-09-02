@@ -9,7 +9,7 @@ Special thanks to [JetBrains](https://jb.gg/OpenSource) for providing the projec
 
 What you have here is a set of extensions for the [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) Redis client that allows for interacting with version 2.x of the RediSearch Redis module. 
 
-Support for RedisJson "JSON" datatypes is probably the most exciting forthcoming feature of RediSearch, and once that support goes mainstream and is documented, expect this package to support that as well. 
+Support for the RedisJson "JSON" data type is in place for those of you running RediSearch 2.2+ with RedisJson 2.0+.
 
 ### What about NRediSearch?
 
@@ -65,6 +65,8 @@ Where appropriate the following examples will use the sample data and indexes th
 
 Creating an index is done by using the `RediSearchIndex` builder to create an index definitions and then invoking the `CreateIndex` or `CreateIndexAsync` extension method. 
 
+The following is an example of creating a search index based on the "hash" data type. 
+
 ```csharp
 var indexDefinition = RediSearchIndex
     .OnHash()
@@ -80,6 +82,34 @@ var indexDefinition = RediSearchIndex
     .Build();
 
 await _db.CreateIndexAsync("zipcodes", indexDefinition);
+```
+If your deployment of RediSearch supports JSON based indexes you can define one by specifying the `.OnJson` builder method when initiating the remainder of the builder. The following example is pulled from the sample data project and demonstrates how to define a JSON based index.
+
+```csharp
+var indexDefintion = RediSearchIndex
+      .OnJson()
+      .ForKeysWithPrefix("laureate::")
+      .WithSchema(
+          x => x.Text("$.Id", "Id"),
+          x => x.Text("$.FirstName", "FirstName", sortable: true),
+          x => x.Text("$.Surname", "LastName", sortable: true),
+          x => x.Numeric("$.BornSeconds", "Born", sortable: true),
+          x => x.Numeric("$.DiedSeconds", "Died", sortable: true),
+          x => x.Text("$.BornCountry", "BornCountry"),
+          x => x.Text("$.BornCountyCode", "BornCountryCode"),
+          x => x.Text("$.DiedCountry", "DiedCountry"),
+          x => x.Text("$.DiedCountryCode", "DiedCountryCode"),
+          x => x.Text("$.DiedCity", "DiedCity"),
+          x => x.Text("$.Gender", "Gender"),
+          x => x.Numeric("$.Prizes[*].YearInt", "YearAwarded"),
+          x => x.Text("$.Prizes[*].Category", "AwardCategory"),
+          x => x.Text("$.Prizes[*].Share", "AwardSharedWith"),
+          x => x.Text("$.Prizes[*].Motivation", "Motivation"),
+          x => x.Text("$.Prizes[*].affiliations[*].name", "InstitutionName"),
+          x => x.Text("$.Prizes[*].affiliations[*].city", "InstitutionCity"),
+          x => x.Text("$.Prizes[*].affiliations[*].country", "InstitutionCountry")
+      )
+      .Build();
 ```
 
 #### Dates and Times
@@ -124,14 +154,25 @@ var movies = result.Select(x =>
 
 ### Updating Index Schema
 
-You can utilize the `AlterSchema` or `AlterSchemaAsync` to expand the schema of an existing index. The method takes an index name and leverages the same schema builder that is used when creating an index. 
+Depending on how your index is defined (JSON or Hash) you can use the `AlterHashSchema(Async)` or `AlterJsonSchema(Async)` methods to expand the index's schema definition.
 
-Let's take a look at an example where I'm adding a TEXT field and a GEO field to an existing index.
+Previously we had the method `AlterSchema(Async` but I decided to deprecate that in favor of the more specific methods. The reason for separate methods is each type of index uses a different kind of field builder. 
+
+Let's take a look at an example where I'm adding a TEXT field and a GEO field to an existing hash based index.
 
 ```csharp
-_db.AlterSchemaAsync("existing_index", 
+await _db.AlterHashSchemaAsync("existing_index", 
     fb => fb.Text("NewTextField", noindex: true), 
     fb => fb.Numeric("NewNumericField", sortable: true)
+);
+```
+
+The following is an example of using `AlterJsonSchemaAsync`...
+
+```csharp
+await _db.AlterJsonSchemaAsync("existing_json_index",
+  fb => fb.Text("$.newTextField, "NewTextField", noindex: true),
+  fb => fb.Numeric("$.newNumericField", sortable: true)
 );
 ```
 
