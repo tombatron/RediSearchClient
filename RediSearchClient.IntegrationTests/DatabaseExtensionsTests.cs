@@ -16,9 +16,9 @@ namespace RediSearchClient.IntegrationTests
         public class AlterSchemaWill : BaseIntegrationTest
         {
             [Fact]
-            public void AlterExistingSchema()
+            public void AlterExistingHashSchema()
             {
-                var indexDefinition = CreateSampleIndex();
+                var indexDefinition = CreateSampleHashIndex();
 
                 _db.CreateIndex(_indexName, indexDefinition);
 
@@ -29,7 +29,7 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Single(fields);
                 Assert.Contains("field_one", fields);
 
-                _db.AlterSchema(_indexName, f => f.Text("field_two"));
+                _db.AlterHashSchema(_indexName, f => f.Text("field_two"));
 
                 indexInfo = _db.Execute("FT.INFO", _indexName);
 
@@ -40,9 +40,34 @@ namespace RediSearchClient.IntegrationTests
             }
 
             [Fact]
-            public async Task AlterExistingSchemaAsync()
+            public void AlterExistingJsonSchema()
             {
-                var indexDefinition = CreateSampleIndex();
+                var indexDefinition = CreateSampleJsonIndex();
+                var indexName = $"{_indexName}_json";
+
+                _db.CreateIndex(indexName, indexDefinition);
+
+                var indexInfo = _db.Execute("FT.INFO", indexName);
+
+                var fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Single(fields);
+                Assert.Contains("FieldOne", fields);
+
+                _db.AlterJsonSchema(indexName, f => f.Text("$.fieldTwo", "FieldTwo"));
+
+                indexInfo = _db.Execute("FT.INFO", indexName);
+
+                fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Equal(2, fields.Count);
+                Assert.Contains("FieldTwo", fields);
+            }
+
+            [Fact]
+            public async Task AlterExistingHashSchemaAsync()
+            {
+                var indexDefinition = CreateSampleHashIndex();
                 var indexName = $"{_indexName}_async";
 
                 await _db.CreateIndexAsync(indexName, indexDefinition);
@@ -54,7 +79,32 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Single(fields);
                 Assert.Contains("field_one", fields);
 
-                await _db.AlterSchemaAsync(indexName, f => f.Text("field_two"));
+                await _db.AlterHashSchemaAsync(indexName, f => f.Text("field_two"));
+
+                indexInfo = await _db.ExecuteAsync("FT.INFO", indexName);
+
+                fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Equal(2, fields.Count);
+                Assert.Contains("field_two", fields);
+            }
+            
+            [Fact]
+            public async Task AlterExistingJsonSchemaAsync()
+            {
+                var indexDefinition = CreateSampleHashIndex();
+                var indexName = $"{_indexName}_json_async";
+
+                await _db.CreateIndexAsync(indexName, indexDefinition);
+
+                var indexInfo = await _db.ExecuteAsync("FT.INFO", indexName);
+
+                var fields = GetSchemaFields(indexInfo).ToList();
+
+                Assert.Single(fields);
+                Assert.Contains("field_one", fields);
+
+                await _db.AlterJsonSchemaAsync(indexName, f => f.Text("$.field_two", "field_two"));
 
                 indexInfo = await _db.ExecuteAsync("FT.INFO", indexName);
 
@@ -64,12 +114,21 @@ namespace RediSearchClient.IntegrationTests
                 Assert.Contains("field_two", fields);
             }
 
-            private RediSearchIndexDefinition CreateSampleIndex()
+            private RediSearchIndexDefinition CreateSampleHashIndex()
             {
                 return RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix("Bogus::")
                     .WithSchema(x => x.Text("field_one"))
+                    .Build();
+            }
+
+            private RediSearchIndexDefinition CreateSampleJsonIndex()
+            {
+                return RediSearchIndex
+                    .OnJson()
+                    .ForKeysWithPrefix("BogusJson::")
+                    .WithSchema(x => x.Text("$.fieldOne", "FieldOne"))
                     .Build();
             }
 
