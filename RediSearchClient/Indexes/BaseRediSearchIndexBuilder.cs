@@ -226,7 +226,8 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public BaseRediSearchIndexBuilder<TFieldBuilder> WithSchema(params Func<TFieldBuilder, IRediSearchSchemaField>[] fields)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> WithSchema(
+            params Func<TFieldBuilder, IRediSearchSchemaField>[] fields)
         {
             _fields = fields;
 
@@ -378,9 +379,14 @@ namespace RediSearchClient.Indexes
                 result[++currentArgumentIndex] = field;
             }
 
+            // ReSharper disable once HeapView.ObjectAllocation.Evident
             return new RediSearchIndexDefinition(result);
         }
 
-         protected abstract string ResolveStructure();
+        /// <summary>
+        /// This method returns a string representation of the kind of data structure that the index is being applied to.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract string ResolveStructure();
     }
 }
