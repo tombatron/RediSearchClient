@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using StackExchange.Redis;
@@ -49,8 +48,6 @@ namespace RediSearchClient
                     yield return new AggregateResultCollection(recordFields);
                 }
             }
-
-            yield break;
         }
 
         /// <summary>

@@ -7,12 +7,11 @@ namespace RediSearchClient.Indexes
     /// <summary>
     /// This is the builder wherein a majority of an index is defined.
     /// </summary>
-    public sealed class RediSearchIndexBuilder
+    public abstract class BaseRediSearchIndexBuilder<TFieldBuilder> where TFieldBuilder : new()
     {
-        private readonly RediSearchStructure _structure;
-
-        internal RediSearchIndexBuilder(RediSearchStructure structure) =>
-            _structure = structure;
+        internal BaseRediSearchIndexBuilder()
+        {
+        }
 
         private List<string> _prefixes;
 
@@ -21,7 +20,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="prefix">Key pattern for which items to index.</param>
         /// <returns></returns>
-        public RediSearchIndexBuilder ForKeysWithPrefix(string prefix)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> ForKeysWithPrefix(string prefix)
         {
             if (_prefixes == null)
             {
@@ -40,7 +39,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder UsingFilter(string filter)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> UsingFilter(string filter)
         {
             _filter = filter;
 
@@ -54,7 +53,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="language"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder UsingLanguage(string language)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> UsingLanguage(string language)
         {
             _language = language;
 
@@ -68,7 +67,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="languageField"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder UsingLanguageField(string languageField)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> UsingLanguageField(string languageField)
         {
             _languageField = languageField;
 
@@ -82,7 +81,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="score"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder SetScore(double score)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> SetScore(double score)
         {
             _score = score;
 
@@ -96,7 +95,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="scoreField"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder SetScoreField(string scoreField)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> SetScoreField(string scoreField)
         {
             _scoreField = scoreField;
 
@@ -110,7 +109,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="payloadField"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder SetPayloadField(string payloadField)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> SetPayloadField(string payloadField)
         {
             _payloadField = payloadField;
 
@@ -126,7 +125,7 @@ namespace RediSearchClient.Indexes
         /// `AlterSchema` or `AlterSchemaAsync`.
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder MaxTextFields()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> MaxTextFields()
         {
             _maxTextFields = true;
 
@@ -140,7 +139,7 @@ namespace RediSearchClient.Indexes
         /// exact searches or highlighting).
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder NoOffsets()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> NoOffsets()
         {
             _noOffsets = true;
 
@@ -154,7 +153,7 @@ namespace RediSearchClient.Indexes
         /// do not store corresponding byte offsets for term positions.
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder NoHighLights()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> NoHighLights()
         {
             _noHighLights = true;
 
@@ -172,7 +171,7 @@ namespace RediSearchClient.Indexes
         /// </summary>
         /// <param name="lifespanInSeconds"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder Temporary(int lifespanInSeconds)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> Temporary(int lifespanInSeconds)
         {
             _lifespanInSeconds = lifespanInSeconds;
 
@@ -186,7 +185,7 @@ namespace RediSearchClient.Indexes
         /// filtering by specific fields.
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder NoFields()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> NoFields()
         {
             _noFields = true;
 
@@ -200,7 +199,7 @@ namespace RediSearchClient.Indexes
         /// but does not allow sorting based on the frequencies of a given term within the document.
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder NoFrequencies()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> NoFrequencies()
         {
             _noFrequencies = true;
 
@@ -213,28 +212,29 @@ namespace RediSearchClient.Indexes
         /// If set, we do not scan and index.
         /// </summary>
         /// <returns></returns>
-        public RediSearchIndexBuilder SkipInitialScan()
+        public BaseRediSearchIndexBuilder<TFieldBuilder> SkipInitialScan()
         {
             _skipInitialScan = true;
 
             return this;
         }
 
-        private Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] _fields;
+        private Func<TFieldBuilder, IRediSearchSchemaField>[] _fields;
 
         /// <summary>
         /// Allows for defining the schema of the search index. 
         /// </summary>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public RediSearchIndexBuilder WithSchema(params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
+        public BaseRediSearchIndexBuilder<TFieldBuilder> WithSchema(
+            params Func<TFieldBuilder, IRediSearchSchemaField>[] fields)
         {
             _fields = fields;
 
             return this;
         }
 
-        private static readonly RediSearchSchemaFieldBuilder _fieldBuilder = new RediSearchSchemaFieldBuilder();
+        private static readonly TFieldBuilder _fieldBuilder = new TFieldBuilder();
 
         /// <summary>
         /// Builds the index definition. 
@@ -260,7 +260,12 @@ namespace RediSearchClient.Indexes
             argumentLength += _skipInitialScan ? 1 : 0; // [SKIPINITIALSCAN]
 
             // If there are no schema fields we should probably throw an exception eh?
-            var schemaFields = _fields.Select(x => x(_fieldBuilder)).ToList();
+            var schemaFields = _fields?.Select(x => x(_fieldBuilder)).ToList();
+
+            if (schemaFields == default)
+            {
+                throw new Exception("It doesn't look like you've actually defined a schema.");
+            }
 
             argumentLength += schemaFields.Sum(x => x.FieldArguments.Length) + 1;
 
@@ -270,7 +275,7 @@ namespace RediSearchClient.Indexes
 
             // ON {structure}
             result[currentArgumentIndex] = "ON";
-            result[++currentArgumentIndex] = _structure.ToString();
+            result[++currentArgumentIndex] = ResolveStructure();
 
             // [PREFIX {count} {prefix} [{prefix} ..]
             result[++currentArgumentIndex] = "PREFIX";
@@ -374,7 +379,14 @@ namespace RediSearchClient.Indexes
                 result[++currentArgumentIndex] = field;
             }
 
+            // ReSharper disable once HeapView.ObjectAllocation.Evident
             return new RediSearchIndexDefinition(result);
         }
+
+        /// <summary>
+        /// This method returns a string representation of the kind of data structure that the index is being applied to.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract string ResolveStructure();
     }
 }

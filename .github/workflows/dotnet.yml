@@ -13,7 +13,7 @@ jobs:
     
     services:
       redis:
-        image: redislabs/redisearch:latest
+        image: redislabs/redismod:preview
         ports:
           - 6379:6379
 

@@ -80,9 +80,56 @@ namespace RediSearchClient
         /// <param name="db"></param>
         /// <param name="indexName"></param>
         /// <param name="fields"></param>
-        public static async Task AlterSchemaAsync(this IDatabase db, string indexName, params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields)
+        [Obsolete(
+            "This method has been deprecated in favor of the `AlterHashSchemaAsync` method. For altering a JSON based schema use `AlterJsonSchemaAsync`.")]
+        public static Task AlterSchemaAsync(this IDatabase db, string indexName,
+            params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterHashSchemaAsync(db, indexName, fields);
+
+        /// <summary>
+        /// **FOR HASH BASED INDEXES**
+        /// 
+        /// `FT.ALTER {index} SCHEMA ADD {field} {options} ...`
+        /// 
+        /// Adds a new field to the index.
+        ///
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing 
+        /// and reindexing of existing documents.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public static Task AlterHashSchemaAsync(this IDatabase db, string indexName,
+            params Func<RediSearchSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterSchemaAsync<RediSearchSchemaFieldBuilder>(db, indexName, fields);
+
+        /// <summary>
+        /// **FOR JSON BASED INDEXES**
+        /// 
+        /// `FT.ALTER {index} SCHEMA ADD {field} {options} ...`
+        /// 
+        /// Adds a new field to the index.
+        ///
+        /// Adding a field to the index will cause any future document updates to use the new field when indexing 
+        /// and reindexing of existing documents.
+        /// 
+        /// https://oss.redislabs.com/redisearch/Commands/#ftalter_schema_add
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="indexName"></param>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public static Task AlterJsonSchemaAsync(this IDatabase db, string indexName,
+            params Func<RediSearchJsonSchemaFieldBuilder, IRediSearchSchemaField>[] fields) =>
+            AlterSchemaAsync(db, indexName, fields);
+
+        private static Task AlterSchemaAsync<TBuilderType>(IDatabase db, string indexName,
+            params Func<TBuilderType, IRediSearchSchemaField>[] fields) where TBuilderType : new()
         {
-            var builder = new RediSearchSchemaFieldBuilder();
+            var builder = new TBuilderType();
 
             var builtFields = fields.Select(x => x(builder)).SelectMany(x => x.FieldArguments).ToArray();
 
@@ -95,7 +142,7 @@ namespace RediSearchClient
 
             commandArguments.AddRange(builtFields);
 
-            await db.ExecuteAsync(RediSearchCommand.ALTER, commandArguments.ToArray());
+            return db.ExecuteAsync(RediSearchCommand.ALTER, commandArguments.ToArray());
         }
 
         /// <summary>

@@ -8,9 +8,9 @@ namespace RediSearchClient.IntegrationTests
     public class CreateIndex : BaseIntegrationTest
     {
         [Fact]
-        public void WillCreateASimpleIndex()
+        public void WillCreateAHashIndex()
         {
-            var indexDefinition = GetComplexIndexDefinition();
+            var indexDefinition = GetIndexDefinition();
 
             _db.CreateIndex(_indexName, indexDefinition);
 
@@ -20,12 +20,12 @@ namespace RediSearchClient.IntegrationTests
         }
 
         [Fact]
-        public async Task WillCreateASimpleIndexAsync()
+        public async Task WillCreateAHashIndexAsync()
         {
-            var indexDefinition = GetComplexIndexDefinition();
+            var indexDefinition = GetIndexDefinition();
 
             var indexName = $"{_indexName}_async";
-            
+
             await _db.CreateIndexAsync(indexName, indexDefinition);
 
             var indexes = await _db.ListIndexesAsync();
@@ -33,10 +33,38 @@ namespace RediSearchClient.IntegrationTests
             Assert.Contains(indexName, indexes);
         }
 
-        private RediSearchIndexDefinition GetComplexIndexDefinition()
+        [Fact]
+        public async Task WillCreateAJsonIndex()
+        {
+            var indexDefinition = GetJsonIndexDefinition();
+
+            var indexName = $"json_{_indexName}";
+
+            await _db.CreateIndexAsync(indexName, indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+        
+        [Fact]
+        public async Task WillCreateAJsonIndexAsync()
+        {
+            var indexDefinition = GetJsonIndexDefinition();
+
+            var indexName = $"json_{_indexName}_async";
+
+            await _db.CreateIndexAsync(indexName, indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+
+        private RediSearchIndexDefinition GetIndexDefinition()
         {
             return RediSearchIndex
-                .On(RediSearchStructure.HASH)
+                .OnHash()
                 .ForKeysWithPrefix("zip::")
                 .UsingFilter("@State=='FL'")
                 .UsingLanguage("English")
@@ -50,6 +78,21 @@ namespace RediSearchClient.IntegrationTests
                     x => x.Geo("Coordinates"),
                     x => x.Numeric("TimeZoneOffset"),
                     x => x.Numeric("DaylightSavingsFlag")
+                )
+                .Build();
+        }
+
+        private RediSearchIndexDefinition GetJsonIndexDefinition()
+        {
+            return RediSearchIndex
+                .OnJson()
+                .ForKeysWithPrefix("laureate::")
+                .WithSchema(
+                    x => x.Text("$.Id", "Id"),
+                    x => x.Text("$.FirstName", "FirstName", sortable: true),
+                    x => x.Text("$.Surname", "LastName", sortable: true),
+                    x => x.Numeric("$.BornSeconds", "Born", sortable: true),
+                    x => x.Numeric("$.DiedSeconds", "Died", sortable: true)
                 )
                 .Build();
         }

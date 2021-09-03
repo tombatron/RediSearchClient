@@ -1,8 +1,9 @@
 namespace RediSearchClient.Indexes
 {
-    internal sealed class TextSchemaField : IRediSearchSchemaField
+    internal sealed class TextJsonSchemaField : IRediSearchSchemaField
     {
-        private readonly string _fieldName;
+        private readonly string _jsonPath;
+        private readonly string _alias;
         private readonly bool _sortable;
         private readonly bool _nostem;
         private readonly bool _noindex;
@@ -11,9 +12,10 @@ namespace RediSearchClient.Indexes
 
         public object[] FieldArguments => GenerateArguments();
 
-        public TextSchemaField(string fieldName, bool sortable, bool nostem, bool noindex, Language phonetic, double weight)
+        public TextJsonSchemaField(string jsonPath, string alias, bool sortable, bool nostem, bool noindex, Language phonetic, double weight)
         {
-            _fieldName = fieldName;
+            _jsonPath = jsonPath;
+            _alias = alias;
             _sortable = sortable;
             _nostem = nostem;
             _noindex = noindex;
@@ -27,7 +29,7 @@ namespace RediSearchClient.Indexes
         {
             if (_fieldArguments == null)
             {
-                var argumentLength = 2;
+                var argumentLength = 4;
                 argumentLength += _sortable ? 1 : 0;
                 argumentLength += _nostem ? 1 : 0;
                 argumentLength += _noindex ? 1 : 0;
@@ -38,7 +40,9 @@ namespace RediSearchClient.Indexes
 
                 var currentArgumentIndex = 0;
 
-                _fieldArguments[currentArgumentIndex] = _fieldName;
+                _fieldArguments[currentArgumentIndex] = _jsonPath;
+                _fieldArguments[++currentArgumentIndex] = "AS";
+                _fieldArguments[++currentArgumentIndex] = _alias;
                 _fieldArguments[++currentArgumentIndex] = "TEXT";
 
                 if (_nostem)
