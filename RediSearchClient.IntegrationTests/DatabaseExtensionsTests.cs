@@ -190,7 +190,7 @@ namespace RediSearchClient.IntegrationTests
             private RediSearchIndexDefinition CreateSimpleIndexDefinition()
             {
                 return RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix("Whatever::*")
                     .WithSchema(s => s.Text("Hello"))
                     .Build();
@@ -204,7 +204,7 @@ namespace RediSearchClient.IntegrationTests
                 base.Setup();
 
                 var index = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix($"{_recordPrefix}:")
                     .WithSchema(
                         x => x.Tag("city"),
@@ -351,7 +351,7 @@ namespace RediSearchClient.IntegrationTests
                 });
 
                 var index = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix($"{_recordPrefix}:")
                     .WithSchema(
                         x => x.Tag("city"),
@@ -650,7 +650,7 @@ namespace RediSearchClient.IntegrationTests
                 {
                     _db.CreateIndex("simple_movie_index",
                         RediSearchIndex
-                            .On(RediSearchStructure.HASH)
+                            .OnHash()
                             .ForKeysWithPrefix("movie::")
                             .WithSchema(x => x.Text("Title"))
                         .Build()
@@ -827,7 +827,7 @@ namespace RediSearchClient.IntegrationTests
                 base.Setup();
 
                 _db.CreateIndex(_indexName, RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix("Whoa::")
                     .WithSchema
                     (
