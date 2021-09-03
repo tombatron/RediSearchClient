@@ -620,7 +620,7 @@ namespace RediSearchClient.IntegrationTests
             private void CreateSynonyms()
             {
                 var index = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix($"this_doesnt_matter:")
                     .WithSchema(
                         x => x.Tag("city"),
@@ -803,7 +803,7 @@ namespace RediSearchClient.IntegrationTests
             private void SetupTestIndex()
             {
                 var index = RediSearchIndex
-                    .On(RediSearchStructure.HASH)
+                    .OnHash()
                     .ForKeysWithPrefix("Whoa::")
                     .WithSchema
                     (
