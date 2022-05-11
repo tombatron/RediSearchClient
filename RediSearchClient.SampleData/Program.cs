@@ -114,7 +114,15 @@ if (db.SuggestionsSize("cities") == 0)
 {
     foreach (var (_, hash) in ZipCodeData.ZipCodes)
     {
-        db.AddSuggestion("cities", (string) hash[1].Value, 1, false, (String) hash[3].Value);
+        try
+        {
+            db.AddSuggestion("cities", (string)hash[1].Value, 1, false, (String)hash[3].Value);
+        }
+        catch (RedisServerException ex)
+        {
+            //Console.WriteLine($"Exception while adding auto-suggestion: {hash[1].Value}, {hash[3].Value}, {ex.Message}");
+        }
+
     }
 
     Console.WriteLine("`cities` auto suggest dictionary created.");
