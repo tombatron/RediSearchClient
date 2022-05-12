@@ -234,6 +234,21 @@ namespace RediSearchClient.Indexes
             return this;
         }
 
+        /// <summary>
+        /// Allows for defining the schema of the search index. 
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public BaseRediSearchIndexBuilder<TFieldBuilder> WithSchema(IRediSearchSchemaField[] fields)
+        {
+            _fields = fields.Select(x => {
+                IRediSearchSchemaField func(TFieldBuilder y) => x;
+                return (Func<TFieldBuilder, IRediSearchSchemaField>)func;
+            }).ToArray();
+
+            return this;
+        }
+
         private static readonly TFieldBuilder _fieldBuilder = new TFieldBuilder();
 
         /// <summary>

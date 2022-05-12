@@ -5,8 +5,9 @@ using StackExchange.Redis;
 using System;
 using System.Linq;
 using NReJSON;
+using RediSearchClient.SampleData.TestingTypes;
 
-using var muxr = ConnectionMultiplexer.Connect("localhost");
+using var muxr = ConnectionMultiplexer.Connect("192.168.0.57:7000,192.168.0.57:7001,192.168.0.57:7002,192.168.0.57:7003,192.168.0.57:7004,192.168.0.57:7005");
 var db = muxr.GetDatabase();
 
 NReJSONSerializer.SerializerProxy = new SerializerProxy();
@@ -179,3 +180,10 @@ db.CreateIndex("nobel",
         )
         .Build()
 );
+
+if (db.ListIndexes().Any(x => x == "products"))
+{
+    db.DropIndex("products");
+}
+
+db.CreateIndex<Product>();

@@ -1,10 +1,12 @@
 using RediSearchClient.Aggregate;
 using RediSearchClient.Exceptions;
+using RediSearchClient.Attributes;
 using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using static RediSearchClient.SpellCheckTerm;
 
@@ -35,6 +37,105 @@ namespace RediSearchClient
             Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
 
             db.Execute(RediSearchCommand.CREATE, commandParameters);
+        }
+
+        public static void CreateIndex<TEntity>(this IDatabase db)
+        {
+            var allProperties = new List<IRediSearchSchemaField>();
+
+            GetProperties(typeof(TEntity), "$", allProperties);
+
+            var indexName = $"{typeof(TEntity).Name}::".ToLower();
+
+            var definition = RediSearchIndex
+                .OnJson()
+                .ForKeysWithPrefix(GetTypeName())
+                .WithSchema(allProperties.ToArray())
+                .Build();
+
+            CreateIndex(db, indexName, definition);
+
+            string GetTypeName()
+            {
+                foreach (var customAttribute in typeof(TEntity).GetCustomAttributes(false))
+                {
+                    if (customAttribute is TypeAttribute typeAttribute)
+                    {
+                        return typeAttribute.Name;
+                    }
+                }
+
+                return $"{typeof(TEntity).FullName}".ToLower();
+            }
+
+            void GetProperties(Type type, string prefix, ICollection<IRediSearchSchemaField> result)
+            {
+                foreach (var property in type.GetProperties())
+                {
+                    if (property.PropertyType.IsClass
+                        && !property.PropertyType.IsValueType
+                        && !property.PropertyType.IsPrimitive
+                        && !IsStringProperty(property))
+                    {
+                        GetProperties(property.PropertyType, $"{prefix}.{property.Name}[*]", result);
+                    }
+
+                    bool sortable = false, noStem = false, noIndex = false;
+                    string alias = $"{prefix}.{property.Name}";
+                    int weight = default;
+                    var language = Language.None;
+
+                    foreach (var customAttribute in property.GetCustomAttributes(false))
+                    {
+                        if (customAttribute is AliasAttribute aliasAttribute)
+                        {
+                            alias = aliasAttribute.Name;
+                        }
+                        else if (customAttribute is PhoneticAttribute phoneticAttribute)
+                        {
+                            language = phoneticAttribute.Language;
+                        }
+                        else if (customAttribute is WeightAttribute weightAttribute)
+                        {
+                            weight = weightAttribute.Weight;
+                        }
+                        else if (customAttribute is NonStemmableAttribute)
+                        {
+                            noStem = true;
+                        }
+                        else if (customAttribute is NoIndexAttribute)
+                        {
+                            noIndex = true;
+                        }
+                        else if (customAttribute is SortableAttribute)
+                        {
+                            sortable = true;
+                        }
+                    }
+
+                    if (IsStringProperty(property))
+                    {
+                        result.Add(new TextJsonSchemaField($"{prefix}.{property.Name}", alias, sortable, noStem, noIndex, language, weight));
+                    }
+                    else if (IsNumericProperty(property) || IsDateTimeProperty(property))
+                    {
+                        result.Add(new NumericJsonSchemaField($"{prefix}.{property.Name}", alias, sortable, noIndex));
+                    }
+
+                    continue;
+                }
+
+                bool IsStringProperty(PropertyInfo property) => property.PropertyType.FullName == typeof(string).FullName;
+
+                bool IsNumericProperty(PropertyInfo property) =>
+                    property.PropertyType.FullName == typeof(int).FullName
+                    || property.PropertyType.FullName == typeof(float).FullName
+                    || property.PropertyType.FullName == typeof(long).FullName
+                    || property.PropertyType.FullName == typeof(decimal).FullName
+                    || property.PropertyType.FullName == typeof(double).FullName;
+
+                bool IsDateTimeProperty(PropertyInfo property) => property.PropertyType.FullName == typeof(DateTime).FullName;
+            }
         }
 
         /// <summary>
