@@ -7,7 +7,7 @@ using System.Linq;
 using NReJSON;
 using RediSearchClient.SampleData.TestingTypes;
 
-using var muxr = ConnectionMultiplexer.Connect("192.168.0.57:7000,192.168.0.57:7001,192.168.0.57:7002,192.168.0.57:7003,192.168.0.57:7004,192.168.0.57:7005");
+using var muxr = ConnectionMultiplexer.Connect("192.168.0.59:7000,192.168.0.57:7001,192.168.0.59:7002,192.168.0.59:7003,192.168.0.57:7004,192.168.0.59:7005");
 var db = muxr.GetDatabase();
 
 NReJSONSerializer.SerializerProxy = new SerializerProxy();
@@ -109,29 +109,29 @@ else
     Console.WriteLine("`zips` index created.");
 }
 
-Console.WriteLine("Creating auto suggest dictionaries.");
+//Console.WriteLine("Creating auto suggest dictionaries.");
 
-if (db.SuggestionsSize("cities") == 0)
-{
-    foreach (var (_, hash) in ZipCodeData.ZipCodes)
-    {
-        try
-        {
-            db.AddSuggestion("cities", (string)hash[1].Value, 1, false, (String)hash[3].Value);
-        }
-        catch (RedisServerException ex)
-        {
-            //Console.WriteLine($"Exception while adding auto-suggestion: {hash[1].Value}, {hash[3].Value}, {ex.Message}");
-        }
+//if (db.SuggestionsSize("cities") == 0)
+//{
+//    foreach (var (_, hash) in ZipCodeData.ZipCodes)
+//    {
+//        try
+//        {
+//            db.AddSuggestion("cities", (string)hash[1].Value, 1, false, (String)hash[3].Value);
+//        }
+//        catch (RedisServerException ex)
+//        {
+//            //Console.WriteLine($"Exception while adding auto-suggestion: {hash[1].Value}, {hash[3].Value}, {ex.Message}");
+//        }
 
-    }
+//    }
 
-    Console.WriteLine("`cities` auto suggest dictionary created.");
-}
-else
-{
-    Console.WriteLine("`cities` auto suggestion dictionary already exists.");
-}
+//    Console.WriteLine("`cities` auto suggest dictionary created.");
+//}
+//else
+//{
+//    Console.WriteLine("`cities` auto suggestion dictionary already exists.");
+//}
 
 Console.WriteLine($"Loading Nobel Laureate (JSON) data into Redis.");
 

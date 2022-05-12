@@ -45,7 +45,7 @@ namespace RediSearchClient
 
             GetProperties(typeof(TEntity), "$", allProperties);
 
-            var indexName = $"{typeof(TEntity).Name}::".ToLower();
+            var indexName = $"{typeof(TEntity).Name}".ToLower();
 
             var definition = RediSearchIndex
                 .OnJson()
@@ -65,13 +65,20 @@ namespace RediSearchClient
                     }
                 }
 
-                return $"{typeof(TEntity).FullName}".ToLower();
+                return $"{typeof(TEntity).FullName}::".ToLower();
             }
 
             void GetProperties(Type type, string prefix, ICollection<IRediSearchSchemaField> result)
             {
                 foreach (var property in type.GetProperties())
                 {
+                    if (property.PropertyType.IsGenericType)
+                    {
+                        var embeddedType = property.PropertyType.GetGenericArguments()[0];
+
+                        GetProperties(embeddedType, $"{prefix}.{property.Name}[*]", result);
+                    }
+
                     if (property.PropertyType.IsClass
                         && !property.PropertyType.IsValueType
                         && !property.PropertyType.IsPrimitive
