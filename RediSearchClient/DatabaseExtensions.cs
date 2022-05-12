@@ -77,7 +77,7 @@ namespace RediSearchClient
                         && !property.PropertyType.IsPrimitive
                         && !IsStringProperty(property))
                     {
-                        GetProperties(property.PropertyType, $"{prefix}.{property.Name}[*]", result);
+                        GetProperties(property.PropertyType, $"{prefix}.{property.Name}", result);
                     }
 
                     bool sortable = false, noStem = false, noIndex = false;
