@@ -141,7 +141,7 @@ namespace RediSearchClient.IntegrationTests
                 {
                     var props = (RedisResult[])field;
 
-                    yield return props[0].ToString();
+                    yield return props[3].ToString();
                 }
 
                 yield break;
