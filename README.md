@@ -224,8 +224,7 @@ Searching an index is done by using the `RediSearchQuery` builder to create a Re
 var queryDefinition = RediSearchQuery
         .On("zipcodes")
         .UsingQuery("@State:FL")
-        .Build()
-    );
+        .Build();
 
 var result = await _db.SearchAsync(queryDefinition);
 ```
