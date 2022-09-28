@@ -25,7 +25,7 @@ namespace RediSearchClient.IntegrationTests
         private void CreateTestInfoData()
         {
             var index = RediSearchIndex
-                .On(RediSearchStructure.HASH)
+                .OnHash()
                 .ForKeysWithPrefix($"{_recordPrefix}:")
                 .WithSchema(x => x.Text("first_name"))
                 .Build();
