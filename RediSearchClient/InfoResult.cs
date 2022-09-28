@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using StackExchange.Redis;
@@ -36,6 +37,13 @@ namespace RediSearchClient
         /// </summary>
         /// <value></value>
         public Dictionary<string, object>[] Fields { get; private set; }
+
+        /// <summary>
+        /// <para>Attributes defined on the schema.</para>
+        /// <para>This will be populated instead of <see cref="Fields"/> versions of RediSearch >= 2.2.1 </para>
+        /// </summary>
+        /// <value></value>
+        public Dictionary<string, Dictionary<string, object>> Attributes { get; private set; }
 
         /// <summary>
         /// Count of documents in the index.
@@ -176,6 +184,33 @@ namespace RediSearchClient
                     case "index_definition":
                         result.IndexDefinition = IndexDefinition.Create((RedisResult[])redisResult[++i]);
                         break;
+                    case "attributes":
+                        var attributeValues = (RedisResult[])redisResult[++i];
+                        var attributes = new Dictionary<string, Dictionary<string, object>>();
+
+                        for (var j = 0; j < attributeValues.Length; j++)
+                        {
+                            var parsed = ParseRedisResult(attributeValues[j]);
+
+                            if (!(parsed is Dictionary<string, object> attrDict))
+                            {
+                                continue;
+                            }
+
+                            if (!attrDict.TryGetValue("identifier", out var identifierValue))
+                            {
+                                continue;
+                            }
+
+                            if (identifierValue is string fieldName)
+                            {
+                                attributes.Add(fieldName, attrDict);
+                                attrDict.Remove(fieldName);
+                            }
+                        }
+
+                        result.Attributes = attributes;
+                        break;
                     case "fields":
                         var fieldValues = (RedisResult[])redisResult[++i];
                         var fields = new Dictionary<string, object>[fieldValues.Length];
@@ -287,6 +322,37 @@ namespace RediSearchClient
             }
 
             return result;
+        }
+
+        private static object ParseRedisResult(RedisResult redisResult)
+        {
+            if (redisResult?.Type == ResultType.MultiBulk && !redisResult.IsNull)
+            {
+                var results = ((RedisResult[]) redisResult);
+
+                if (results?.Length == 0)
+                {
+                    return Array.Empty<object>();
+                }
+
+                if (results[0].Type ==  ResultType.MultiBulk)
+                {
+                    return results.Select(ParseRedisResult);
+                }
+
+                var result = new Dictionary<string, object>(results.Length / 2);
+
+                for (var i = 0; i < results.Length-1; i++)
+                {
+                    result.Add((string)results[i], ParseRedisResult(results[++i]));
+                }
+
+                return result;
+            }
+
+            var val = (RedisValue)redisResult;
+
+            return val.HasValue && val.TryParse(out double d) && !double.IsNaN(d) ? (object)d : (string) val;
         }
 
         private static string[] ParseIndexOptions(RedisResult[] redisResult)
