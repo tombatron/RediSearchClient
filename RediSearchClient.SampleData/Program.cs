@@ -5,6 +5,10 @@ using StackExchange.Redis;
 using System;
 using System.Linq;
 using NReJSON;
+using RediSearchClient.SampleData.TestingTypes;
+using System.Collections.Generic;
+using RediSearchClient.Query;
+using System.Text.Json;
 
 using var muxr = ConnectionMultiplexer.Connect("localhost");
 var db = muxr.GetDatabase();
@@ -179,3 +183,50 @@ db.CreateIndex("nobel",
         )
         .Build()
 );
+
+var indexName = "product-data-index";
+
+if (db.ListIndexes().Any(x => x == indexName))
+{
+    db.DropIndex(indexName);
+}
+
+await db.CreateIndexAsync<Product>("product-doc:", indexName);
+
+var product = new Product
+{
+    Identifier = "testprod1",
+    Meta = "test meta",
+    Price = 10.3m,
+    Dimensions = new Dimensions
+    {
+        Width = 10,
+        Length = 11,
+        Height = 12
+    },
+    Sellers = new List<Seller>
+    {
+        new Seller
+        {
+            Name = "seller1",
+            Locations = new List<string> {"location1", "location2"}
+        },
+        new Seller
+        {
+            Name = "seller2",
+            Locations = new List<string> {"location3", "location4"}
+        }
+    },
+    DateAdded = DateTime.Now
+};
+
+await db.RediSearchJsonSetAsync(product, $"product-doc:{product.Identifier}");
+
+var query = RediSearchQuery
+    .On(indexName)
+    .UsingQuery("@id:{ testprod1 }")
+    .Return("id", "Price", "$.Dimensions", "$.Sellers[*].Name", "$.Sellers[*].Locations", "DateAdded")
+    .Dialect(3)
+    .Build();
+
+var queryResult = await db.SearchAsync(query);
