@@ -16,7 +16,7 @@ namespace RediSearchClient.Converters
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteNumberValue((value - DateTime.MinValue).TotalSeconds);
+            writer.WriteNumberValue(new DateTimeOffset(value).ToUnixTimeSeconds());
         }
     }
 }
