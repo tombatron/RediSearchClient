@@ -1,10 +1,6 @@
 # RediSearchClient
 [![Build Status](https://github.com/tombatron/RedisSearchClient/actions/workflows/dotnet.yml/badge.svg)](https://github.com/tombatron/RedisSearchClient/actions/workflows/dotnet.yml)
 
-Special thanks to [JetBrains](https://jb.gg/OpenSource) for providing the project with an open source license for all of the JetBrains products!
-
-![](jetbrains.svg)
-
 ## Overview
 
 What you have here is a set of extensions for the [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) Redis client that allows for interacting with version 2.x of the RediSearch Redis module. 
