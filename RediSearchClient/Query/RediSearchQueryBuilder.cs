@@ -337,6 +337,20 @@ namespace RediSearchClient.Query
             return this;
         }
 
+        private int? _dialect;
+
+        /// <summary>
+        /// Builder method for specifying "DIALECT". This allows targetting a specific RediSearch dialect. If it is not specified, the DEFAULT_DIALECT is used, 
+        /// which can be set using FT.CONFIG SET or by passing it as an argument to the redisearch module when it is loaded.
+        /// </summary>
+        /// <returns></returns>
+        public RediSearchQueryBuilder Dialect(int dialect)
+        {
+            _dialect = dialect;
+
+            return this;
+        }
+
         private static readonly RediSearchNumericFilterBuilder _numericFilterBuilder = new RediSearchNumericFilterBuilder();
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
@@ -377,6 +391,9 @@ namespace RediSearchClient.Query
 
             // [RETURN {num} {key} ... ]
             argumentLength += _returnFields != null ? 2 + _returnFields.Length : 0;
+
+            // [DIALECT dialect]
+            argumentLength += _dialect.HasValue ? 2 : 0;
 
             // [SUMMARIZE [FIELDS {num} {field} ... ] [FRAGS {num}] [LEN {fragsize}] [SEPARATOR {separator}]]
             if (_summarizeBuilderAction != null)
@@ -594,6 +611,13 @@ namespace RediSearchClient.Query
                 result[++currentArgumentIndex] = "LIMIT";
                 result[++currentArgumentIndex] = _limit.offset.ToString();
                 result[++currentArgumentIndex] = _limit.limit.ToString();
+            }
+
+            // [DIALECT]
+            if (_dialect.HasValue)
+            {
+                result[++currentArgumentIndex] = "DIALECT";
+                result[++currentArgumentIndex] = _dialect.Value;
             }
 
             return new RediSearchQueryDefinition(result);

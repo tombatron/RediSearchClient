@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using RediSearchClient.Exceptions;
+using System.Reflection;
+using RediSearchClient.Attributes;
+using System.Text.Json;
 
 namespace RediSearchClient
 {
@@ -31,6 +34,165 @@ namespace RediSearchClient
             Array.Copy(indexDefinition.Fields, 0, commandParameters, 1, indexDefinition.Fields.Length);
 
             return db.ExecuteAsync(RediSearchCommand.CREATE, commandParameters);
+        }
+
+        /// <summary>
+        /// Used to map a given type to a JSON RediSearch index.
+        /// </summary>
+        /// <typeparam name="TEntity">The type to be mapped to the RediSearch index</typeparam>
+        /// <param name="db"></param>
+        /// <param name="indexableKeysPrefix">The prefix of the keys that will be included in the index</param>
+        /// <param name="indexName">The index name, defaults to the type's name</param>
+        public static async Task CreateIndexAsync<TEntity>(this IDatabase db, string indexableKeysPrefix, string indexName = null)
+        {
+            var allProperties = new List<IRediSearchSchemaField>();
+
+            var entityType = typeof(TEntity);
+
+            var defaultNoIndex = entityType.GetCustomAttributes(false).Any(x => x is DefaultNoIndexAttribute);
+
+            GetProperties(entityType, "$", allProperties, new List<string> { entityType.Name }, false);
+
+            var definition = RediSearchIndex
+                .OnJson()
+                .ForKeysWithPrefix(indexableKeysPrefix)
+                .WithSchema(allProperties.ToArray())
+                .Build();
+
+            await CreateIndexAsync(db, indexName ?? entityType.Name.ToLower(), definition);
+
+            void GetProperties(Type type, string prefix, ICollection<IRediSearchSchemaField> result, IEnumerable<string> typesProcessedInHierarchy, bool forceTag)
+            {
+                foreach (var property in type.GetProperties())
+                {
+                    if (property.PropertyType.IsGenericType)
+                    {
+                        if (property.PropertyType.IsCollectionType())
+                        {
+                            ProcessCollection(result, prefix, property, property.PropertyType.GetGenericArguments()[0], typesProcessedInHierarchy);
+                        }
+
+                        continue;
+                    }
+
+                    if (property.PropertyType.IsClass && !property.PropertyType.IsBuiltInType())
+                    {
+                        if (!typesProcessedInHierarchy.Contains(property.PropertyType.Name))
+                        {
+                            GetProperties(property.PropertyType, $"{prefix}.{property.Name}", result,
+                                CloneProcessedHierarchy(typesProcessedInHierarchy, property.PropertyType.Name), forceTag);
+                        }
+
+                        continue;
+                    }
+
+                    MapToRedisType(result, property.PropertyType, property.Name, property.GetCustomAttributes(false), prefix, forceTag);
+                }
+            }
+
+            void MapToRedisType(ICollection<IRediSearchSchemaField> result, Type propertyType, string propertyName, object[] customAttributes, string prefix, bool forceTag)
+            {
+                bool sortable = false;
+                bool noStem = false;
+                bool noIndex = defaultNoIndex;
+                string alias = $"{prefix}.{propertyName}".Substring(2); //Ignoring the $.
+                string separator = default;
+                int weight = default;
+                var language = Language.None;
+
+                foreach (var customAttribute in customAttributes)
+                {
+                    if (customAttribute is SchemaIgnoreAttribute)
+                    {
+                        return;
+                    }
+
+                    if (customAttribute is TagAttribute tagAttribute)
+                    {
+                        forceTag = true;
+                        separator = tagAttribute.Separator;
+                    }
+
+                    if (customAttribute is AliasAttribute aliasAttribute)
+                    {
+                        alias = aliasAttribute.Name;
+                    }
+
+                    if (customAttribute is PhoneticAttribute phoneticAttribute)
+                    {
+                        language = phoneticAttribute.Language;
+                    }
+
+                    if (customAttribute is WeightAttribute weightAttribute)
+                    {
+                        weight = weightAttribute.Weight;
+                    }
+
+                    if (customAttribute is NonStemmableAttribute)
+                    {
+                        noStem = true;
+                    }
+
+                    if (customAttribute is IndexAttribute indexAttribute)
+                    {
+                        noIndex = !indexAttribute.Value;
+                    }
+
+                    if (customAttribute is SortableAttribute)
+                    {
+                        sortable = true;
+                    }
+                }
+
+                if (forceTag || propertyType.IsBooleanType())
+                {
+                    result.Add(new TagJsonSchemaField($"{prefix}.{propertyName}", alias, separator, sortable, noIndex));
+                }
+                else if (IsRedisTextType(propertyType))
+                {
+                    result.Add(new TextJsonSchemaField($"{prefix}.{propertyName}", alias, sortable, noStem, noIndex, language, weight));
+                }
+                else if (IsRedisNumericType(propertyType))
+                {
+                    result.Add(new NumericJsonSchemaField($"{prefix}.{propertyName}", alias, sortable, noIndex));
+                }
+            }
+
+            void ProcessCollection(ICollection<IRediSearchSchemaField> result, string prefix, PropertyInfo property, Type embeddedType, IEnumerable<string> typesProcessedInHierarchy)
+            {
+                if (!embeddedType.IsBuiltInType())
+                {
+                    if (typesProcessedInHierarchy.Contains(embeddedType.Name))
+                    {
+                        return;
+                    }
+
+                    GetProperties(embeddedType, $"{prefix}.{property.Name}[*]", result,
+                        CloneProcessedHierarchy(typesProcessedInHierarchy, embeddedType.Name), true);
+                }
+                else
+                {
+                    MapToRedisType(result, embeddedType, $"{property.Name}[*]", property.GetCustomAttributes(false), prefix, true);
+                }
+            }
+
+            bool IsRedisNumericType(Type t) => t.IsNumericType() || t.IsDateTimeType();
+
+            bool IsRedisTextType(Type t) => ((t.IsPrimitive || t.IsNullableCharType()) && !t.IsNumericType() && !t.IsBooleanType()) || t.IsStringType() || t.IsObjectType();
+
+            IEnumerable<string> CloneProcessedHierarchy(IEnumerable<string> hierarchy, string newMember) => new List<string>(hierarchy) { newMember };
+        }
+
+        /// <summary>
+        /// Use to set a JSON value in redis from a given generic value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="value">The value to be serialized and saved as JSON in Redis</param>
+        /// <param name="key">The redis key, ensure that it starts with the predefined index prefix</param>
+        public async static Task RediSearchJsonSetAsync<T>(this IDatabase db, T value, string key)
+        {
+            await db.ExecuteAsync("JSON.SET", key, "$", JsonSerializer.Serialize(value, RediSearchJsonSerializerOptionsFactory.GetOptions()));
         }
 
         /// <summary>
