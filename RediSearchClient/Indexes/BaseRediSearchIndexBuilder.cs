@@ -15,6 +15,8 @@ namespace RediSearchClient.Indexes
 
         private List<string> _prefixes;
 
+        private bool HasPrefixes() => _prefixes?.Any() ?? false;
+
         /// <summary>
         /// Builder method for defining the key pattern to index.
         /// </summary>
@@ -241,7 +243,8 @@ namespace RediSearchClient.Indexes
         /// <returns></returns>
         public BaseRediSearchIndexBuilder<TFieldBuilder> WithSchema(IRediSearchSchemaField[] fields)
         {
-            _fields = fields.Select(x => {
+            _fields = fields.Select(x =>
+            {
                 IRediSearchSchemaField func(TFieldBuilder y) => x;
                 return (Func<TFieldBuilder, IRediSearchSchemaField>)func;
             }).ToArray();
@@ -259,7 +262,7 @@ namespace RediSearchClient.Indexes
         {
             var argumentLength = 2; // ON {structure}
 
-            argumentLength += 2 + _prefixes.Count; // [PREFIX {count} {prefix} [{prefix} ..]
+            argumentLength += HasPrefixes() ? 2 + _prefixes.Count : 0; // [PREFIX {count} {prefix} [{prefix} ..]
             argumentLength += string.IsNullOrEmpty(_filter) ? 0 : 2; // [FILTER {filter}]		
             argumentLength += string.IsNullOrEmpty(_language) ? 0 : 2; // [LANGUAGE {default_lang}]
             argumentLength += string.IsNullOrEmpty(_languageField) ? 0 : 2; // [LANGUAGE_FIELD {lang_field}]
@@ -293,12 +296,16 @@ namespace RediSearchClient.Indexes
             result[++currentArgumentIndex] = ResolveStructure();
 
             // [PREFIX {count} {prefix} [{prefix} ..]
-            result[++currentArgumentIndex] = "PREFIX";
-            result[++currentArgumentIndex] = _prefixes.Count;
 
-            foreach (var prefix in _prefixes)
+            if (HasPrefixes())
             {
-                result[++currentArgumentIndex] = prefix;
+                result[++currentArgumentIndex] = "PREFIX";
+                result[++currentArgumentIndex] = _prefixes.Count;
+
+                foreach (var prefix in _prefixes)
+                {
+                    result[++currentArgumentIndex] = prefix;
+                }
             }
 
             // [FILTER {filter}]
