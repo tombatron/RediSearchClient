@@ -25,6 +25,53 @@ namespace RediSearchClient.Tests.Indexes
 
                 Assert.NotNull(index);
             }
+
+            [Fact]
+            public void CanBeCreatedWithNoStopwords()
+            {
+                var index = RediSearchIndex
+                    .OnHash()
+                    .WithNoStopwords()
+                    .WithSchema(x => x.Text("Testing"))
+                    .Build();
+
+                Assert.NotNull(index);
+            }
+
+            [Fact]
+            public void CanBeCreatedWithCustomStopwordsList()
+            {
+                var index = RediSearchIndex
+                    .OnHash()
+                    .WithStopwords(new []{"if", "or", "else"})
+                    .WithSchema(x => x.Text("Testing"))
+                    .Build();
+
+                Assert.NotNull(index);
+            }
+            [Fact]
+            public void CanBeCreatedWithCustomStopwordsParam()
+            {
+                var index = RediSearchIndex
+                    .OnHash()
+                    .WithStopwords("if", "or", "else")
+                    .WithSchema(x => x.Text("Testing"))
+                    .Build();
+
+                Assert.NotNull(index);
+            }
+
+            [Fact]
+            public void CanBeCreatedWithCustomStopword()
+            {
+                var index = RediSearchIndex
+                    .OnHash()
+                    .WithStopwords("if")
+                    .WithSchema(x => x.Text("Testing"))
+                    .Build();
+
+                Assert.NotNull(index);
+            }
         }
     }
 }

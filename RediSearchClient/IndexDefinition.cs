@@ -23,6 +23,12 @@ namespace RediSearchClient
         public string[] Prefixes { get; private set; }
 
         /// <summary>
+        /// Custom set of Stopwords
+        /// </summary>
+        /// <value></value>
+        public string[] Stopwords { get; private set; }
+
+        /// <summary>
         /// The filter expression applied to the index during creation. 
         /// </summary>
         /// <value></value>
@@ -83,6 +89,10 @@ namespace RediSearchClient
                         break;
                     case "payload_field":
                         result.PayloadField = (string)redisResults[++i];
+                        break;
+                    case "stopwords_list":
+                        var stopwords = (RedisResult[])redisResults[++i];
+                        result.Stopwords = stopwords.Select(x => x.ToString()).ToArray();
                         break;
                     default:
                         ++i;

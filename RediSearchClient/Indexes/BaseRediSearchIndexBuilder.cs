@@ -208,6 +208,48 @@ namespace RediSearchClient.Indexes
             return this;
         }
 
+        private List<string> _stopwords;
+        private bool _withNoStopwords = false;
+
+        private bool OverrideDefaultStopwords() => _stopwords?.Any() ?? false || _withNoStopwords ;
+
+        /// <summary>
+        /// Builder method for setting the index with a custom stopword list,
+        /// to be ignored during indexing and search time
+        /// If not set, FT.CREATE takes the default list of stopwords. If {count} is set to 0, the index does not have stopwords.
+        /// </summary>
+        /// <param name="stopwords">A collection of stopwords which will override the defaults</param>
+        /// <returns></returns>
+        public BaseRediSearchIndexBuilder<TFieldBuilder> WithStopwords(params string[] stopwords)
+        {
+            if (_withNoStopwords)
+            {
+                throw new Exception("Conflicting Stopwords configuration");
+            }
+            if (_stopwords == null)
+            {
+                _stopwords = new List<string>(stopwords.Count());
+            }
+
+            _stopwords.AddRange(stopwords);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Builder method for setting the index to use no stopwords
+        /// This must be explicitly called to override the default stopwords list.
+        /// </summary>
+        /// <returns></returns>
+        public BaseRediSearchIndexBuilder<TFieldBuilder> WithNoStopwords(){
+            if (_stopwords != null)
+            {
+                throw new Exception("Conflicting Stopwords configuration");
+            }
+            _withNoStopwords = true;
+            return this;
+        }
+
         private bool _skipInitialScan;
 
         /// <summary>
@@ -275,6 +317,7 @@ namespace RediSearchClient.Indexes
             argumentLength += _noHighLights ? 1 : 0; // [NOHL]
             argumentLength += _noFields ? 1 : 0; // [NOFIELDS]
             argumentLength += _noFrequencies ? 1 : 0; // [NOFREQS]
+            argumentLength += OverrideDefaultStopwords() ? 2 + _stopwords.Count : 0; // [STOPWORDS {count} [{stopwords} ..]]
             argumentLength += _skipInitialScan ? 1 : 0; // [SKIPINITIALSCAN]
 
             // If there are no schema fields we should probably throw an exception eh?
@@ -385,6 +428,22 @@ namespace RediSearchClient.Indexes
             if (_noFrequencies)
             {
                 result[++currentArgumentIndex] = "NOFREQS";
+            }
+
+            // [STOPWORDS {count} [{stopwords} {prefix} ..]
+            if (OverrideDefaultStopwords())
+            {
+                result[++currentArgumentIndex] = "STOPWORDS";
+
+                if (_withNoStopwords){ 
+                    result[++currentArgumentIndex] = 0;
+                } else {
+                    result[++currentArgumentIndex] = _stopwords.Count;
+                    foreach (var stopword in _stopwords)
+                    {
+                        result[++currentArgumentIndex] = stopword;
+                    } 
+                }
             }
 
             // [SKIPINITIALSCAN]
