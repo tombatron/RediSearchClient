@@ -317,7 +317,7 @@ namespace RediSearchClient.Indexes
             argumentLength += _noHighLights ? 1 : 0; // [NOHL]
             argumentLength += _noFields ? 1 : 0; // [NOFIELDS]
             argumentLength += _noFrequencies ? 1 : 0; // [NOFREQS]
-            argumentLength += OverrideDefaultStopwords() ? 2 + _stopwords.Count : 0; // [STOPWORDS {count} [{stopwords} ..]]
+            argumentLength += OverrideDefaultStopwords() ? 2 + (_stopwords?.Count ?? 0) : 0; // [STOPWORDS {count} [{stopwords} ..]]
             argumentLength += _skipInitialScan ? 1 : 0; // [SKIPINITIALSCAN]
 
             // If there are no schema fields we should probably throw an exception eh?
