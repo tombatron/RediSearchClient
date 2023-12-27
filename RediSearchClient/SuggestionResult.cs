@@ -27,6 +27,10 @@ namespace RediSearchClient
 
         internal static SuggestionResult[] CreateArray(RedisResult redisResult, bool withScores, bool withPayloads)
         {
+            if (redisResult.IsNull)
+            {
+                return new SuggestionResult[0];
+            }
             var redisResultArray = (RedisResult[])redisResult;
 
             var suggestionComponentLength = 1 + (withScores ? 1 : 0) + (withPayloads ? 1 : 0);
