@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using System;
 
 namespace RediSearchClient
 {
@@ -29,7 +30,7 @@ namespace RediSearchClient
         {
             if (redisResult.IsNull)
             {
-                return new SuggestionResult[0];
+                return Array.Empty<SuggestionResult>();
             }
             var redisResultArray = (RedisResult[])redisResult;
 
