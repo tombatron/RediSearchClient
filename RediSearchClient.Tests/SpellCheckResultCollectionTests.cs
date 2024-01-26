@@ -1,3 +1,4 @@
+using StackExchange.Redis;
 using Xunit;
 
 namespace RediSearchClient.Tests
@@ -37,6 +38,15 @@ namespace RediSearchClient.Tests
             }
 
             Assert.Equal(5, count);
+        }
+
+        [Fact]
+        public void Create_ReturnsEmptyArray_WithNullInput()
+        {
+            RedisResult redisResult = RedisResult.Create(new RedisValue(null));
+            var res = SpellCheckResult.CreateArray(redisResult);
+
+            Assert.Empty(res);
         }
 
         [Fact]
