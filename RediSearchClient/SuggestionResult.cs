@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using System;
 
 namespace RediSearchClient
 {
@@ -27,6 +28,10 @@ namespace RediSearchClient
 
         internal static SuggestionResult[] CreateArray(RedisResult redisResult, bool withScores, bool withPayloads)
         {
+            if (redisResult.IsNull)
+            {
+                return Array.Empty<SuggestionResult>();
+            }
             var redisResultArray = (RedisResult[])redisResult;
 
             var suggestionComponentLength = 1 + (withScores ? 1 : 0) + (withPayloads ? 1 : 0);

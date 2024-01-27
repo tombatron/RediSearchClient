@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using StackExchange.Redis;
 
 namespace RediSearchClient
@@ -69,6 +69,10 @@ namespace RediSearchClient
 
         internal static SpellCheckResult[] CreateArray(RedisResult redisResult)
         {
+            if (redisResult.IsNull)
+            {
+                return Array.Empty<SpellCheckResult>();
+            }
             var redisResultArray = (RedisResult[])redisResult;
 
             var results = new SpellCheckResult[redisResultArray.Length];
