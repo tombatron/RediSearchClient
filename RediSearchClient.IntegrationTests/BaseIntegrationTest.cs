@@ -18,7 +18,7 @@ namespace RediSearchClient.IntegrationTests
 
         protected virtual void Setup()
         {
-            _muxr = ConnectionMultiplexer.Connect("192.168.86.40");
+            _muxr = ConnectionMultiplexer.Connect("localhost");
 
             _db = _muxr.GetDatabase(0);
 
