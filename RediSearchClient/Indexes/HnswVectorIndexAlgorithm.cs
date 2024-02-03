@@ -27,6 +27,7 @@ namespace RediSearchClient.Indexes
             _type = type;
             _dimensions = dimensions;
             _distanceMetric = distanceMetric;
+
             _initialCap = initialCap;
             _m = m;
             _efConstruction = efConstruction;

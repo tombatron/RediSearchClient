@@ -3,18 +3,16 @@
     internal sealed class VectorSchemaField : IRediSearchSchemaField
     {
         private readonly string _name;
-        private readonly int _dimensions;
-        private readonly DistanceMetric _distanceMetric;
-        private readonly VectorType _vectorType;
+        private readonly VectorIndexAlgorithm _vectorIndexAlgorithm;
 
         public object[] FieldArguments => GenerateArguments();
 
-        public VectorSchemaField(string name, int dimensions, DistanceMetric distanceMetric, VectorType vectorType)
+        public VectorSchemaField(
+            string name, 
+            VectorIndexAlgorithm vectorIndexAlgorithm)
         {
             _name = name;
-            _dimensions = dimensions;
-            _distanceMetric = distanceMetric;
-            _vectorType = vectorType;
+            _vectorIndexAlgorithm = vectorIndexAlgorithm;
         }
 
         private object[] GenerateArguments()
