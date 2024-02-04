@@ -17,7 +17,11 @@
 
         private object[] GenerateArguments()
         {
-            return new object[] { 0 };
+            var vectorIndexSpecification = _vectorIndexAlgorithm.GenerateArguments();
+
+            vectorIndexSpecification[0] = _name;
+
+            return vectorIndexSpecification;
         }
     }
 }
