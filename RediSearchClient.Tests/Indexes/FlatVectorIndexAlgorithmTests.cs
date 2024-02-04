@@ -106,19 +106,19 @@ namespace RediSearchClient.Tests.Indexes
                         new object[]
                         {
                             new FlatVectorIndexAlgorithm(VectorType.FLOAT32, 10, DistanceMetric.IP, null, null),
-                            3
+                            6
                         },
 
                         new object[]
                         {
                             new FlatVectorIndexAlgorithm(VectorType.FLOAT32, 10, DistanceMetric.IP, 100, null),
-                            4
+                            8
                         },
 
                         new object[]
                         {
                             new FlatVectorIndexAlgorithm(VectorType.FLOAT32, 10, DistanceMetric.IP, 100, 200),
-                            5
+                            10
                         },
                     };
                 }
