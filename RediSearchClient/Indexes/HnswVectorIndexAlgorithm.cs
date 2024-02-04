@@ -18,6 +18,7 @@ namespace RediSearchClient.Indexes
             VectorType type,
             int dimensions,
             DistanceMetric distanceMetric,
+
             int? initialCap,
             int? m,
             int? efConstruction,
