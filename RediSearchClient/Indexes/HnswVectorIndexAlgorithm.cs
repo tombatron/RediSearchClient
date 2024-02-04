@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RediSearchClient.Indexes
+﻿namespace RediSearchClient.Indexes
 {
     internal class HnswVectorIndexAlgorithm : VectorIndexAlgorithm
     {
@@ -45,7 +43,81 @@ namespace RediSearchClient.Indexes
         /// <returns></returns>
         internal override object[] GenerateArguments()
         {
-            throw new NotImplementedException();
+            var argCount = 10;
+
+            if (!(_initialCap is null))
+            {
+                argCount += 2;
+            }
+
+            if(!(_m is null))
+            {
+                argCount += 2;
+            }
+
+            if(!(_efConstruction is null))
+            {
+                argCount += 2;
+            }
+
+            if(!(_efRuntime is null))
+            {
+                argCount += 2;
+            }
+
+            if(!(_epsilon is null))
+            {
+                argCount += 2;
+            }
+
+            var args = new object[argCount];
+
+            args[1] = "VECTOR";
+            args[2] = "HNSW";
+            args[3] = (argCount - 4);
+
+            args[4] = "TYPE";
+            args[5] = _type.ToString();
+
+            args[6] = "DIM";
+            args[7] = _dimensions;
+
+            args[8] = "DISTANCE_METRIC";
+            args[9] = _distanceMetric.ToString();
+
+            var currentIndex = 9;
+
+            if (!(_initialCap is null))
+            {
+                args[++currentIndex] = "INITIAL_CAP";
+                args[++currentIndex] = _initialCap;
+            }
+
+            if (!(_m is null))
+            {
+                args[++currentIndex] = "M";
+                args[++currentIndex] = _m;
+            }
+
+            if (!(_efConstruction is null))
+            {
+                args[++currentIndex] = "EF_CONSTRUCTION";
+                args[++currentIndex] = _efConstruction;
+            }
+
+            if (!(_efRuntime is null))
+            {
+                args[++currentIndex] = "EF_RUNTIME";
+                args[++currentIndex] = _efRuntime;
+            }
+
+            if (!(_epsilon is null))
+            {
+                args[++currentIndex] = "EPSILON";
+                args[++currentIndex] = _epsilon;
+            }
+
+            return args;
         }
     }
 }
