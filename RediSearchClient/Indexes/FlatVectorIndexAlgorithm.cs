@@ -27,6 +27,13 @@ namespace RediSearchClient.Indexes
             _blockSize = blockSize;
         }
 
+        /// <summary>
+        /// This method will return an `object[]` containing the bulk of the vector index
+        /// specification.
+        /// 
+        /// The 0th item in the array is null to allow for a space to put the field name.
+        /// </summary>
+        /// <returns></returns>
         internal override object[] GenerateArguments()
         {
             throw new NotImplementedException();
