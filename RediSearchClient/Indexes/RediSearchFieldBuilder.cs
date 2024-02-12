@@ -46,5 +46,14 @@ namespace RediSearchClient.Indexes
         /// <returns></returns>
         public IRediSearchSchemaField Geo(string fieldName) =>
             new GeoSchemaField(fieldName);
+
+        /// <summary>
+        /// Create a "VECTOR" field on the schema.
+        /// </summary>
+        /// <param name="fieldName">Name of the vector field being indexed.</param>
+        /// <param name="vectorIndexAlgorithm">HNSW or FLAT with the attendent parameters.</param>
+        /// <returns></returns>
+        public IRediSearchSchemaField Vector(string fieldName, VectorIndexAlgorithm vectorIndexAlgorithm) =>
+            new VectorSchemaField(fieldName, vectorIndexAlgorithm);
     }
 }
