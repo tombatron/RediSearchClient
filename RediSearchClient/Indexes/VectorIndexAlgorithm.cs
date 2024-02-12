@@ -7,7 +7,7 @@
     /// </summary>
     public abstract class VectorIndexAlgorithm
     {
-        internal abstract object[] GenerateArguments();
+        internal abstract object[] GenerateArguments(int namePadding = 1);
 
         /// <summary>
         /// The "FLAT" (Fast, Lightweight, and Accurate Top-k) vector index algorithm 

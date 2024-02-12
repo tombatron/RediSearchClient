@@ -41,9 +41,9 @@
         /// The 0th item in the array is null to allow for a space to put the field name.
         /// </summary>
         /// <returns></returns>
-        internal override object[] GenerateArguments()
+        internal override object[] GenerateArguments(int namePadding = 1)
         {
-            var argCount = 10;
+            var argCount = 9 + namePadding;
 
             if (!(_initialCap is null))
             {
@@ -72,20 +72,22 @@
 
             var args = new object[argCount];
 
-            args[1] = "VECTOR";
-            args[2] = "HNSW";
-            args[3] = (argCount - 4);
+            var currentIndex = (namePadding - 1);
 
-            args[4] = "TYPE";
-            args[5] = _type.ToString();
+            args[++currentIndex] = "VECTOR";
+            args[++currentIndex] = "HNSW";
+            args[++currentIndex] = (argCount - 4);
 
-            args[6] = "DIM";
-            args[7] = _dimensions;
+            args[++currentIndex] = "TYPE";
+            args[++currentIndex] = _type.ToString();
 
-            args[8] = "DISTANCE_METRIC";
-            args[9] = _distanceMetric.ToString();
+            args[++currentIndex] = "DIM";
+            args[++currentIndex] = _dimensions;
 
-            var currentIndex = 9;
+            args[++currentIndex] = "DISTANCE_METRIC";
+            args[++currentIndex] = _distanceMetric.ToString();
+
+            
 
             if (!(_initialCap is null))
             {

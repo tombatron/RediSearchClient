@@ -32,9 +32,9 @@
         /// The 0th item in the array is null to allow for a space to put the field name.
         /// </summary>
         /// <returns></returns>
-        internal override object[] GenerateArguments()
+        internal override object[] GenerateArguments(int namePadding = 1)
         {
-            var argCount = 10;
+            var argCount = 9 + namePadding;
 
             if (!(_initialCap is null))
             {
