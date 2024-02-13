@@ -52,5 +52,15 @@
         /// <returns></returns>
         public IRediSearchSchemaField Geo(string jsonPath, string alias) => 
             new GeoJsonSchemaField(jsonPath, alias);
+
+        /// <summary>
+        /// Creates a "VECTOR" field on the schema.
+        /// </summary>
+        /// <param name="jsonPath">JSONPath to the desired field.</param>
+        /// <param name="alias">The alias used to refer to the value at the specified JSONPath.</param>
+        /// <param name="vectorIndexAlgorithm">HNSW or FLAT with the attendent parameters.</param>
+        /// <returns></returns>
+        public IRediSearchSchemaField Vector(string jsonPath, string alias, VectorIndexAlgorithm vectorIndexAlgorithm) =>
+            new VectorSchemaField(jsonPath, alias, vectorIndexAlgorithm);
     }
 }

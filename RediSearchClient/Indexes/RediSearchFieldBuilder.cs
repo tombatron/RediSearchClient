@@ -55,5 +55,16 @@ namespace RediSearchClient.Indexes
         /// <returns></returns>
         public IRediSearchSchemaField Vector(string fieldName, VectorIndexAlgorithm vectorIndexAlgorithm) =>
             new VectorSchemaField(fieldName, vectorIndexAlgorithm);
+
+        /// <summary>
+        /// Create a "VECTOR" field with alias. on the schema.
+        /// </summary>
+        /// <param name="fieldName">Name of the vector field being indexed.</param>
+        /// <param name="alias">Alias of the vector field.</param>
+        /// <param name="vectorIndexAlgorithm">HNSW or FLAT with the attendent parameters.</param>
+        /// <returns></returns>
+        public IRediSearchSchemaField Vector(string fieldName, string alias, VectorIndexAlgorithm vectorIndexAlgorithm) =>
+            new VectorSchemaField(fieldName, alias, vectorIndexAlgorithm);
+
     }
 }
