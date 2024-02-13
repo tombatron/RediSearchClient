@@ -88,13 +88,40 @@ namespace RediSearchClient.Tests.Indexes
 
                 var arguments = vectorField.FieldArguments;
 
-                Assert.Null(arguments);
+                Assert.Equal("test_flat", arguments[0]);
+                Assert.Equal("VECTOR", arguments[1]);
+                Assert.Equal("FLAT", arguments[2]);
+                Assert.Equal(10, arguments[3]);
+                Assert.Equal("TYPE", arguments[4]);
+                Assert.Equal("FLOAT64", arguments[5]);
+                Assert.Equal("DIM", arguments[6]);
+                Assert.Equal(32, arguments[7]);
+                Assert.Equal("DISTANCE_METRIC", arguments[8]);
+                Assert.Equal("L2", arguments[9]);
+                Assert.Equal("INITIAL_CAP", arguments[10]);
+                Assert.Equal(20, arguments[11]);
+                Assert.Equal("BLOCK_SIZE", arguments[12]);
+                Assert.Equal(50, arguments[13]);
             }
 
             [Fact]
             public void WillReturnAppropriateArgumentsWithAlias()
             {
+                var vectorField = new VectorSchemaField("test_flat", alias: "test_flat_alias",
+                    VectorIndexAlgorithm.FLAT(
+                        type: VectorType.FLOAT64,
+                        dimensions: 32,
+                        distanceMetric: DistanceMetric.L2,
 
+                        initialCap: 20,
+                        blockSize: 50
+                    ));
+
+                var arguments = vectorField.FieldArguments;
+
+                Assert.Equal("test_flat", arguments[0]);
+                Assert.Equal("AS", arguments[1]);
+                Assert.Equal("test_flat_alias", arguments[2]);
             }
         }
     }

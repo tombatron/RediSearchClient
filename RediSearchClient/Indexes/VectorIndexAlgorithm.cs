@@ -29,10 +29,9 @@
             DistanceMetric distanceMetric,
 
             int? initialCap = null,
-            int? blockSize = null)
-        {
-            return default;
-        }
+            int? blockSize = null) =>
+                new FlatVectorIndexAlgorithm(type, dimensions, distanceMetric, initialCap, blockSize);
+
 
         /// <summary>
         /// The HNSW (Hierarchical Navigable Small World) algorithm is a scalable and 
