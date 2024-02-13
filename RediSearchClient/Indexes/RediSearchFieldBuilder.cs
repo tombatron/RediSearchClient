@@ -57,7 +57,7 @@ namespace RediSearchClient.Indexes
             new VectorSchemaField(fieldName, vectorIndexAlgorithm);
 
         /// <summary>
-        /// Create a "VECTOR" field with alias. on the schema.
+        /// Create a "VECTOR" field with alias on the schema.
         /// </summary>
         /// <param name="fieldName">Name of the vector field being indexed.</param>
         /// <param name="alias">Alias of the vector field.</param>
