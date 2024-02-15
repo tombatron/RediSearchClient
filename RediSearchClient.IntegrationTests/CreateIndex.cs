@@ -116,6 +116,94 @@ namespace RediSearchClient.IntegrationTests
             Assert.Contains(indexName, indexes);
         }
 
+        [Fact]
+        public void WillCreateHashIndexWithFlatVectorField()
+        {
+            var indexDefinition = GetHashIndexWithFlatVectorField();
+
+            var indexName = $"hash_index_{_indexName}_flatvector";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
+        }
+
+        [Fact]
+        public async Task WillCreateHashIndexWithFlatVectorFieldAsync()
+        {
+            var indexDefinition = GetHashIndexWithFlatVectorField();
+
+            var indexName = $"hash_index_{_indexName}_flatvector_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
+        }
+
+        [Fact]
+        public void WillCreateHashIndexWithAliasedFlatVectorField()
+        {
+
+        }
+
+        [Fact]
+        public async Task WillCreateHashIndexWithAliasedFlatVectorFieldAsync()
+        {
+
+        }
+
+        [Fact]
+        public void WillCreateJsonIndexWithFlatVectorField()
+        {
+
+        }
+
+        [Fact]
+        public async Task WillCreateJsonIndexWithFlatVectorFieldAsync()
+        {
+
+        }
+
+        [Fact]
+        public void WillCreateHashIndexWithHnswVectorField()
+        {
+
+        }
+
+        [Fact]
+        public async Task WillCreateHashIndexWithHnswVectorFieldAsync()
+        {
+
+        }
+
+        [Fact]
+        public void WillCreateHashIndexWithAliasedHnswVectorField()
+        {
+
+        }
+
+        [Fact]
+        public async Task WillCreateHashIndexWithAliasedHnswVectorFieldAsync()
+        {
+
+        }
+
+        [Fact]
+        public void WillCreateJsonIndexWithHnswVectorField()
+        {
+
+        }
+
+        [Fact]
+        public async Task WillCreateJsonIndexWithHnswVectorFieldAsync()
+        {
+
+        }
+
         private RediSearchIndexDefinition GetIndexDefinition()
         {
             return RediSearchIndex
@@ -184,6 +272,118 @@ namespace RediSearchClient.IntegrationTests
                     x => x.Numeric("$.DiedSeconds", "Died", sortable: true)
                 )
                 .Build();
-        }        
+        }
+
+        private RediSearchIndexDefinition GetHashIndexWithFlatVectorField()
+        {
+            return RediSearchIndex
+                .OnHash()
+                .WithSchema(
+                    x=> x.Text("Name"),
+                    x=> x.Vector("Embedding", 
+                        VectorIndexAlgorithm.FLAT(
+                            VectorType.FLOAT32, 
+                            32, 
+                            DistanceMetric.L2, 
+                            initialCap: 30, 
+                            blockSize: 20))
+                )
+                .Build();
+        }
+
+        public RediSearchIndexDefinition GetHashIndexWithFlatVectorFieldAliased()
+        {
+            return RediSearchIndex
+                .OnHash()
+                .WithSchema(
+                    x => x.Text("Name"),
+                    x => x.Vector("Embedding", alias: "AliasedEmbedding",
+                        VectorIndexAlgorithm.FLAT(
+                            VectorType.FLOAT32,
+                            32,
+                            DistanceMetric.L2,
+                            initialCap: 30,
+                            blockSize: 20))
+                )
+                .Build();
+        }
+
+        public RediSearchIndexDefinition GetJsonIndexWithFlatVectorField()
+        {
+            return RediSearchIndex
+                .OnJson()
+                .WithSchema(
+                    x=> x.Text("$.Id", "Id"),
+                    x=> x.Vector("$.Embedding", alias: "Embedded",
+                        VectorIndexAlgorithm.FLAT(
+                            VectorType.FLOAT64,
+                            33,
+                            DistanceMetric.L2,
+                            initialCap: 23,
+                            blockSize: 22
+                            ))
+                )
+                .Build();
+        }
+
+        private RediSearchIndexDefinition GetHashIndexWithHnswVectorField()
+        {
+            return RediSearchIndex
+                .OnHash()
+                .WithSchema(
+                    x => x.Text("Name"),
+                    x => x.Vector("Embedding",
+                        VectorIndexAlgorithm.HNSW(
+                            VectorType.FLOAT32,
+                            32,
+                            DistanceMetric.COSINE,
+                            initialCap: 20,
+                            m: 30,
+                            efConstruction: 22,
+                            efRuntime: 1,
+                            epsilon: 1.2f))
+                )
+                .Build();
+        }
+
+        public RediSearchIndexDefinition GetHashIndexWithHnswVectorFieldAliased()
+        {
+            return RediSearchIndex
+                .OnHash()
+                .WithSchema(
+                    x => x.Text("Name"),
+                    x => x.Vector("Embedding", alias: "AliasedEmbedding",
+                        VectorIndexAlgorithm.HNSW(
+                            VectorType.FLOAT32,
+                            32,
+                            DistanceMetric.COSINE,
+                            initialCap: 20,
+                            m: 30,
+                            efConstruction: 22,
+                            efRuntime: 1,
+                            epsilon: 1.2f))
+                )
+                .Build();
+        }
+
+        public RediSearchIndexDefinition GetJsonIndexWithHnswVectorField()
+        {
+            return RediSearchIndex
+                .OnJson()
+                .WithSchema(
+                    x => x.Text("$.Id", "Id"),
+                    x => x.Vector("$.Embedding", alias: "Embedded",
+                        VectorIndexAlgorithm.HNSW(
+                            VectorType.FLOAT32,
+                            32,
+                            DistanceMetric.COSINE,
+                            initialCap: 20,
+                            m: 30,
+                            efConstruction: 22,
+                            efRuntime: 1,
+                            epsilon: 1.2f))
+                )
+                .Build();
+        }
     }
 }
