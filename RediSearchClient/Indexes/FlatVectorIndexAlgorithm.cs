@@ -34,34 +34,39 @@
         /// <returns></returns>
         internal override object[] GenerateArguments(int namePadding = 1)
         {
-            var argCount = 9 + namePadding;
+            var argCount = 6;
+            var resultLength = 9 + namePadding;
 
             if (!(_initialCap is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
             if (!(_blockSize is null)) 
             { 
                 argCount += 2;
+                resultLength += 2;
             }
 
-            var args = new object[argCount];
+            var args = new object[resultLength];
 
-            args[1] = "VECTOR";
-            args[2] = "FLAT";
-            args[3] = (argCount - 4);
+            var currentIndex = 2;
 
-            args[4] = "TYPE";
-            args[5] = _type.ToString();
+            args[++currentIndex] = "VECTOR";
+            args[++currentIndex] = "FLAT";
+            args[++currentIndex] = argCount;
 
-            args[6] = "DIM";
-            args[7] = _dimensions;
+            args[++currentIndex] = "TYPE";
+            args[++currentIndex] = _type.ToString();
 
-            args[8] = "DISTANCE_METRIC";
-            args[9] = _distanceMetric.ToString();
+            args[++currentIndex] = "DIM";
+            args[++currentIndex] = _dimensions;
 
-            var currentIndex = 9;
+            args[++currentIndex] = "DISTANCE_METRIC";
+            args[++currentIndex] = _distanceMetric.ToString();
+
+            
 
             if (!(_initialCap is null))
             {

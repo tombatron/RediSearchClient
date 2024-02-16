@@ -147,61 +147,141 @@ namespace RediSearchClient.IntegrationTests
         [Fact]
         public void WillCreateHashIndexWithAliasedFlatVectorField()
         {
+            var indexDefinition = GetHashIndexWithFlatVectorFieldAliased();
 
+            var indexName = $"hash_index_{_indexName}_flatvector_aliased";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateHashIndexWithAliasedFlatVectorFieldAsync()
         {
+            var indexDefinition = GetHashIndexWithFlatVectorFieldAliased();
 
+            var indexName = $"hash_index_{_indexName}_flatvector_aliased_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public void WillCreateJsonIndexWithFlatVectorField()
         {
+            var indexDefinition = GetJsonIndexWithFlatVectorField();
 
+            var indexName = $"json_index_{_indexName}_flatvector";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateJsonIndexWithFlatVectorFieldAsync()
         {
+            var indexDefinition = GetJsonIndexWithFlatVectorField();
 
+            var indexName = $"json_index_{_indexName}_flatvector_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public void WillCreateHashIndexWithHnswVectorField()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorField();
 
+            var indexName = $"hash_index_{_indexName}_hnswvector";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateHashIndexWithHnswVectorFieldAsync()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorField();
 
+            var indexName = $"hash_index_{_indexName}_hnswvector_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public void WillCreateHashIndexWithAliasedHnswVectorField()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorFieldAliased();
 
+            var indexName = $"hash_index_{_indexName}_hnswvector_aliased";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateHashIndexWithAliasedHnswVectorFieldAsync()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorFieldAliased();
 
+            var indexName = $"hash_index_{_indexName}_hnswvector_aliased_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public void WillCreateJsonIndexWithHnswVectorField()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorField();
 
+            var indexName = $"json_index_{_indexName}_hnswvector";
+
+            _db.CreateIndex($"{indexName}", indexDefinition);
+
+            var indexes = _db.ListIndexes();
+
+            Assert.Contains(indexName, indexes);
         }
 
         [Fact]
         public async Task WillCreateJsonIndexWithHnswVectorFieldAsync()
         {
+            var indexDefinition = GetHashIndexWithHnswVectorField();
 
+            var indexName = $"json_index_{_indexName}_hnswvector_async";
+
+            await _db.CreateIndexAsync($"{indexName}", indexDefinition);
+
+            var indexes = await _db.ListIndexesAsync();
+
+            Assert.Contains(indexName, indexes);
         }
 
         private RediSearchIndexDefinition GetIndexDefinition()
