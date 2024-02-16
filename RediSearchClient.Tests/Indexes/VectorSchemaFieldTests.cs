@@ -68,6 +68,7 @@ namespace RediSearchClient.Tests.Indexes
                 Assert.Equal("test_hnsw", arguments[0]);
                 Assert.Equal("AS", arguments[1]);
                 Assert.Equal("test_alias", arguments[2]);
+                Assert.Equal("VECTOR", arguments[3]);
             }
         }
 
@@ -122,6 +123,7 @@ namespace RediSearchClient.Tests.Indexes
                 Assert.Equal("test_flat", arguments[0]);
                 Assert.Equal("AS", arguments[1]);
                 Assert.Equal("test_flat_alias", arguments[2]);
+                Assert.Equal("VECTOR", arguments[3]);
             }
         }
     }

@@ -43,40 +43,46 @@
         /// <returns></returns>
         internal override object[] GenerateArguments(int namePadding = 1)
         {
-            var argCount = 9 + namePadding;
+            var argCount = 6;
+            var resultLength = 9 + namePadding;
 
             if (!(_initialCap is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
             if(!(_m is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
             if(!(_efConstruction is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
             if(!(_efRuntime is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
             if(!(_epsilon is null))
             {
                 argCount += 2;
+                resultLength += 2;
             }
 
-            var args = new object[argCount];
+            var args = new object[resultLength];
 
             var currentIndex = (namePadding - 1);
 
             args[++currentIndex] = "VECTOR";
             args[++currentIndex] = "HNSW";
-            args[++currentIndex] = (argCount - 4);
+            args[++currentIndex] = argCount;
 
             args[++currentIndex] = "TYPE";
             args[++currentIndex] = _type.ToString();
@@ -86,8 +92,6 @@
 
             args[++currentIndex] = "DISTANCE_METRIC";
             args[++currentIndex] = _distanceMetric.ToString();
-
-            
 
             if (!(_initialCap is null))
             {

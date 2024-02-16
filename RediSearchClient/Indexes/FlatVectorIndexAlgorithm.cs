@@ -51,7 +51,7 @@
 
             var args = new object[resultLength];
 
-            var currentIndex = 2;
+            var currentIndex = (namePadding - 1);
 
             args[++currentIndex] = "VECTOR";
             args[++currentIndex] = "FLAT";
