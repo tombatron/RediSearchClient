@@ -362,9 +362,9 @@ namespace RediSearchClient.IntegrationTests
                     x=> x.Text("Name"),
                     x=> x.Vector("Embedding", 
                         VectorIndexAlgorithm.FLAT(
-                            VectorType.FLOAT32, 
-                            32, 
-                            DistanceMetric.L2, 
+                            type: VectorType.FLOAT32, 
+                            dimensions: 32, 
+                            distanceMetric: DistanceMetric.L2, 
                             initialCap: 30, 
                             blockSize: 20))
                 )
@@ -396,9 +396,9 @@ namespace RediSearchClient.IntegrationTests
                     x=> x.Text("$.Id", "Id"),
                     x=> x.Vector("$.Embedding", alias: "Embedded",
                         VectorIndexAlgorithm.FLAT(
-                            VectorType.FLOAT64,
-                            33,
-                            DistanceMetric.L2,
+                            type: VectorType.FLOAT64,
+                            dimensions: 33,
+                            distanceMetric: DistanceMetric.L2,
                             initialCap: 23,
                             blockSize: 22
                             ))
