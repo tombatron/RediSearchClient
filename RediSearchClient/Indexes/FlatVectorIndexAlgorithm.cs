@@ -43,8 +43,8 @@
                 resultLength += 2;
             }
 
-            if (!(_blockSize is null)) 
-            { 
+            if (!(_blockSize is null))
+            {
                 argCount += 2;
                 resultLength += 2;
             }
@@ -65,8 +65,6 @@
 
             args[++currentIndex] = "DISTANCE_METRIC";
             args[++currentIndex] = _distanceMetric.ToString();
-
-            
 
             if (!(_initialCap is null))
             {
