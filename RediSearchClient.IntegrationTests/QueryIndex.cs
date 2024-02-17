@@ -71,7 +71,7 @@ namespace RediSearchClient.IntegrationTests
             _db.HashSet($"{_recordPrefix}:5", new[] { new HashEntry("first_name", "Glen") });
 
             var index = RediSearchIndex
-                .On(RediSearchStructure.HASH)
+                .OnHash()
                 .ForKeysWithPrefix($"{_recordPrefix}:")
                 .WithSchema(x => x.Text("first_name"))
                 .Build();
