@@ -360,6 +360,15 @@ namespace RediSearchClient.Query
         public RediSearchKnnVectorQueryBuilder VectorKnn() =>
             new RediSearchKnnVectorQueryBuilder(_indexName);
 
+        /// <summary>
+        /// Builder method for returning the Range vector query builder.
+        /// 
+        /// https://redis.io/docs/interact/search-and-query/query/vector-search/
+        /// </summary>
+        /// <returns></returns>
+        public RediSearchRangeVectorQueryBuilder VectorRange() =>
+            new RediSearchRangeVectorQueryBuilder(_indexName);
+
         private static readonly RediSearchNumericFilterBuilder _numericFilterBuilder = new RediSearchNumericFilterBuilder();
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
