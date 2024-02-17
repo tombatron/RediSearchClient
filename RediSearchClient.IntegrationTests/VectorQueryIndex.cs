@@ -1,4 +1,5 @@
 ﻿using NReJSON;
+using RediSearchClient.Indexes;
 using StackExchange.Redis;
 using System;
 using System.IO;
@@ -17,6 +18,8 @@ public class VectorQueryIndex : BaseIntegrationTest
 
     private void CreateTestVectorData()
     {
+        // Load the vector data.
+
         var sampleDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Samples");
         var binFiles = Directory.GetFiles(sampleDirectory, "*.bin");
         var names = binFiles.Select(x => Path.GetFileNameWithoutExtension(x)).ToArray();
@@ -44,5 +47,35 @@ public class VectorQueryIndex : BaseIntegrationTest
                 feature_embeddings = fileFloats
             });
         }
+
+        // Create the test indexes. 
+        var hashIndex = RediSearchIndex
+            .OnHash()
+            .ForKeysWithPrefix("test_hash_vector:")
+            .WithSchema(
+                s => s.Text("name"),
+                s => s.Vector("feature_embeddings", 
+                    VectorIndexAlgorithm.HNSW(
+                        type: VectorType.FLOAT32, 
+                        dimensions: 512, // Used ResNet34 to generate feature embeddings...
+                        distanceMetric: DistanceMetric.COSINE
+                     ))
+                ).Build();
+
+        var jsonIndex = RediSearchIndex
+            .OnJson()
+            .ForKeysWithPrefix("test_hash_vector:")
+            .WithSchema(
+                s => s.Text("$.name", "name"),
+                s => s.Vector("$.feature_embeddings", "feature_embeddings",
+                    VectorIndexAlgorithm.HNSW(
+                        type: VectorType.FLOAT32,
+                        dimensions: 512, // Used ResNet34 to generate feature embeddings...
+                        distanceMetric: DistanceMetric.COSINE
+                     ))
+                ).Build();
+
+        _db.CreateIndex("test_hash_vector_query", hashIndex);
+        _db.CreateIndex("test_json_vector_query", jsonIndex);
     }
 }
