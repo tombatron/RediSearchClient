@@ -29,6 +29,11 @@ public class VectorQueryIndex : BaseIntegrationTest
                         .NumberOfNeighbors(10)
                         .FieldName("feature_embeddings")
                         .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Limit(0, 10)
+                        .Dialect(2)
+                        .SortByDistance()
+                        .EfRuntime(10)
+                        .Epsilon(0.01f)
                     .Build();
 
             var rangeQuery = RediSearchQuery
@@ -37,6 +42,10 @@ public class VectorQueryIndex : BaseIntegrationTest
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
                         .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .DistanceFieldName("distance")
+                        .Epsilon(0.5f)
+                        .Dialect(2)
+                        .SortBy("distance")
                     .Build();
         }
 
