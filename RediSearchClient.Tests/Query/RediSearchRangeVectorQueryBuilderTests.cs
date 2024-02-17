@@ -24,7 +24,7 @@ public class RediSearchRangeVectorQueryBuilderTests
                 .Build();
 
         Assert.Equal("index_name", query.Fields[0]);
-        Assert.Equal("@feature_embeddings:[VECTOR_RANGE $r $BLOB]=>{$EPSILON:0.5; $YIELD_DISTANCE_AS: distance", query.Fields[1]);
+        Assert.Equal("@feature_embeddings:[VECTOR_RANGE $r $BLOB]=>{$EPSILON:0.5; $YIELD_DISTANCE_AS: distance}", query.Fields[1]);
         Assert.Equal("PARAMS", query.Fields[2]);
         Assert.Equal(4, query.Fields[3]);
         Assert.Equal("r", query.Fields[4]);

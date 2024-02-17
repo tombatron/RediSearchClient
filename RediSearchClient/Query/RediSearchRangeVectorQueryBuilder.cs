@@ -1,4 +1,8 @@
-﻿namespace RediSearchClient.Query
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace RediSearchClient.Query
 {
     /// <summary>
     /// Query builder for range type vector queries.
@@ -19,7 +23,7 @@
         /// <returns></returns>
         public RediSearchRangeVectorQueryBuilder FieldName(string fieldName)
         {
-            _fieldName = fieldName;
+            _fieldName = fieldName.StartsWith("@") ? fieldName.Substring(1) : fieldName;
 
             return this;
         }
@@ -143,7 +147,74 @@
         /// <returns></returns>
         public RediSearchQueryDefinition Build()
         {
-            return default;
+            var parameters = new List<object>(20);
+
+            parameters.Add(_indexName);
+
+            if (string.IsNullOrEmpty(_fieldName))
+            {
+                // TODO: Create a custom exception type...
+                throw new Exception("FieldName is required.");
+            }
+
+            var vectorQuery = new StringBuilder();
+
+            vectorQuery.Append($"@{_fieldName}:[VECTOR_RANGE $r $BLOB]");
+
+            // Check to see if we have any runtime parameters...
+            if (_epsilon.HasValue || !string.IsNullOrEmpty(_distanceFieldName))
+            {
+                // Looks like we have some...
+                vectorQuery.Append("=>{");
+
+                if (_epsilon.HasValue)
+                {
+                    vectorQuery.Append($"$EPSILON:{_epsilon.Value}; ");
+                }
+
+                if (!string.IsNullOrEmpty(_distanceFieldName))
+                {
+                    vectorQuery.Append($"$YIELD_DISTANCE_AS: {_distanceFieldName}");
+                }
+
+                // Close it off.
+                vectorQuery.Append("}");
+            }
+
+            parameters.Add(vectorQuery.ToString());
+
+            parameters.Add("PARAMS");
+            parameters.Add(4);
+
+            parameters.Add("r");
+            parameters.Add(_range);
+
+            parameters.Add("BLOB");
+            parameters.Add(_vector);
+
+            if (!string.IsNullOrEmpty(_sortByField))
+            {
+                parameters.Add("SORTBY");
+                parameters.Add(_sortByField);
+
+                if (_sortByAscending)
+                {
+                    parameters.Add("ASC");
+                }
+                else
+                {
+                    parameters.Add("DESC");
+                }
+            }
+
+            parameters.Add("LIMIT");
+            parameters.Add(_offset);
+            parameters.Add(_limit);
+
+            parameters.Add("DIALECT");
+            parameters.Add(_dialect);
+
+            return new RediSearchQueryDefinition(parameters.ToArray());
         }
     }
 }
