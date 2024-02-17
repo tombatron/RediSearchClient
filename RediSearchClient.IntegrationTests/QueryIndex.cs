@@ -5,6 +5,8 @@ using RediSearchClient.Indexes;
 using RediSearchClient.Query;
 using StackExchange.Redis;
 using Xunit;
+using System;
+using System.IO;
 
 namespace RediSearchClient.IntegrationTests
 {
@@ -83,5 +85,6 @@ namespace RediSearchClient.IntegrationTests
                 Thread.Sleep(500); // Yeah I know...
             }
         }
+
     }
 }
