@@ -19,32 +19,23 @@ public class VectorQueryIndex : BaseIntegrationTest
     private void CreateTestVectorData()
     {
         // Load the vector data.
-
-        var sampleDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Samples");
-        var binFiles = Directory.GetFiles(sampleDirectory, "*.bin");
-        var names = binFiles.Select(x => Path.GetFileNameWithoutExtension(x)).ToArray();
-
-        if (_db.KeyExists($"test_hash_vector:{names[0]}"))
+        if (_db.KeyExists($"test_hash_vector:{SampleData.SampleVectorData[0].Name}"))
         {
             return;
         }
 
-        foreach (var binFile in binFiles)
+        foreach (var vec in SampleData.SampleVectorData)
         {
-            var fileBytes = File.ReadAllBytes(binFile);
-            var fileFloats = Enumerable.Range(0, fileBytes.Length / sizeof(float)).Select(i => BitConverter.ToSingle(fileBytes, i * sizeof(float))).ToArray();
-            var name = Path.GetFileNameWithoutExtension(binFile);
-
-            _db.HashSet($"test_hash_vector:{name}", new[]
+            _db.HashSet($"test_hash_vector:{vec.Name}", new[]
             {
-                    new HashEntry("name", name),
-                    new HashEntry("feature_embeddings", fileBytes)
+                new HashEntry("name", vec.Name),
+                new HashEntry("feature_embeddings", vec.FileBytes)
             });
 
-            _db.JsonSet($"test_json_vector:{name}", new 
+            _db.JsonSet($"test_json_vector:{vec.Name}", new 
             { 
-                name = name,
-                feature_embeddings = fileFloats
+                name = vec.Name,
+                feature_embeddings = vec.FileFloats
             });
         }
 
