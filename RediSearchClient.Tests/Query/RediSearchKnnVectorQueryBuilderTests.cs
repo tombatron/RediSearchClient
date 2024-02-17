@@ -25,10 +25,10 @@ public class RediSearchKnnVectorQueryBuilderTests
                 .Build();
 
         Assert.Equal("index_name", query.Fields[0]);
-        Assert.Equal("(@category=='test')=>[KNN 10 @feature_embeddings $vector EF_RUNTIME $ef_runtime EPSILON $epsilon]", query.Fields[1]);
+        Assert.Equal("(@category=='test')=>[KNN 10 @feature_embeddings $BLOB EF_RUNTIME $ef_runtime EPSILON $epsilon]", query.Fields[1]);
         Assert.Equal("PARAMS", query.Fields[2]);
         Assert.Equal(6, query.Fields[3]);
-        Assert.Equal("vector", query.Fields[4]);
+        Assert.Equal("BLOB", query.Fields[4]);
         Assert.Equal(byteArray, query.Fields[5]);
         Assert.Equal("ef_runtime", query.Fields[6]);
         Assert.Equal(10, query.Fields[7]);

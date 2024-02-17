@@ -48,8 +48,6 @@ public class VectorQueryIndex : BaseIntegrationTest
                         .SortBy("distance")
                     .Build();
         }
-
-       
     }
 
     private void CreateTestVectorData()

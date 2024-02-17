@@ -120,6 +120,23 @@
             return this;
         }
 
+        private int _offset = 0;
+        private int _limit = 10;
+
+        /// <summary>
+        /// How many matches to return? 
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public RediSearchRangeVectorQueryBuilder Limit(int limit, int offset = 0)
+        {
+            _offset = offset;
+            _limit = limit;
+
+            return this;
+        }
+
         /// <summary>
         /// Builds the query definition.
         /// </summary>
