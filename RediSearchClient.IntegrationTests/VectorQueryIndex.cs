@@ -1,19 +1,46 @@
 ﻿using NReJSON;
 using RediSearchClient.Indexes;
+using RediSearchClient.Query;
 using StackExchange.Redis;
-using System;
-using System.IO;
-using System.Linq;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests;
 
 public class VectorQueryIndex : BaseIntegrationTest
 {
+    private const string HashVectorIndexName = "test_hash_vector_index";
+    private const string JsonVectorIndexName = "test_json_vector_index";
+
     [Fact]
     public void CanDoVectorQuery()
     {
         CreateTestVectorData();
+    }
+
+    public class KNearestNeighorQuery
+    {
+        [Fact]
+        public void AgainstHashIndex()
+        {
+            var knnQuery = RediSearchQuery
+                .On(HashVectorIndexName)
+                    .VectorKnn()
+                        .Prefilter("")
+                        .NumberOfNeighbors(10)
+                        .FieldName("feature_embeddings")
+                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                    .Build();
+
+            var rangeQuery = RediSearchQuery
+                .On(HashVectorIndexName)
+                    .VectorRange()
+                        .FieldName("feature_embeddings")
+                        .Range(0.5f)
+                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                    .Build();
+        }
+
+       
     }
 
     private void CreateTestVectorData()
@@ -66,7 +93,7 @@ public class VectorQueryIndex : BaseIntegrationTest
                      ))
                 ).Build();
 
-        _db.CreateIndex("test_hash_vector_query", hashIndex);
-        _db.CreateIndex("test_json_vector_query", jsonIndex);
+        _db.CreateIndex(HashVectorIndexName, hashIndex);
+        _db.CreateIndex(JsonVectorIndexName, jsonIndex);
     }
 }

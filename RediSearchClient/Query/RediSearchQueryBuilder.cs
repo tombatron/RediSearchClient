@@ -351,6 +351,15 @@ namespace RediSearchClient.Query
             return this;
         }
 
+        /// <summary>
+        /// Builder method for returning the KNN vector query builder.
+        /// 
+        /// https://redis.io/docs/interact/search-and-query/query/vector-search/
+        /// </summary>
+        /// <returns></returns>
+        public RediSearchKnnVectorQueryBuilder VectorKnn() =>
+            new RediSearchKnnVectorQueryBuilder(_indexName);
+
         private static readonly RediSearchNumericFilterBuilder _numericFilterBuilder = new RediSearchNumericFilterBuilder();
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
