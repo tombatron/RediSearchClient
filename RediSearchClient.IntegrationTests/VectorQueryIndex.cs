@@ -1,7 +1,4 @@
-﻿using NReJSON;
-using RediSearchClient.Indexes;
-using RediSearchClient.Query;
-using StackExchange.Redis;
+﻿using RediSearchClient.Query;
 using Xunit;
 
 namespace RediSearchClient.IntegrationTests;
