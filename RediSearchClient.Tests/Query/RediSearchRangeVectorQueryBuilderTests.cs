@@ -16,7 +16,7 @@ public class RediSearchRangeVectorQueryBuilderTests
                     .FieldName("feature_embeddings")
                     .Range(0.5f)
                     .Vector(byteArray)
-                    .DistanceFieldName("distance")
+                    .ScoreFieldName("distance")
                     .Epsilon(0.5f)
                     .SortBy("distance")
                     .Limit(10)

@@ -56,16 +56,16 @@ namespace RediSearchClient.Query
             return this;
         }
 
-        private string _distanceFieldName;
+        private string _scoreFieldName;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="distanceFieldName"></param>
+        /// <param name="scoreFieldName"></param>
         /// <returns></returns>
-        public RediSearchRangeVectorQueryBuilder DistanceFieldName(string distanceFieldName)
+        public RediSearchRangeVectorQueryBuilder ScoreFieldName(string scoreFieldName)
         {
-            _distanceFieldName = distanceFieldName;
+            _scoreFieldName = scoreFieldName;
 
             return this;
         }
@@ -163,7 +163,7 @@ namespace RediSearchClient.Query
             vectorQuery.Append($"@{_fieldName}:[VECTOR_RANGE $r $BLOB]");
 
             // Check to see if we have any runtime parameters...
-            if (_epsilon.HasValue || !string.IsNullOrEmpty(_distanceFieldName))
+            if (_epsilon.HasValue || !string.IsNullOrEmpty(_scoreFieldName))
             {
                 // Looks like we have some...
                 vectorQuery.Append("=>{");
@@ -173,9 +173,9 @@ namespace RediSearchClient.Query
                     vectorQuery.Append($"$EPSILON:{_epsilon.Value}; ");
                 }
 
-                if (!string.IsNullOrEmpty(_distanceFieldName))
+                if (!string.IsNullOrEmpty(_scoreFieldName))
                 {
-                    vectorQuery.Append($"$YIELD_DISTANCE_AS: {_distanceFieldName}");
+                    vectorQuery.Append($"$YIELD_DISTANCE_AS: {_scoreFieldName}");
                 }
 
                 // Close it off.

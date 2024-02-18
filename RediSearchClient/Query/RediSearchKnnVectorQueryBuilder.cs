@@ -54,6 +54,27 @@ namespace RediSearchClient.Query
         {
             _fieldName = fieldName;
 
+            if (string.IsNullOrEmpty(_scoreFieldName))
+            {
+                _scoreFieldName = $"__{_fieldName}_score";
+            }
+
+            return this;
+        }
+
+        private string _scoreFieldName;
+
+        /// <summary>
+        /// Specify the name of the score field returned with the results.
+        /// 
+        /// This defaults to $"__{_fieldName}_score"
+        /// </summary>
+        /// <param name="scoreFieldName"></param>
+        /// <returns></returns>
+        public RediSearchKnnVectorQueryBuilder ScoreFieldName(string scoreFieldName)
+        {
+            _scoreFieldName = scoreFieldName; 
+            
             return this;
         }
 
@@ -193,7 +214,7 @@ namespace RediSearchClient.Query
             }
 
             // Moving on to the specification of the vector...
-            vectorQuery.Append($"[KNN {_numberOfNeighbors} @{_fieldName} $BLOB");
+            vectorQuery.Append($"[KNN {_numberOfNeighbors} @{_fieldName} $BLOB AS {_scoreFieldName}");
 
             var paramCount = 2; // We're always goign to send the BLOB parameter, but...
 
