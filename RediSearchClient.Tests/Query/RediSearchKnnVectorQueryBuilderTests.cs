@@ -26,7 +26,7 @@ public class RediSearchKnnVectorQueryBuilderTests
                     .Return(r => 
                     {
                         r.Field("name", "Name");
-                        r.Field("score", "Score");
+                        r.Field("score", alias: "Score");
                     })
                 .Build();
 
