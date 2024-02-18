@@ -147,9 +147,10 @@ namespace RediSearchClient.Query
         /// <returns></returns>
         public RediSearchQueryDefinition Build()
         {
-            var parameters = new List<object>(20);
-
-            parameters.Add(_indexName);
+            var parameters = new List<object>(14) // At a minimum I think the result array will have 14 items. 
+            {
+                _indexName
+            };
 
             if (string.IsNullOrEmpty(_fieldName))
             {

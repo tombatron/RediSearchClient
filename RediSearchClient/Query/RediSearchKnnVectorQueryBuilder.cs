@@ -1,4 +1,7 @@
-﻿namespace RediSearchClient.Query
+﻿using System.Collections.Generic;
+using System.Text;
+
+namespace RediSearchClient.Query
 {
     /// <summary>
     /// Query builder for KNN type vector queries.
@@ -33,7 +36,7 @@
         /// </summary>
         /// <param name="numberOfNeighbors">How many neighbors to return? Defaults to `10`.</param>
         /// <returns></returns>
-        public RediSearchKnnVectorQueryBuilder NumberOfNeighbors(int numberOfNeighbors) 
+        public RediSearchKnnVectorQueryBuilder NumberOfNeighbors(int numberOfNeighbors)
         {
             _numberOfNeighbors = numberOfNeighbors;
 
@@ -76,9 +79,21 @@
         /// than the default of `10`, you should specify a higher limit here.
         /// </summary>
         /// <param name="limit"></param>
-        /// <param name="offset"></param>
         /// <returns></returns>
-        public RediSearchKnnVectorQueryBuilder Limit(int limit, int offset = 0)
+        public RediSearchKnnVectorQueryBuilder Limit(int limit)
+        {
+            _limit = limit;
+
+            return this;
+        }
+
+        /// <summary>
+        /// How many matches to return after an offset?
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public RediSearchKnnVectorQueryBuilder Limit(int offset, int limit)
         {
             _offset = offset;
             _limit = limit;
@@ -151,14 +166,95 @@
 
             return this;
         }
-        
+
         /// <summary>
         /// Builds the query definition.
         /// </summary>
         /// <returns></returns>
         public RediSearchQueryDefinition Build()
         {
-            return default;
+            var parameters = new List<object>()
+            {
+                _indexName
+            };
+
+            // Formulate the vector query. 
+
+            var vectorQuery = new StringBuilder();
+
+            // Start with the prefilter...
+            if (string.IsNullOrEmpty(_prefilter))
+            {
+                vectorQuery.Append("*=>");
+            }
+            else
+            {
+                vectorQuery.Append($"({_prefilter})=>");
+            }
+
+            // Moving on to the specification of the vector...
+            vectorQuery.Append($"[KNN {_numberOfNeighbors} @{_fieldName} $BLOB");
+
+            var paramCount = 2; // We're always goign to send the BLOB parameter, but...
+
+            if (_efRuntime.HasValue)
+            {
+                // Looks like we have an EF_RUNTIME parameter being passed, add that in...
+                paramCount += 2;
+
+                vectorQuery.Append(" EF_RUNTIME $ef_runtime");
+            }
+
+            if(_epsilon.HasValue)
+            {
+                // Looks like we have an EPSILON parameter being passed, add that in too...
+                paramCount += 2;
+
+                vectorQuery.Append(" EPSILON $epsilon");
+            }
+
+            vectorQuery.Append("]"); // Done...
+
+            parameters.Add(vectorQuery.ToString());
+
+            parameters.Add("PARAMS");
+            parameters.Add(paramCount);
+
+            parameters.Add("BLOB");
+            parameters.Add(_vector);
+
+            if (_efRuntime.HasValue)
+            {
+                parameters.Add("ef_runtime");
+                parameters.Add(_efRuntime.Value);
+            }
+
+            if (_epsilon.HasValue)
+            {
+                parameters.Add("epsilon");
+                parameters.Add(_epsilon.Value);
+            }
+
+            if (_sortByDistanceAcending.HasValue)
+            {
+                parameters.Add("SORTBY");
+
+                // This builder doesn't give the user the ability specify the name of the distance score. By
+                // default on KNN type queries the score field is `__<vector_field>_score` so we're just using
+                // that.
+                parameters.Add($"__{_fieldName}_score");
+
+                parameters.Add(_sortByDistanceAcending.Value ? "ASC" : "DESC");
+            }
+
+            parameters.Add("LIMIT");
+            parameters.Add(_offset);
+            parameters.Add(_limit);
+
+            parameters.Add("DIALECT");
+            parameters.Add(_dialect);
+
+            return new RediSearchQueryDefinition(parameters.ToArray());
         }
     }
 }

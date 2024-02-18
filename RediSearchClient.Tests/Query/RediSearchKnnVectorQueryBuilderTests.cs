@@ -17,7 +17,7 @@ public class RediSearchKnnVectorQueryBuilderTests
                     .NumberOfNeighbors(10)
                     .FieldName("feature_embeddings")
                     .Vector(byteArray)
-                    .Limit(0, 10)
+                    .Limit(15)
                     .Dialect(2)
                     .SortByDistance()
                     .EfRuntime(10)
@@ -32,14 +32,14 @@ public class RediSearchKnnVectorQueryBuilderTests
         Assert.Equal(byteArray, query.Fields[5]);
         Assert.Equal("ef_runtime", query.Fields[6]);
         Assert.Equal(10, query.Fields[7]);
-        Assert.Equal("epsilson", query.Fields[8]);
+        Assert.Equal("epsilon", query.Fields[8]);
         Assert.Equal(0.01f, query.Fields[9]);
         Assert.Equal("SORTBY", query.Fields[10]);
         Assert.Equal("__feature_embeddings_score", query.Fields[11]);
         Assert.Equal("ASC", query.Fields[12]);
         Assert.Equal("LIMIT", query.Fields[13]);
         Assert.Equal(0, query.Fields[14]);
-        Assert.Equal(10, query.Fields[15]);
+        Assert.Equal(15, query.Fields[15]);
         Assert.Equal("DIALECT", query.Fields[16]);
         Assert.Equal(2, query.Fields[17]);
     }
