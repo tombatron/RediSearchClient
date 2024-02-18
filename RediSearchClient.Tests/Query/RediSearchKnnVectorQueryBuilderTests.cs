@@ -31,7 +31,7 @@ public class RediSearchKnnVectorQueryBuilderTests
                 .Build();
 
         Assert.Equal("index_name", query.Fields[0]);
-        Assert.Equal("(@category=='test')=>[KNN 10 @feature_embeddings $BLOB AS score EF_RUNTIME $ef_runtime EPSILON $epsilon]", query.Fields[1]);
+        Assert.Equal("(@category=='test')=>[KNN 10 @feature_embeddings $BLOB]=>{$YIELD_DISTANCE_AS: score; $EF_RUNTIME: $ef_runtime; $EPSILON: $epsilon;}", query.Fields[1]);
         Assert.Equal("PARAMS", query.Fields[2]);
         Assert.Equal(6, query.Fields[3]);
         Assert.Equal("BLOB", query.Fields[4]);

@@ -24,6 +24,11 @@ public class VectorQueryIndex
                         .FieldName("feature_embeddings")
                         .ScoreFieldName("score")
                         .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Return(r =>
+                        {
+                            r.Field("name", "Name");
+                            r.Field("score");
+                        })
                     .Build();
 
             var result = _db.Search(knnQuery);

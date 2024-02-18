@@ -231,7 +231,9 @@ namespace RediSearchClient.Query
             }
 
             // Moving on to the specification of the vector...
-            vectorQuery.Append($"[KNN {_numberOfNeighbors} @{_fieldName} $BLOB AS {_scoreFieldName}");
+            vectorQuery.Append($"[KNN {_numberOfNeighbors} @{_fieldName} $BLOB]");// AS {_scoreFieldName}");
+
+            vectorQuery.Append($"=>{{$YIELD_DISTANCE_AS: {_scoreFieldName};");
 
             var paramCount = 2; // We're always goign to send the BLOB parameter, but...
 
@@ -240,7 +242,7 @@ namespace RediSearchClient.Query
                 // Looks like we have an EF_RUNTIME parameter being passed, add that in...
                 paramCount += 2;
 
-                vectorQuery.Append(" EF_RUNTIME $ef_runtime");
+                vectorQuery.Append(" $EF_RUNTIME: $ef_runtime;");
             }
 
             if(_epsilon.HasValue)
@@ -248,10 +250,10 @@ namespace RediSearchClient.Query
                 // Looks like we have an EPSILON parameter being passed, add that in too...
                 paramCount += 2;
 
-                vectorQuery.Append(" EPSILON $epsilon");
+                vectorQuery.Append(" $EPSILON: $epsilon;");
             }
 
-            vectorQuery.Append("]"); // Done...
+            vectorQuery.Append("}"); // Done...
 
             parameters.Add(vectorQuery.ToString());
 
