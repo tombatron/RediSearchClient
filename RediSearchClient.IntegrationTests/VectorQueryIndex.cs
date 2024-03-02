@@ -66,6 +66,29 @@ public class VectorQueryIndex
 
             Assert.Equal("baby", result.First().Name);
         }
+
+        [Fact]
+        public void CanExecuteQueryWithFilterAndVector()
+        {
+            var knnQuery = RediSearchQuery
+                .On(HashVectorIndexName)
+                    .UsingQuery("@name:baby")
+                    .VectorKnn()
+                        .FieldName("feature_embeddings")
+                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .ScoreFieldName("Score")
+                        .Return(r => 
+                        { 
+                            r.Field("name", "Name");
+                            r.Field("Score");
+                        })
+                        .Build();
+
+            var result = _db.Search(knnQuery).As<SimpleSearchResult>();
+
+            Assert.Single(result);
+            Assert.Equal("baby", result.First().Name);
+        }
     }
 
     public class RangeQuery : BaseIntegrationTest
@@ -119,6 +142,30 @@ public class VectorQueryIndex
 
             var result = _db.Search(rangeQuery).As<SimpleSearchResult>();
 
+            Assert.Equal("baby", result.First().Name);
+        }
+
+        [Fact]
+        public void CanExecuteQueryWithFilterAndVector()
+        {
+            var knnQuery = RediSearchQuery
+                .On(HashVectorIndexName)
+                    .UsingQuery("@name:baby")
+                    .VectorRange()
+                        .FieldName("feature_embeddings")
+                        .Range(0.5f)
+                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .ScoreFieldName("Score")
+                        .Return(r =>
+                        {
+                            r.Field("name", "Name");
+                            r.Field("Score");
+                        })
+                        .Build();
+
+            var result = _db.Search(knnQuery).As<SimpleSearchResult>();
+
+            Assert.Single(result);
             Assert.Equal("baby", result.First().Name);
         }
     }

@@ -14,6 +14,23 @@ namespace RediSearchClient.Query
         internal RediSearchRangeVectorQueryBuilder(string indexName) =>
             _indexName = indexName;
 
+        private string _additionalFilter = null;
+
+        /// <summary>
+        /// Prepend an additional filter to your vector range query. 
+        /// 
+        /// This value will be prepended to the vector filter. 
+        /// </summary>
+        /// <param name="additionalFilter"></param>
+        /// <returns></returns>
+        public RediSearchRangeVectorQueryBuilder AdditionalFilter(string additionalFilter)
+        {
+            _additionalFilter = additionalFilter;
+
+            return this;
+        }
+
+
         private string _fieldName;
 
         /// <summary>
@@ -175,6 +192,11 @@ namespace RediSearchClient.Query
             }
 
             var vectorQuery = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(_additionalFilter))
+            {
+                vectorQuery.Append($"{_additionalFilter.Trim()} ");
+            }
 
             vectorQuery.Append($"@{_fieldName}:[VECTOR_RANGE $r $BLOB]");
 
