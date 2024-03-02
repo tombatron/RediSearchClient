@@ -59,7 +59,7 @@ public class VectorQueryIndex
                             r.Field("name", "Name");
                             r.Field("Score"); // Can't alias the aliased score field.
                         })
-                        .SortByDistance(sortByDistanceAcending: true) // Best result first!
+                        .SortBy("Score", sortByAscending: true) // Best result first!
                     .Build();
 
             var result = _db.Search(knnQuery).As<SimpleSearchResult>();

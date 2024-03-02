@@ -20,7 +20,7 @@ public class RediSearchKnnVectorQueryBuilderTests
                     .Vector(byteArray)
                     .Limit(15)
                     .Dialect(2)
-                    .SortByDistance()
+                    .SortBy("score")
                     .EfRuntime(10)
                     .Epsilon(0.01f)
                     .Return(r => 
@@ -41,7 +41,7 @@ public class RediSearchKnnVectorQueryBuilderTests
         Assert.Equal("epsilon", query.Fields[8]);
         Assert.Equal(0.01f, query.Fields[9]);
         Assert.Equal("SORTBY", query.Fields[10]);
-        Assert.Equal("__feature_embeddings_score", query.Fields[11]);
+        Assert.Equal("score", query.Fields[11]);
         Assert.Equal("ASC", query.Fields[12]);
         Assert.Equal("LIMIT", query.Fields[13]);
         Assert.Equal(0, query.Fields[14]);

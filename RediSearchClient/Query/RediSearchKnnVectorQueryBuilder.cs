@@ -140,19 +140,23 @@ namespace RediSearchClient.Query
             return this;
         }
 
-        private bool? _sortByDistanceAcending;
+        private bool _sortByAscending;
+        private string _sortByField;
 
         /// <summary>
-        /// RediSearch doesn't order the results automatically. 
+        /// Specify which field you'd like to sort by. 
         /// 
-        /// Use this method if you want to sort by the computed distance of the result vector versus
-        /// the query vector. 
+        /// If you want to sort by the distance of the result vector from the query vector then you'd also
+        /// want to specify the `DistanceFieldName` and then provide the same value for the `sortByField`
+        /// argument here. 
         /// </summary>
-        /// <param name="sortByDistanceAcending">`True` to get the closest matches first, `False` to get the closest matches last.</param>
+        /// <param name="sortByField">Name of the field to sort by.</param>
+        /// <param name="sortByAscending">If true will sort by closest match to furthest. [Default: True]</param>
         /// <returns></returns>
-        public RediSearchKnnVectorQueryBuilder SortByDistance(bool sortByDistanceAcending = true)
+        public RediSearchKnnVectorQueryBuilder SortBy(string sortByField, bool sortByAscending = true)
         {
-            _sortByDistanceAcending = sortByDistanceAcending;
+            _sortByField = sortByField;
+            _sortByAscending = sortByAscending;
 
             return this;
         }
@@ -275,14 +279,19 @@ namespace RediSearchClient.Query
                 parameters.Add(_epsilon.Value);
             }
 
-            if (_sortByDistanceAcending.HasValue)
+            if (!string.IsNullOrEmpty(_sortByField))
             {
                 parameters.Add("SORTBY");
+                parameters.Add(_sortByField);
 
-
-                parameters.Add(_scoreFieldName);
-
-                parameters.Add(_sortByDistanceAcending.Value ? "ASC" : "DESC");
+                if (_sortByAscending)
+                {
+                    parameters.Add("ASC");
+                }
+                else
+                {
+                    parameters.Add("DESC");
+                }
             }
 
             parameters.Add("LIMIT");
