@@ -279,10 +279,8 @@ namespace RediSearchClient.Query
             {
                 parameters.Add("SORTBY");
 
-                // This builder doesn't give the user the ability specify the name of the distance score. By
-                // default on KNN type queries the score field is `__<vector_field>_score` so we're just using
-                // that.
-                parameters.Add($"__{_fieldName}_score");
+
+                parameters.Add(_scoreFieldName);
 
                 parameters.Add(_sortByDistanceAcending.Value ? "ASC" : "DESC");
             }

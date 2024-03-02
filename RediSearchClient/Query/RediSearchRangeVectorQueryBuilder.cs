@@ -141,6 +141,22 @@ namespace RediSearchClient.Query
             return this;
         }
 
+        private Action<ReturnFieldBuilder> _returnBuilder;
+
+        /// <summary>
+        /// Specify the fields for your index that you watch to return. For vector queries this is important because by
+        /// default the search results WILL include your vectors. For some vectors with lower dimensionality this is probably
+        /// fine, but if you're working with larger vectors you might start to notice some performance issues...
+        /// </summary>
+        /// <param name="returnBuilder"></param>
+        /// <returns></returns>
+        public RediSearchRangeVectorQueryBuilder Return(Action<ReturnFieldBuilder> returnBuilder)
+        {
+            _returnBuilder = returnBuilder;
+
+            return this;
+        }
+
         /// <summary>
         /// Builds the query definition.
         /// </summary>
@@ -211,6 +227,16 @@ namespace RediSearchClient.Query
             parameters.Add("LIMIT");
             parameters.Add(_offset);
             parameters.Add(_limit);
+
+            // Check to see if we've specified RETURN fields...
+            if (!(_returnBuilder is null))
+            {
+                var returnFieldParameters = new ReturnFieldBuilder();
+
+                _returnBuilder(returnFieldParameters);
+
+                parameters.AddRange(returnFieldParameters.ReturnParameters());
+            }
 
             parameters.Add("DIALECT");
             parameters.Add(_dialect);
