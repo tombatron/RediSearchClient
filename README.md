@@ -28,6 +28,7 @@ So here we are.
     - [Custom Dictionaries](#custom-dictionaries)
 * [Tag Values](#tag-values)
 * [Synonyms](#synonyms)
+* [Vector Support **\*NEW\***](https://github.com/tombatron/RediSearchClient/wiki/VectorSearchSupport)
 
 ## Installation
 
@@ -107,6 +108,46 @@ var indexDefintion = RediSearchIndex
       )
       .Build();
 ```
+
+If you're using RediSearch as a vector database, you can now define a `VECTOR` field on hash-based and JSON-based indexes. 
+
+The following is an example of defining a `VECTOR` field on a hash-based index:
+
+```csharp
+var indexDefinition = RediSearchIndex
+    .OnHash()
+    .WithSchema(
+        x=> x.Text("Name"),
+        x=> x.Vector("Embedding", 
+            VectorIndexAlgorithm.FLAT(
+                type: VectorType.FLOAT32, 
+                dimensions: 32, 
+                distanceMetric: DistanceMetric.L2, 
+                initialCap: 30, 
+                blockSize: 20))
+    )
+    .Build();
+```
+
+Next is an example of defining a `VECTOR` field on a JSON-based index:
+
+```csharp
+var indexDefinition = RediSearchIndex
+    .OnJson()
+    .WithSchema(
+        x=> x.Text("$.Id", "Id"),
+        x=> x.Vector("$.Embedding", alias: "Embedded",
+            VectorIndexAlgorithm.FLAT(
+                type: VectorType.FLOAT64,
+                dimensions: 33,
+                distanceMetric: DistanceMetric.L2,
+                initialCap: 23,
+                blockSize: 22))
+    )
+    .Build();
+```
+
+Note, that while the above examples specify a "FLAT" vector index, the `VectorIndexAlgorithm` factory class will also allow you to define an HNSW index as well. 
 
 #### Dates and Times
 

@@ -13,7 +13,7 @@ jobs:
     
     services:
       redis:
-        image: redislabs/redismod:preview
+        image: redis/redis-stack-server:latest
         ports:
           - 6379:6379
 
@@ -22,7 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build

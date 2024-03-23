@@ -1,19 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediSearchClient", "RediSearchClient\RediSearchClient.csproj", "{41958300-33A4-4058-B61C-86164FC125D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RediSearchClient", "RediSearchClient\RediSearchClient.csproj", "{41958300-33A4-4058-B61C-86164FC125D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediSearchClient.Tests", "RediSearchClient.Tests\RediSearchClient.Tests.csproj", "{E2010AB9-FB02-47F0-8932-088775492C54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RediSearchClient.Tests", "RediSearchClient.Tests\RediSearchClient.Tests.csproj", "{E2010AB9-FB02-47F0-8932-088775492C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediSearchClient.IntegrationTests", "RediSearchClient.IntegrationTests\RediSearchClient.IntegrationTests.csproj", "{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RediSearchClient.IntegrationTests", "RediSearchClient.IntegrationTests\RediSearchClient.IntegrationTests.csproj", "{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project Documents", "Project Documents", "{29A83265-24B9-4D31-B82C-DF1F2B80C266}"
-ProjectSection(SolutionItems) = preProject
-	README.md = README.md
-	License = License
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		License = License
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{1C236CC1-E243-49BA-9FD6-4CF2539171AE}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,9 +29,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{41958300-33A4-4058-B61C-86164FC125D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -64,5 +67,8 @@ Global
 		{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}.Release|x64.Build.0 = Release|Any CPU
 		{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}.Release|x86.ActiveCfg = Release|Any CPU
 		{70CF9A73-C1BC-42A4-B2FF-4644C37E821B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

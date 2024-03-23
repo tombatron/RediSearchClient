@@ -351,6 +351,47 @@ namespace RediSearchClient.Query
             return this;
         }
 
+        /// <summary>
+        /// Builder method for returning the KNN vector query builder.
+        /// 
+        /// https://redis.io/docs/interact/search-and-query/query/vector-search/
+        /// </summary>
+        /// <returns></returns>
+        public RediSearchKnnVectorQueryBuilder VectorKnn()
+        {
+            var vectorQueryBuilder = new RediSearchKnnVectorQueryBuilder(_indexName);
+
+            if (string.IsNullOrEmpty(_query))
+            {
+                return vectorQueryBuilder;
+            }
+            else
+            {
+                return vectorQueryBuilder.Prefilter(_query);
+            }
+        }
+
+
+        /// <summary>
+        /// Builder method for returning the Range vector query builder.
+        /// 
+        /// https://redis.io/docs/interact/search-and-query/query/vector-search/
+        /// </summary>
+        /// <returns></returns>
+        public RediSearchRangeVectorQueryBuilder VectorRange()
+        {
+            var vectorQueryBuilder = new RediSearchRangeVectorQueryBuilder(_indexName);
+
+            if (string.IsNullOrEmpty(_query))
+            {
+                return vectorQueryBuilder;
+            }
+            else
+            {
+                return vectorQueryBuilder.AdditionalFilter(_query);
+            }
+        }
+
         private static readonly RediSearchNumericFilterBuilder _numericFilterBuilder = new RediSearchNumericFilterBuilder();
         private readonly SummarizeBuilder _summarizeBuilder = new SummarizeBuilder();
         private readonly HighlightBuilder _highlightBuilder = new HighlightBuilder();
