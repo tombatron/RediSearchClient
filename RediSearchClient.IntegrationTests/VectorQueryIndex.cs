@@ -23,7 +23,7 @@ public class VectorQueryIndex
         public void CanExecuteSimpleQuery()
         {
             var knnQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .VectorKnn()
                         .FieldName("feature_embeddings")
                         .ScoreFieldName("Score")
@@ -49,7 +49,7 @@ public class VectorQueryIndex
         public void CanExecuteSortedSimpleQuery()
         {
             var knnQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .VectorKnn()
                         .FieldName("feature_embeddings")
                         .ScoreFieldName("Score")
@@ -71,7 +71,7 @@ public class VectorQueryIndex
         public void CanExecuteQueryWithFilterAndVector()
         {
             var knnQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .UsingQuery("@name:baby")
                     .VectorKnn()
                         .FieldName("feature_embeddings")
@@ -97,7 +97,7 @@ public class VectorQueryIndex
         public void CanExecuteSimpleQuery()
         {
             var rangeQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .VectorRange()
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
@@ -125,7 +125,7 @@ public class VectorQueryIndex
         public void CanExecuteSortedSimpleQuery()
         {
             var rangeQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .VectorRange()
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
@@ -149,7 +149,7 @@ public class VectorQueryIndex
         public void CanExecuteQueryWithFilterAndVector()
         {
             var knnQuery = RediSearchQuery
-                .On(HashVectorIndexName)
+                .On(_hashVectorIndexName)
                     .UsingQuery("@name:baby")
                     .VectorRange()
                         .FieldName("feature_embeddings")

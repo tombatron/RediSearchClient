@@ -1,17 +1,15 @@
-using System;
-using System.Text.Json;
 using NReJSON;
 using RediSearchClient.Indexes;
 using StackExchange.Redis;
+using System;
+using System.Text.Json;
+using System.Threading;
 using static RediSearchClient.IntegrationTests.SampleData;
 
 namespace RediSearchClient.IntegrationTests;
 
 public abstract class BaseIntegrationTest : IDisposable
 {
-    protected const string HashVectorIndexName = "test_hash_vector_index";
-    protected const string JsonVectorIndexName = "test_json_vector_index";
-
     private static bool HasIndexCleanupRun = false;
 
     protected const string MovieDataPrefix = "movie::";
@@ -21,6 +19,8 @@ public abstract class BaseIntegrationTest : IDisposable
     protected string _indexName;
     protected string _recordPrefix;
     protected string _dictionaryName;
+    protected string _hashVectorIndexName;
+    protected string _jsonVectorIndexName;
 
     protected virtual void Setup()
     {
@@ -33,15 +33,17 @@ public abstract class BaseIntegrationTest : IDisposable
         _indexName = Guid.NewGuid().ToString("n");
         _recordPrefix = Guid.NewGuid().ToString("n");
         _dictionaryName = Guid.NewGuid().ToString("n");
+        _hashVectorIndexName = Guid.NewGuid().ToString("n");
+        _jsonVectorIndexName = Guid.NewGuid().ToString("n");
 
         SetupDemoMovieData();
         SetupTestVectorData();
-
-        CleanupIndexes();
     }
 
     public virtual void TearDown()
     {
+        //CleanupIndexes();
+
         _muxr.Dispose();
     }
 
@@ -71,12 +73,6 @@ public abstract class BaseIntegrationTest : IDisposable
 
     private void SetupTestVectorData()
     {
-        // Load the vector data.
-        if (_db.KeyExists($"test_hash_vector:{SampleData.SampleVectorData[0].Name}"))
-        {
-            return;
-        }
-
         foreach (var vec in SampleData.SampleVectorData)
         {
             _db.HashSet($"test_hash_vector:{vec.Name}", new[]
@@ -119,8 +115,10 @@ public abstract class BaseIntegrationTest : IDisposable
                      ))
                 ).Build();
 
-        _db.CreateIndex(HashVectorIndexName, hashIndex);
-        _db.CreateIndex(JsonVectorIndexName, jsonIndex);
+        _db.CreateIndex(_hashVectorIndexName, hashIndex);
+        _db.CreateIndex(_jsonVectorIndexName, jsonIndex);
+
+        Thread.Sleep(500);
     }
 
     private static object locker = new object();
