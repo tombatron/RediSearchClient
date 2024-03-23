@@ -28,6 +28,7 @@ So here we are.
     - [Custom Dictionaries](#custom-dictionaries)
 * [Tag Values](#tag-values)
 * [Synonyms](#synonyms)
+* [Vector Support **\*NEW\***](https://github.com/tombatron/RediSearchClient/wiki/VectorSearchSupport)
 
 ## Installation
 
