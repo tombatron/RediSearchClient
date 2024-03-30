@@ -338,3 +338,8 @@ ASALocalRun/
 
 
 global.json
+
+
+# Exclude docfx generated items
+_site
+api
