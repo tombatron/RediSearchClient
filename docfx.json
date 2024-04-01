@@ -39,7 +39,7 @@
       "_appName": "RediSearchClient",
       "_appTitle": "RediSearchClient",
       "_enableSearch": true,
-      "pdf": true
+      "pdf": false
     }
   }
 }

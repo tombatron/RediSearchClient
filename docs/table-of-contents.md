@@ -1,0 +1,16 @@
+## Table of Contents
+
+* [Installation](installation.md)
+* [Sample Data](sample-data.md)
+* [Creating an Index](creating-an-index.md)
+* [Updating Index Schema](updating-index-schema.md)
+* [Deleting and Index](deleting-an-index.md)
+* [Index Aliases](index-aliases.md)
+* [Executing a Query](executing-a-query.md)
+* [Executing an Aggregation](executing-an-aggregation.md)
+* [Auto-Complete Suggestions](auto-complete-suggestions.md)
+* [Spell Check](spell-check.md)
+    - [Custom Dictionaries](spell-check.md#custom-dictionaries)
+* [Tag Values](tag-values.md)
+* [Synonyms](synonyms.md)
+* [Vector Support **\*NEW\***](vector-search-support.md)

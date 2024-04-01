@@ -1,4 +1,28 @@
-- name: Introduction
-  href: introduction.md
-- name: Getting Started
-  href: getting-started.md
+- name: Table of Contents
+  href: table-of-contents.md
+- name: Installation
+  href: installation.md
+- name: Sample Data
+  href: sample-data.md
+- name: Creating an Index
+  href: creating-an-index.md
+- name: Updating an Index
+  href: updating-index-schema.md
+- name: Deleting an Index
+  href: deleting-an-index.md
+- name: Index Aliases
+  href: index-aliases.md
+- name: Executing a Query
+  href: executing-a-query.md
+- name: Executing an Aggregation
+  href: executing-an-aggregation.md
+- name: Auto-Complete Suggestions
+  href: auto-complete-suggestions.md
+- name: Spell Check
+  href: spell-check.md
+- name: Tag Values
+  href: tag-values.md
+- name: Synonyms
+  href: synonyms.md
+- name: Vector Search Support
+  href: vector-search-support.md
