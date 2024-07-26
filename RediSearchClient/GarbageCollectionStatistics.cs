@@ -4,7 +4,7 @@ using static RediSearchClient.ConversionUtilities;
 namespace RediSearchClient
 {
     /// <summary>
-    /// Statistics... about garbarge collection. 
+    /// Statistics... about garbage collection. 
     /// </summary>
     public class GarbageCollectionStatistics
     {
@@ -32,26 +32,26 @@ namespace RediSearchClient
         /// Average GC cycle time: TotalMillisecondsRun / TotalCycles
         /// </summary>
         /// <value></value>
-        public int AverageCycleTimeMilliseconds { get; private set; }
+        public double AverageCycleTimeMilliseconds { get; private set; }
 
         /// <summary>
         /// In relation to the start time of the RediSearch/Redis process when was the 
         /// last time GC was run? (I think...)
         /// </summary>
         /// <value></value>
-        public int LastRunTimeMilliseconds { get; private set; }
+        public double LastRunTimeMilliseconds { get; private set; }
 
         /// <summary>
         /// TODO: Populate `GcNumericTreesMissed` summary.
         /// </summary>
         /// <value></value>
-        public int GcNumericTreesMissed { get; private set; }
+        public double GcNumericTreesMissed { get; private set; }
 
         /// <summary>
         /// TODO: Populate `GcBlocksDenied` summary.
         /// </summary>
         /// <value></value>
-        public int GcBlocksDenied { get; private set; }
+        public double GcBlocksDenied { get; private set; }
 
         internal static GarbageCollectionStatistics Create(RedisResult[] redisResult)
         {

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net472;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Tom Hanks (tombatron), Daniel Leach (leachdaniel), Ahmed Arnaout (asarnaout), Simon Turner (simonjturner), dave22000</Authors>
+    <Authors>Tom Hanks (tombatron), Daniel Leach (leachdaniel), Ahmed Arnaout (asarnaout), Simon Turner (simonjturner), dave22000, Gabe Willard (wss-jwillard)</Authors>
     <Company />
     <AssemblyVersion>2.1.0.0</AssemblyVersion>
     <FileVersion>2.1.0.0</FileVersion>
