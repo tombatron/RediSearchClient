@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using StackExchange.Redis;
 
 namespace RediSearchClient
@@ -17,6 +15,20 @@ namespace RediSearchClient
             else
             {
                 return int.TryParse(stringValue, out var result) ? result : default;
+            }
+        }
+
+        internal static double ConvertToDouble(RedisResult redisResult)
+        {
+            var stringValue = (string)redisResult;
+
+            if (stringValue.Contains("nan"))
+            {
+                return default;
+            }
+            else
+            {
+                return double.TryParse(stringValue, out var result) ? result : default;
             }
         }
     }
