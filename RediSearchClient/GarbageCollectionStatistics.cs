@@ -73,16 +73,16 @@ namespace RediSearchClient
                         result.TotalCycles = ConvertToInt(redisResult[++i]);
                         break;
                     case "average_cycle_time_ms":
-                        result.AverageCycleTimeMilliseconds = ConvertToInt(redisResult[++i]);
+                        result.AverageCycleTimeMilliseconds = ConvertToDouble(redisResult[++i]);
                         break;
                     case "last_run_time_ms":
-                        result.LastRunTimeMilliseconds = ConvertToInt(redisResult[++i]);
+                        result.LastRunTimeMilliseconds = ConvertToDouble(redisResult[++i]);
                         break;
                     case "gc_numeric_trees_missed":
-                        result.GcNumericTreesMissed = ConvertToInt(redisResult[++i]);
+                        result.GcNumericTreesMissed = ConvertToDouble(redisResult[++i]);
                         break;
                     case "gc_blocked_denied":
-                        result.GcBlocksDenied = ConvertToInt(redisResult[++i]);
+                        result.GcBlocksDenied = ConvertToDouble(redisResult[++i]);
                         break;
                     default:
                         ++i;

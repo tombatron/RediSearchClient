@@ -269,7 +269,7 @@ namespace RediSearchClient
                         result.InvertedSizeMegabytes = (double)redisResult[++i];
                         break;
                     case "total_inverted_index_blocks":
-                        result.TotalInvertedIndexBlocks = (int)redisResult[++i];
+                        result.TotalInvertedIndexBlocks = (long)redisResult[++i];
                         break;
                     case "offset_vectors_sz_mb":
                         result.OffsetVectorsSizeMegabytes = (double)redisResult[++i];
