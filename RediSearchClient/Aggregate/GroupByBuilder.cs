@@ -23,7 +23,7 @@ namespace RediSearchClient.Aggregate
             _fields = fields;
         }
 
-        private ReduceSpec _reduceSpec;
+        private readonly List<ReduceSpec> _reduceSpec = new List<ReduceSpec>();
 
         /// <summary>
         /// Builder method for specifying the reducer and any associated properties. 
@@ -33,9 +33,11 @@ namespace RediSearchClient.Aggregate
         /// <returns></returns>
         public ReduceSpec Reduce(Reducer func, params string[] args)
         {
-            _reduceSpec = new ReduceSpec(func, args);
+            var spec = new ReduceSpec(func, args);
 
-            return _reduceSpec;
+            _reduceSpec.Add(spec);
+
+            return spec;
         }
 
         internal object[] Build()
@@ -49,9 +51,9 @@ namespace RediSearchClient.Aggregate
                 result.AddRange(_fields);
             }
 
-            if (_reduceSpec != null)
+            foreach(var reduceSpec in _reduceSpec)
             {
-                result.AddRange(_reduceSpec.Build());
+                result.AddRange(reduceSpec.Build());
             }
 
             return result.ToArray();
