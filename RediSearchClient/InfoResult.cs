@@ -79,7 +79,7 @@ namespace RediSearchClient
         /// TODO: Populate `TotalInvertedIndexBlocks` summary.
         /// </summary>
         /// <value></value>
-        public int TotalInvertedIndexBlocks { get; private set; }
+        public long TotalInvertedIndexBlocks { get; private set; }
 
         /// <summary>
         /// TODO: Populate `OffsetVectorsSizeMegabytes` summary.
@@ -335,7 +335,7 @@ namespace RediSearchClient
                     return Array.Empty<object>();
                 }
 
-                if (results[0].Type ==  ResultType.MultiBulk)
+                if (results[0].Type == ResultType.MultiBulk)
                 {
                     return results.Select(ParseRedisResult);
                 }
@@ -352,7 +352,7 @@ namespace RediSearchClient
 
             var val = (RedisValue)redisResult;
 
-            return val.HasValue && val.TryParse(out double d) && !double.IsNaN(d) ? (object)d : (string) val;
+            return val.HasValue && val.TryParse(out double d) && !double.IsNaN(d) ? (object) d : (string) val;
         }
 
         private static string[] ParseIndexOptions(RedisResult[] redisResult)

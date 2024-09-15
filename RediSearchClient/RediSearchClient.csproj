@@ -3,17 +3,17 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net472;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Tom Hanks (tombatron), Daniel Leach (leachdaniel), Ahmed Arnaout (asarnaout), Simon Turner (simonjturner), dave22000</Authors>
+    <Authors>Tom Hanks (tombatron), Daniel Leach (leachdaniel), Ahmed Arnaout (asarnaout), Simon Turner (simonjturner), dave22000, Gabe Willard (wss-jwillard)</Authors>
     <Company />
-    <AssemblyVersion>2.1.0.0</AssemblyVersion>
-    <FileVersion>2.1.0.0</FileVersion>
-    <Version>2.1.0</Version>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
+    <Version>2.4.0</Version>
     <Description>A series of extension methods for use with StackExchange.Redis 2.x and the RediSearch 2.x Redis module.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/tombatron/RediSearchClient</RepositoryUrl>
     <PackageProjectUrl>https://github.com/tombatron/RediSearchClient</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageVersion>2.1.0-beta</PackageVersion>
+    <PackageVersion>2.4.0</PackageVersion>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
