@@ -1,6 +1,7 @@
 ﻿using RediSearchClient.Query;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace RediSearchClient.IntegrationTests;
 
@@ -14,9 +15,11 @@ public class VectorQueryIndex
 
     public class KnnQuery : BaseIntegrationTest
     {
-        protected override void Setup()
+        private ITestOutputHelper _output;
+        
+        public KnnQuery(ITestOutputHelper output) : base()
         {
-            base.Setup();
+            _output = output;
         }
 
         [Fact]
@@ -48,6 +51,8 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteSortedSimpleQuery()
         {
+            _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
+            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
@@ -63,6 +68,13 @@ public class VectorQueryIndex
                     .Build();
 
             var result = _db.Search(knnQuery).As<SimpleSearchResult>();
+
+            foreach (var r in result)
+            {
+                _output.WriteLine($"Search Result Name: {r.Name}/{r.Score}");
+            }
+            
+            _output.WriteLine("[Ending] CanExecuteSortedSimpleQuery");
 
             Assert.Equal("baby", result.First().Name);
         }
