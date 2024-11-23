@@ -52,7 +52,7 @@ public class VectorQueryIndex
         public void CanExecuteSortedSimpleQuery()
         {
             _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
-            
+            _output.WriteLine($"Sample Data Length: {SampleData.SampleVectorData[0].FileBytes.Length}");
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
