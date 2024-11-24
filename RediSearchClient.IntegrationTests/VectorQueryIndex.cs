@@ -51,14 +51,12 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteSortedSimpleQuery()
         {
-            var babyVectorBytes = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
-            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
                         .FieldName("feature_embeddings")
                         .ScoreFieldName("Score")
-                        .Vector(babyVectorBytes)
+                        .Vector(SampleData.SampleVectorData.GetByNameOrDefault("baby")!.FileBytes)
                         .Return(r =>
                         {
                             r.Field("name", "Name");
@@ -82,14 +80,12 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteQueryWithFilterAndVector()
         {
-            var babyVectorBytes = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
-            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .UsingQuery("@name:baby")
                     .VectorKnn()
                         .FieldName("feature_embeddings")
-                        .Vector(babyVectorBytes)
+                        .Vector(SampleData.SampleVectorData.GetByNameOrDefault("baby")!.FileBytes)
                         .ScoreFieldName("Score")
                         .Return(r => 
                         { 
@@ -138,14 +134,12 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteSortedSimpleQuery()
         {
-            var babyVectorData = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
-            
             var rangeQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorRange()
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
-                        .Vector(babyVectorData)
+                        .Vector(SampleData.SampleVectorData.GetByNameOrDefault("baby")!.FileBytes)
                         .ScoreFieldName("Score")
                         .Epsilon(0.5f)
                         .Return(r =>
@@ -170,7 +164,7 @@ public class VectorQueryIndex
                     .VectorRange()
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
-                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Vector(SampleData.SampleVectorData.GetByNameOrDefault("baby")!.FileBytes)
                         .ScoreFieldName("Score")
                         .Return(r =>
                         {
