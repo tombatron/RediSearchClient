@@ -58,6 +58,14 @@ public class VectorQueryIndex
             
             _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
             _output.WriteLine($"Sample Data Length: {SampleData.SampleVectorData[0].FileBytes.Length}");
+
+            var babyVectorData = (Byte[])_db.HashGetAll("test_hash_vector:baby").First(x=> x.Name == "feature_embeddings").Value;
+            var babyVectorString = Convert.ToBase64String(babyVectorData);
+            _output.WriteLine($"Baby Vector Data: {babyVectorString[0..20]}");
+            
+            var notBabyVectorData = _db.HashGetAll("test_hash_vector:not_baby").First(x=>x.Name == "feature_embeddings").Value;
+            var notBabyVectorString = Convert.ToBase64String(notBabyVectorData);
+            _output.WriteLine($"Not Baby Vector Data: {notBabyVectorString[0..20]}");
             
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
