@@ -67,6 +67,8 @@ public class VectorQueryIndex
             var notBabyVectorString = Convert.ToBase64String(notBabyVectorData);
             _output.WriteLine($"Not Baby Vector Data: {notBabyVectorString[0..20]}");
             
+            _output.WriteLine($"Query Vector String: {Convert.ToBase64String(SampleData.SampleVectorData[0].FileBytes)[0..20]}");
+            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
