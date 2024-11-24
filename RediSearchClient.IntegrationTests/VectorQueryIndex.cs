@@ -1,5 +1,7 @@
-﻿using RediSearchClient.Query;
+﻿using System;
+using RediSearchClient.Query;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,10 +51,14 @@ public class VectorQueryIndex
         }
 
         [Fact]
-        public void CanExecuteSortedSimpleQuery()
+        public async Task CanExecuteSortedSimpleQuery()
         {
+            await Task.Delay(TimeSpan.FromSeconds(5).Milliseconds);
+            
+            
             _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
             _output.WriteLine($"Sample Data Length: {SampleData.SampleVectorData[0].FileBytes.Length}");
+            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
