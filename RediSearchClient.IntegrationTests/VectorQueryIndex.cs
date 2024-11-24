@@ -1,7 +1,5 @@
-﻿using System;
-using RediSearchClient.Query;
+﻿using RediSearchClient.Query;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -51,24 +49,8 @@ public class VectorQueryIndex
         }
 
         [Fact]
-        public async Task CanExecuteSortedSimpleQuery()
+        public void CanExecuteSortedSimpleQuery()
         {
-
-            
-            
-            _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
-            _output.WriteLine($"Sample Data Length: {SampleData.SampleVectorData[0].FileBytes.Length}");
-
-            var babyVectorData = (Byte[])_db.HashGetAll("test_hash_vector:baby").First(x=> x.Name == "feature_embeddings").Value;
-            var babyVectorString = Convert.ToBase64String(babyVectorData);
-            _output.WriteLine($"Baby Vector Data: {babyVectorString[0..20]}");
-            
-            var notBabyVectorData = _db.HashGetAll("test_hash_vector:not_baby").First(x=>x.Name == "feature_embeddings").Value;
-            var notBabyVectorString = Convert.ToBase64String(notBabyVectorData);
-            _output.WriteLine($"Not Baby Vector Data: {notBabyVectorString[0..20]}");
-            
-            _output.WriteLine($"Query Vector String: {Convert.ToBase64String(SampleData.SampleVectorData[0].FileBytes)[0..20]}");
-
             var babyVectorBytes = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
             
             var knnQuery = RediSearchQuery
@@ -156,12 +138,14 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteSortedSimpleQuery()
         {
+            var babyVectorData = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
+            
             var rangeQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorRange()
                         .FieldName("feature_embeddings")
                         .Range(0.5f)
-                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Vector(babyVectorData)
                         .ScoreFieldName("Score")
                         .Epsilon(0.5f)
                         .Return(r =>
