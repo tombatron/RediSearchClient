@@ -53,7 +53,7 @@ public class VectorQueryIndex
         [Fact]
         public async Task CanExecuteSortedSimpleQuery()
         {
-            await Task.Delay(TimeSpan.FromSeconds(5).Milliseconds);
+
             
             
             _output.WriteLine("[Starting] CanExecuteSortedSimpleQuery");
@@ -68,13 +68,15 @@ public class VectorQueryIndex
             _output.WriteLine($"Not Baby Vector Data: {notBabyVectorString[0..20]}");
             
             _output.WriteLine($"Query Vector String: {Convert.ToBase64String(SampleData.SampleVectorData[0].FileBytes)[0..20]}");
+
+            var babyVectorBytes = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
             
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .VectorKnn()
                         .FieldName("feature_embeddings")
                         .ScoreFieldName("Score")
-                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Vector(babyVectorBytes)
                         .Return(r =>
                         {
                             r.Field("name", "Name");
@@ -98,12 +100,14 @@ public class VectorQueryIndex
         [Fact]
         public void CanExecuteQueryWithFilterAndVector()
         {
+            var babyVectorBytes = SampleData.SampleVectorData.First(x => x.Name == "baby").FileBytes;
+            
             var knnQuery = RediSearchQuery
                 .On(_hashVectorIndexName)
                     .UsingQuery("@name:baby")
                     .VectorKnn()
                         .FieldName("feature_embeddings")
-                        .Vector(SampleData.SampleVectorData[0].FileBytes)
+                        .Vector(babyVectorBytes)
                         .ScoreFieldName("Score")
                         .Return(r => 
                         { 
